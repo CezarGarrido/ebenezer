@@ -43,3 +43,10 @@ jobs:
       # Compilar e testar com Maven
       - name: Build and Test with Maven
         run: mvn clean install -DskipTests=false
+        
+       # Passo 5: Upload de artefatos (arquivos gerados pelo Maven)
+      - name: Upload Maven build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: target/*.jar  # Apenas o arquivo JAR gerado

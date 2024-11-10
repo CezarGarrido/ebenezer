@@ -47,7 +47,7 @@
   </dependencies>
   <properties>
     <maven.compiler.target>21</maven.compiler.target>
-    <exec.mainClass>com.aldrin.pos.AldrinPOS</exec.mainClass>
+    <exec.mainClass>com.ebenezer.pos.Ebenezer</exec.mainClass>
     <maven.compiler.source>21</maven.compiler.source>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>

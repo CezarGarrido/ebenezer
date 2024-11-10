@@ -302,5 +302,47 @@ INSERT INTO `invoice_entry` (`id`,`deleted`,`INVOICE_ID`,`STOCKIN_ENTRY_ID`) VAL
  (1,0,1,1);
 /*!40000 ALTER TABLE `invoice_entry` ENABLE KEYS */;
 
+-- Donors Table
+CREATE TABLE donors (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `name` VARCHAR(255),
+    `phone_number` VARCHAR(20),
+    contact_name VARCHAR(255),
+    cpf VARCHAR(20),  
+    cpnj VARCHAR(20), 
+    ie  VARCHAR(60), 
+    rg VARCHAR(12)
+    rg_exp VARCHAR(20),  -- SSP
+    `entry_date` timestamp,
+    `old` MEDIUMBLOB,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Data de criação
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP  -- Data de atualização
+    FOREIGN KEY (user_id) REFERENCES users(id)  -- Assuming 'users' table exists
+);
 
+
+CREATE TABLE `employees` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,  -- ID único do funcionário
+  `name` varchar(255),
+  `phone_number` VARCHAR(20),
+  `birth_date` varchar(255),
+  `marital_status` varchar(255),
+  `spouses_name` varchar(255),
+  `spouses_datebirth` varchar(255),
+  `phone_number` varchar(20),
+  `cpf` varchar(14),
+  `rg` varchar(14),
+  `pis` varchar(60),
+  `ctps` varchar(60),
+  `admission_date` timestamp,
+  `wage` numeric,
+  `commission` varchar(255),
+  `sector` varchar(255),
+  `dimissal_date` timestamp,
+  `entry_date` timestamp,
+  `entry_time` varchar(255),
+  `old` MEDIUMBLOB,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Data de criação
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP  -- Data de atualização
+);
 

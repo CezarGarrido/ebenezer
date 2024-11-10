@@ -20,6 +20,7 @@ import com.ebenezer.pos.data.dao.impl.ProductDAOImpl;
 import com.ebenezer.pos.data.dao.impl.StockInEntryDAOImpl;
 import com.ebenezer.pos.gui.dialog.JDialogAbout;
 import com.ebenezer.pos.gui.dialog.JDialogCategory;
+import com.ebenezer.pos.gui.dialog.JDialogDonor;
 import com.ebenezer.pos.gui.dialog.JDialogChangePassword;
 import com.ebenezer.pos.gui.dialog.JDialogProduct;
 import com.ebenezer.pos.gui.dialog.JDialogTransporter;
@@ -285,6 +286,7 @@ public class JFrameAldrinPOS extends javax.swing.JFrame implements MouseListener
         jMenuItem6 = new javax.swing.JMenuItem();
         jMenuItem5 = new javax.swing.JMenuItem();
         jMenuItem4 = new javax.swing.JMenuItem();
+        jMenuItem7 = new javax.swing.JMenuItem();
         jMenu1 = new javax.swing.JMenu();
         jMenuItemLight = new javax.swing.JMenuItem();
         jMenuItemDark = new javax.swing.JMenuItem();
@@ -293,7 +295,7 @@ public class JFrameAldrinPOS extends javax.swing.JFrame implements MouseListener
         jMenuItem1 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("Aldrin POS v1.0");
+        setTitle("Ebenezer v1.0");
 
         jPanel1.setLayout(new java.awt.BorderLayout());
 
@@ -1384,6 +1386,14 @@ public class JFrameAldrinPOS extends javax.swing.JFrame implements MouseListener
         });
         jMenuSetting.add(jMenuItem4);
 
+        jMenuItem7.setText("Doador");
+        jMenuItem7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem7ActionPerformed(evt);
+            }
+        });
+        jMenuSetting.add(jMenuItem7);
+
         jMenuBar1.add(jMenuSetting);
 
         jMenu1.setText("Themes");
@@ -1618,6 +1628,13 @@ public class JFrameAldrinPOS extends javax.swing.JFrame implements MouseListener
         about.setVisible(true);
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
+    private void jMenuItem7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem7ActionPerformed
+        // TODO add your handling code here:
+        // TODO abrir cadastro de doador
+        JDialogDonor donor = new JDialogDonor(this, true);
+        donor.setVisible(true);
+    }//GEN-LAST:event_jMenuItem7ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1680,6 +1697,7 @@ public class JFrameAldrinPOS extends javax.swing.JFrame implements MouseListener
     private javax.swing.JMenuItem jMenuItem4;
     private javax.swing.JMenuItem jMenuItem5;
     private javax.swing.JMenuItem jMenuItem6;
+    private javax.swing.JMenuItem jMenuItem7;
     private javax.swing.JMenuItem jMenuItem8;
     private javax.swing.JMenuItem jMenuItem9;
     private javax.swing.JMenuItem jMenuItemDark;

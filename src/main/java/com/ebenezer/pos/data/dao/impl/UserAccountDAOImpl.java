@@ -147,9 +147,11 @@ public class UserAccountDAOImpl extends DBConnection implements UserAccountDAO {
             while (rs.next()) {
 
                 Blob picturel = rs.getBlob("PHOTO");
-                photo = picturel;
-                byte[] bytes = convertBlobToBytes(picturel);
-                userPhoto.setPhoto(bytes);
+                if (picturel != null) {
+                    photo = picturel;
+                    byte[] bytes = convertBlobToBytes(picturel);
+                    userPhoto.setPhoto(bytes);
+                }
             }
             rs.close();
             statement.close();

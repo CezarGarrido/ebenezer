@@ -45,15 +45,20 @@ jobs:
         run: mvn clean install -DskipTests=false
 
       # Passo 4: Empacotar com jpackage
-      - name: Package with jpackage
+      - name: Package with jpackage for Linux
+        if: matrix.os == 'ubuntu-latest'
         run: |
-          if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
-            jpackage --type tar.gz --input target/ --name Ebenezer --main-jar Ebenezer-1.0-SNAPSHOT.jar --main-class com.ebenezer.pos.Ebenezer --java-options "-Xmx512m" --dest target/linux
-          elif [ "${{ matrix.os }}" == "windows-latest" ]; then
-            jpackage --type exe --input target/ --name Ebenezer --main-jar Ebenezer-1.0-SNAPSHOT.jar --main-class com.ebenezer.pos.Ebenezer --java-options "-Xmx512m" --dest target/windows
-          elif [ "${{ matrix.os }}" == "macos-latest" ]; then
-            jpackage --type dmg --input target/ --name Ebenezer --main-jar Ebenezer-1.0-SNAPSHOT.jar --main-class com.ebenezer.pos.Ebenezer --java-options "-Xmx512m" --dest target/macos
-          fi
+          jpackage --type app-image --input target/ --name Ebenezer --main-jar Ebenezer-1.0-SNAPSHOT.jar --main-class com.ebenezer.pos.Ebenezer --java-options "-Xmx512m" --dest target/linux
+
+      - name: Package with jpackage for Windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          jpackage --type exe --input target/ --name Ebenezer --main-jar Ebenezer-1.0-SNAPSHOT.jar --main-class com.ebenezer.pos.Ebenezer --java-options "-Xmx512m" --dest target/windows
+
+      - name: Package with jpackage for macOS
+        if: matrix.os == 'macos-latest'
+        run: |
+          jpackage --type dmg --input target/ --name Ebenezer --main-jar Ebenezer-1.0-SNAPSHOT.jar --main-class com.ebenezer.pos.Ebenezer --java-options "-Xmx512m" --dest target/macos
 
       # Passo 5: Upload de artefatos (arquivos gerados pelo Maven e pacotes)
       - name: Upload Maven build artifacts

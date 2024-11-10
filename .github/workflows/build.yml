@@ -54,13 +54,12 @@ jobs:
       - name: Package with jpackage for Windows
         if: matrix.os == 'windows-latest'
         run: |
-          jpackage --type exe --input target/ --name Ebenezer --main-jar Ebenezer-1.0-SNAPSHOT.jar --main-class com.ebenezer.pos.Ebenezer --java-options "-Xmx512m" --dest target/ebenezer-windows
+          jpackage --type exe --input target/ --name Ebenezer --main-jar Ebenezer-1.0-SNAPSHOT.jar --main-class com.ebenezer.pos.Ebenezer --java-options "-Xmx512m"
 
       - name: Package with jpackage for macOS
         if: matrix.os == 'macos-latest'
         run: |
-          jpackage --type dmg --input target/ --name Ebenezer --main-jar Ebenezer-1.0-SNAPSHOT.jar --main-class com.ebenezer.pos.Ebenezer --java-options "-Xmx512m" --dest target/ebenezer-macos
-
+          jpackage --type dmg --input target/ --name Ebenezer --main-jar Ebenezer-1.0-SNAPSHOT.jar --main-class com.ebenezer.pos.Ebenezer --java-options "-Xmx512m"
       # Passo 5: Upload de artefatos (arquivos gerados pelo Maven e pacotes)
       - name: Upload Maven build artifacts
         uses: actions/upload-artifact@v4
@@ -68,7 +67,3 @@ jobs:
           name: ebenezer-${{ matrix.os }}-${{ matrix.arch }}   # Nome único com ID da execução
           path: |
             Ebenezer/
-            target/*.jar
-            target/ebenezer-linux/*
-            target/ebenezer-windows/*
-            target/ebenezer-macos/*

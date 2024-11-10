@@ -67,6 +67,7 @@ jobs:
         with:
           name: ebenezer-${{ matrix.os }}-${{ matrix.arch }}   # Nome único com ID da execução
           path: |
+            Ebenezer/
             target/*.jar
             target/ebenezer-linux/*
             target/ebenezer-windows/*

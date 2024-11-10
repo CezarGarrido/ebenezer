@@ -15,23 +15,21 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         arch: [x64, x86]
-        java-version: [21, 19]  # Define versões de Java específicas para x86 e x64
       fail-fast: false
-      exclude:
-        - java-version: 21
-          arch: x86  # Exclui o Java 21 para builds x86
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Configura a versão do Java com base na arquitetura
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
-          java-version: ${{ matrix.java-version }}
+          java-version: ${{ matrix.arch == 'x86' && '19' || '21' }}
           architecture: ${{ matrix.arch }}
           distribution: 'temurin'
           cache: maven
 
+      # Compilar e testar com Maven
       - name: Build and Test with Maven
         run: mvn clean install -DskipTests=false

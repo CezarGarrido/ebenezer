@@ -18,7 +18,7 @@
             </goals>
             <configuration>
               <transformers>
-                <transformer>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                   <mainClass>com.ebenezer.pos.Ebenezer</mainClass>
                 </transformer>
               </transformers>

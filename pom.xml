@@ -11,6 +11,30 @@
         <maven.compiler.target>21</maven.compiler.target>
         <exec.mainClass>com.ebenezer.pos.Ebenezer</exec.mainClass>
     </properties>
+<build>
+  <plugins>
+    <plugin>
+      <artifactId>maven-shade-plugin</artifactId>
+      <version>3.2.1</version> <!-- Certifique-se de usar a versão mais estável -->
+      <executions>
+        <execution>
+          <phase>package</phase>
+          <goals>
+            <goal>shade</goal>
+          </goals>
+          <configuration>
+            <transformers>
+              <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                <mainClass>com.ebenezer.pos.Ebenezer</mainClass>
+              </transformer>
+            </transformers>
+          </configuration>
+        </execution>
+      </executions>
+    </plugin>
+  </plugins>
+</build>
+
     <dependencies>
         <!--hibernate-->
         <dependency>

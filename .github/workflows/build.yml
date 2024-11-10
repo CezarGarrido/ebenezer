@@ -43,10 +43,25 @@ jobs:
       # Compilar e testar com Maven
       - name: Build and Test with Maven
         run: mvn clean install -DskipTests=false
-        
-       # Passo 5: Upload de artefatos (arquivos gerados pelo Maven)
+
+      # Passo 4: Empacotar com jpackage
+      - name: Package with jpackage
+        run: |
+          if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
+            jpackage --type tar.gz --input target/ --name Ebenezer --main-jar Ebenezer-1.0-SNAPSHOT.jar --main-class com.ebenezer.pos.Ebenezer --java-options "-Xmx512m" --dest target/linux
+          elif [ "${{ matrix.os }}" == "windows-latest" ]; then
+            jpackage --type exe --input target/ --name Ebenezer --main-jar Ebenezer-1.0-SNAPSHOT.jar --main-class com.ebenezer.pos.Ebenezer --java-options "-Xmx512m" --dest target/windows
+          elif [ "${{ matrix.os }}" == "macos-latest" ]; then
+            jpackage --type dmg --input target/ --name Ebenezer --main-jar Ebenezer-1.0-SNAPSHOT.jar --main-class com.ebenezer.pos.Ebenezer --java-options "-Xmx512m" --dest target/macos
+          fi
+
+      # Passo 5: Upload de artefatos (arquivos gerados pelo Maven e pacotes)
       - name: Upload Maven build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ebenezer-${{ matrix.os }}-${{ matrix.arch }}   # Nome único com ID da execução
-          path: target/*.jar
+          path: |
+            target/*.jar
+            target/linux/*
+            target/windows/*
+            target/macos/*

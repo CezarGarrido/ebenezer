@@ -3,12 +3,13 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.ebenezer</groupId>
   <artifactId>Ebenezer</artifactId>
+  <name>Ebenezer</name>
   <version>1.0-SNAPSHOT</version>
   <build>
     <plugins>
       <plugin>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>3.5.2</version>
+        <version>3.2.1</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -18,10 +19,7 @@
             <configuration>
               <transformers>
                 <transformer>
-                  <manifestEntries>
-                    <Main-Class>com.ebenezer.pos.Ebenezer</Main-Class>
-                    <Build-Number>123</Build-Number>
-                  </manifestEntries>
+                  <mainClass>com.ebenezer.pos.Ebenezer</mainClass>
                 </transformer>
               </transformers>
             </configuration>

@@ -21,6 +21,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Passo 2: Reescrever o pom.xml para usar o Java 19
+      - name: Update pom.xml to Java 19
+        if: matrix.arch == 'x86'  # Condição que verifica se a arquitetura é x86
+        run: |
+          sed -i 's/<maven.compiler.source>.*<\/maven.compiler.source>/<maven.compiler.source>19<\/maven.compiler.source>/' pom.xml
+          sed -i 's/<maven.compiler.target>.*<\/maven.compiler.target>/<maven.compiler.target>19<\/maven.compiler.target>/' pom.xml
+          # Garantir que a versão do plugin de compilação também seja configurada corretamente
+          sed -i 's/<source>.*<\/source>/<source>19<\/source>/' pom.xml
+          sed -i 's/<target>.*<\/target>/<target>19<\/target>/' pom.xml
+
       # Configura a versão do Java com base na arquitetura
       - name: Set up Java
         uses: actions/setup-java@v4

@@ -1,4 +1,4 @@
-name: Java 21 Multi-Platform Build
+name: Java Multi-Platform Build
 
 on:
   push:
@@ -15,24 +15,23 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         arch: [x64, x86]
+        java-version: [21, 19]  # Define versões de Java específicas para x86 e x64
+      fail-fast: false
+      exclude:
+        - java-version: 21
+          arch: x86  # Exclui o Java 21 para builds x86
 
     steps:
-      # Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Set up JDK 21
-      - name: Set up Java 21
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: ${{ matrix.java-version }}
           architecture: ${{ matrix.arch }}
           distribution: 'temurin'
+          cache: maven
 
-      # Build with Maven
-      - name: Build with Maven
-        run: mvn clean install
-
-      # Run tests
-      - name: Run tests with Maven
-        run: mvn test
+      - name: Build and Test with Maven
+        run: mvn clean install -DskipTests=false

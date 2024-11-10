@@ -48,5 +48,5 @@ jobs:
       - name: Upload Maven build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build-artifacts
-          path: target/*.jar  # Apenas o arquivo JAR gerado
+          name: ebenezer-${{ matrix.os }}-${{ matrix.arch }}   # Nome único com ID da execução
+          path: target/*.jar

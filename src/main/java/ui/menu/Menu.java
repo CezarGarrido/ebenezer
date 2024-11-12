@@ -4,15 +4,24 @@ import ui.menu.mode.LightDarkMode;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.ui.FlatUIUtils;
 import com.formdev.flatlaf.util.UIScale;
+import java.awt.AlphaComposite;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Insets;
 import java.awt.LayoutManager;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
@@ -27,18 +36,25 @@ public class Menu extends JPanel {
     private final String menuItems[][] = {
         {"~MAIN~"},
         {"Dashboard"},
-        {"~WEB APP~"},
-        {"Ligações", "Inbox", "Read", "Compost"},
-        {"Chat"},
-        {"Agenda"},
+        {"~APP~"},
+        {"Ligações", "Realizar", "Read", "Compost"},
         {"~COMPONENT~"},
-        {"Advanced UI", "Cropper", "Owl Carousel", "Sweet Alert"},
-        {"Forms", "Basic Elements", "Advanced Elements", "Editors", "Wizard"},
+        {"Cadastros", "Doadores", "Funcionários"},
         {"~OTHER~"},
-        {"Charts", "Apex", "Flot", "Peity", "Sparkline"},
-        {"Icons", "Feather Icons", "Flag Icons", "Mdi Icons"},
-        {"Special Pages", "Blank page", "Faq", "Invoice", "Profile", "Pricing", "Timeline"},
+        {"Relatórios", "Recibos", "Ligações", "Doações"},
         {"Sair"}
+    };
+
+    private final String menuIcons[] = {
+        "", // ~MAIN~ não tem imagem
+        "dashboard.svg", // Dashboard
+        "", // ~APP~ não tem imagem
+        "agenda.svg",
+        "", // ~COMPONENT~ não tem imagem
+        "register.svg",
+        "", // ~OTHER~ não tem imagem
+        "reports.svg",
+        "logout.svg" // Sair não tem imagem
     };
 
     public boolean isMenuFull() {
@@ -85,9 +101,9 @@ public class Menu extends JPanel {
                 + "background:$Menu.background;"
                 + "arc:10");
         header = new JLabel(headerName);
-        
+
         header.setIcon(new ImageIcon(getClass().getResource("/icon/png/logo.png")));
-        
+
         header.putClientProperty(FlatClientProperties.STYLE, ""
                 + "font:$Menu.header.font;"
                 + "foreground:$Menu.foreground");
@@ -127,7 +143,7 @@ public class Menu extends JPanel {
             if (menuName.startsWith("~") && menuName.endsWith("~")) {
                 panelMenu.add(createTitle(menuName));
             } else {
-                MenuItem menuItem = new MenuItem(this, menuItems[i], index++, events);
+                MenuItem menuItem = new MenuItem(this, menuItems[i], menuIcons[i], index++, events);
                 panelMenu.add(menuItem);
             }
         }
@@ -144,6 +160,39 @@ public class Menu extends JPanel {
 
     public void setSelectedMenu(int index, int subIndex) {
         runEvent(index, subIndex);
+    }
+
+    public void setUserImage(byte[] image) {
+        try {
+            if (image == null) {
+                return;
+            }
+            // Cria um InputStream a partir dos bytes da imagem
+            ByteArrayInputStream bis = new ByteArrayInputStream(image);
+            Image img = ImageIO.read(bis);  // Lê a imagem diretamente dos bytes
+
+            if (img != null) {
+                // Redimensiona a imagem para 40x40 pixels
+                Image resizedImg = img.getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+                // Cria uma imagem BufferedImage para permitir manipulação dos pixels
+                BufferedImage bufferedImage = new BufferedImage(40, 40, BufferedImage.TYPE_INT_ARGB);
+                Graphics2D g2d = bufferedImage.createGraphics();
+                // Cria um círculo e recorta a imagem dentro do círculo
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2d.fillRoundRect(0, 0, 40, 40, 40, 40); // Desenha o círculo
+                g2d.setComposite(AlphaComposite.SrcIn); // Faz com que a imagem seja desenhada dentro do círculo
+                g2d.drawImage(resizedImg, 0, 0, null);
+                g2d.dispose();
+                // Define o ícone com a imagem arredondada
+                header.setIcon(new ImageIcon(bufferedImage));
+            } else {
+                throw new IOException("Imagem inválida.");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Opss...", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     protected void setSelected(int index, int subIndex) {
@@ -249,7 +298,7 @@ public class Menu extends JPanel {
                 int hgap = menuFull ? sheaderFullHgap : 0;
                 int accentColorHeight = 0;
                 if (toolBarAccentColor.isVisible()) {
-                    accentColorHeight = toolBarAccentColor.getPreferredSize().height+gap;
+                    accentColorHeight = toolBarAccentColor.getPreferredSize().height + gap;
                 }
 
                 header.setBounds(x + hgap, y, iconWidth - (hgap * 2), iconHeight);
@@ -257,7 +306,7 @@ public class Menu extends JPanel {
                 int ldWidth = width - ldgap * 2;
                 int ldHeight = lightDarkMode.getPreferredSize().height;
                 int ldx = x + ldgap;
-                int ldy = y + height - ldHeight - ldgap  - accentColorHeight;
+                int ldy = y + height - ldHeight - ldgap - accentColorHeight;
 
                 int menux = x;
                 int menuy = y + iconHeight + gap;

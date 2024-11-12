@@ -5,6 +5,9 @@ import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
 import com.formdev.flatlaf.fonts.roboto.FlatRobotoFont;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
+import domain.model.User;
+import domain.service.UserService;
+import infra.postgres.repository.UserRepositoryPgsql;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -23,16 +26,21 @@ public class Application extends javax.swing.JFrame {
     private static Application app;
     private final MainForm mainForm;
     private final LoginForm loginForm;
+    private User currentUser;
 
     public Application() {
         initComponents();
         setSize(new Dimension(1366, 768));
         setLocationRelativeTo(null);
+        var userRepo = new UserRepositoryPgsql();
+        var userService = new UserService(userRepo);
+
         mainForm = new MainForm();
-        loginForm = new LoginForm();
+
+        loginForm = new LoginForm(userService);
         setContentPane(loginForm);
         getRootPane().putClientProperty(FlatClientProperties.FULL_WINDOW_CONTENT, true);
-       // Notifications.getInstance().setJFrame(this);
+        // Notifications.getInstance().setJFrame(this);
     }
 
     public static void showForm(Component component) {
@@ -40,7 +48,7 @@ public class Application extends javax.swing.JFrame {
         app.mainForm.showForm(component);
     }
 
-    public static void login() {
+    public static void login(User loggedUser) {
         FlatAnimatedLafChange.showSnapshot();
         app.setContentPane(app.mainForm);
         app.mainForm.applyComponentOrientation(app.getComponentOrientation());
@@ -48,6 +56,8 @@ public class Application extends javax.swing.JFrame {
         app.mainForm.hideMenu();
         SwingUtilities.updateComponentTreeUI(app.mainForm);
         FlatAnimatedLafChange.hideSnapshotWithAnimation();
+        app.currentUser = loggedUser;
+        setUserImage(loggedUser().getPhoto());
     }
 
     public static void logout() {
@@ -58,8 +68,19 @@ public class Application extends javax.swing.JFrame {
         FlatAnimatedLafChange.hideSnapshotWithAnimation();
     }
 
+    public static User loggedUser() {
+        if (app != null) {
+            return app.currentUser;
+        }
+        return null;
+    }
+
     public static void setSelectedMenu(int index, int subIndex) {
         app.mainForm.setSelectedMenu(index, subIndex);
+    }
+
+    public static void setUserImage(byte[] image) {
+        app.mainForm.setUserImage(image);
     }
 
     @SuppressWarnings("unchecked")

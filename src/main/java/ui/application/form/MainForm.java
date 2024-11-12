@@ -16,6 +16,7 @@ import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import ui.application.Application;
+import ui.application.form.donor.FormDonor;
 import ui.application.form.other.FormDashboard;
 import ui.application.form.other.FormInbox;
 import ui.application.form.other.FormRead;
@@ -36,6 +37,10 @@ public class MainForm extends JLayeredPane {
         setBorder(new EmptyBorder(5, 5, 5, 5));
         setLayout(new MainFormLayout());
         menu = new Menu();
+        if (Application.loggedUser() != null) {
+            menu.setUserImage(Application.loggedUser().getPhoto());
+        }
+        
         panelBody = new JPanel(new BorderLayout());
         initMenuArrowIcon();
         menuButton.putClientProperty(FlatClientProperties.STYLE, ""
@@ -80,6 +85,10 @@ public class MainForm extends JLayeredPane {
                 } else {
                     action.cancel();
                 }
+            } else if (index == 2) {
+                if (subIndex == 1) {
+                    Application.showForm(new FormDonor());
+                }
             } else if (index == 9) {
                 Application.logout();
             } else {
@@ -115,6 +124,12 @@ public class MainForm extends JLayeredPane {
         menu.setSelectedMenu(index, subIndex);
     }
 
+    
+    public void setUserImage(byte[] image) {
+        menu.setUserImage(image);
+    }
+
+    
     private Menu menu;
     private JPanel panelBody;
     private JButton menuButton;

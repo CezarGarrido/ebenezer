@@ -1,6 +1,11 @@
 package ui.application.form;
 
 import com.formdev.flatlaf.FlatClientProperties;
+import domain.model.User;
+import domain.service.UserService;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import javax.swing.JOptionPane;
 import net.miginfocom.swing.MigLayout;
 import ui.application.Application;
 
@@ -10,7 +15,10 @@ import ui.application.Application;
  */
 public class LoginForm extends javax.swing.JPanel {
 
-    public LoginForm() {
+    private final UserService userService;
+
+    public LoginForm(UserService userService) {
+        this.userService = userService;
         initComponents();
         init();
     }
@@ -20,15 +28,34 @@ public class LoginForm extends javax.swing.JPanel {
 
         lbTitle.putClientProperty(FlatClientProperties.STYLE, ""
                 + "font:$h1.font");
-        
+
         txtPass.putClientProperty(FlatClientProperties.STYLE, ""
                 + "showRevealButton:true;"
                 + "showCapsLock:true");
         cmdLogin.putClientProperty(FlatClientProperties.STYLE, ""
                 + "borderWidth:0;"
                 + "focusWidth:0");
-        txtUser.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "User Name");
-        txtPass.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Password");
+        txtUser.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Usuário");
+        txtPass.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Senha");
+
+        // Adicionando o KeyListener para os campos de texto
+        txtUser.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    cmdLogin.doClick();  // Simula o clique no botão de login
+                }
+            }
+        });
+
+        txtPass.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    cmdLogin.doClick();  // Simula o clique no botão de login
+                }
+            }
+        });
     }
 
     @SuppressWarnings("unchecked")
@@ -82,7 +109,18 @@ public class LoginForm extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void cmdLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdLoginActionPerformed
-        Application.login();
+        var user = new User();
+        user.setUsername(txtUser.getText().trim());
+        user.setPassword(txtPass.getText().trim());
+        var oUser = userService.login(user);
+
+        if (oUser.isPresent()) {
+            var loggedUser = oUser.get();
+            Application.login(loggedUser);
+        } else {
+            JOptionPane.showMessageDialog(null, "Verifique o usuário e senha, e tente novamente!", "Opss...", JOptionPane.ERROR_MESSAGE);
+        }
+
     }//GEN-LAST:event_cmdLoginActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -55,6 +55,7 @@ public class MenuItem extends JPanel {
     private final List<MenuEvent> events;
     private final Menu menu;
     private final String menus[];
+    private final String icon;
     private final int menuIndex;
     private final int menuItemHeight = 38;
     private final int subMenuItemHeight = 35;
@@ -66,23 +67,27 @@ public class MenuItem extends JPanel {
 
     private PopupSubmenu popup;
 
-    public MenuItem(Menu menu, String menus[], int menuIndex, List<MenuEvent> events) {
+    public MenuItem(Menu menu, String menus[], String icon, int menuIndex, List<MenuEvent> events) {
         this.menu = menu;
         this.menus = menus;
         this.menuIndex = menuIndex;
         this.events = events;
+        this.icon = icon;
         init();
     }
 
     private Icon getIcon() {
         Color lightColor = FlatUIUtils.getUIColor("Menu.icon.lightColor", Color.red);
         Color darkColor = FlatUIUtils.getUIColor("Menu.icon.darkColor", Color.red);
-        FlatSVGIcon icon = new FlatSVGIcon("icon/menu/icon/" + menuIndex + ".svg");
+        FlatSVGIcon icon = new FlatSVGIcon("icon/menu/icon/" + this.icon);
+
+        
         FlatSVGIcon.ColorFilter f = new FlatSVGIcon.ColorFilter();
         f.add(Color.decode("#969696"), lightColor, darkColor);
         icon.setColorFilter(f);
         return icon;
     }
+    
 
     private void init() {
         setLayout(new MenuLayout());

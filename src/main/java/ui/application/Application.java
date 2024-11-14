@@ -7,6 +7,7 @@ import com.formdev.flatlaf.fonts.roboto.FlatRobotoFont;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import domain.model.User;
 import domain.service.UserService;
+import infra.postgres.repository.DonorRepositoryPgsql;
 import infra.postgres.repository.UserRepositoryPgsql;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -32,10 +33,12 @@ public class Application extends javax.swing.JFrame {
         initComponents();
         setSize(new Dimension(1366, 768));
         setLocationRelativeTo(null);
+        
         var userRepo = new UserRepositoryPgsql();
         var userService = new UserService(userRepo);
+        var donorRepo = new DonorRepositoryPgsql();
 
-        mainForm = new MainForm();
+        mainForm = new MainForm(donorRepo);
 
         loginForm = new LoginForm(userService);
         setContentPane(loginForm);

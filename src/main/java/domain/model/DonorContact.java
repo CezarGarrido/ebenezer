@@ -22,8 +22,10 @@ public class DonorContact {
 
     private Long id;
     private Long donorId;
-    private String contactName;
-    private String phoneNumber;
+    private String name;
+    private String phone;
+    private String email;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

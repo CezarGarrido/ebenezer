@@ -1,6 +1,7 @@
 package ui.application.form.donor;
 
 import com.formdev.flatlaf.FlatClientProperties;
+import domain.repository.DonorRepository;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -13,17 +14,20 @@ import ui.application.form.donor.dialog.DonorNewDialog;
  */
 public class FormDonor extends javax.swing.JPanel {
 
-    public FormDonor() {
+    private DonorRepository repo;
+    
+    public FormDonor(DonorRepository repo) {
         initComponents();
         init();
+        this.repo = repo;
     }
-
+    
     private void init() {
         setBorder(new EmptyBorder(10, 10, 10, 10)); //Margin
 
         //setLayout(new MigLayout("wrap,fillx", "[fill]"));
         jScrollPane2.putClientProperty(FlatClientProperties.STYLE, "" + "arc:20;");
-
+        
         jTextField1.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Pesquisar...");
         //txtPass.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Password");
         jLabel1.putClientProperty(FlatClientProperties.STYLE, ""
@@ -32,7 +36,7 @@ public class FormDonor extends javax.swing.JPanel {
         jTextPane1.setEditable(false);
         jTextPane1.setBorder(BorderFactory.createEmptyBorder());
     }
-
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -141,6 +145,7 @@ public class FormDonor extends javax.swing.JPanel {
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
         // TODO add your handling code here:
         DonorNewDialog dialog = new DonorNewDialog((JFrame) SwingUtilities.getWindowAncestor(this), true);
+        dialog.setRepository(this.repo);
         dialog.setVisible(true);
     }//GEN-LAST:event_jButton6ActionPerformed
 

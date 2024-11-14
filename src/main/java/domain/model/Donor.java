@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.List;
 
 /**
  *
@@ -23,6 +24,7 @@ public class Donor {
     private Long id;
     private Long companyId;
     private String name;
+    private String personType;
     private String cnpj;
     private String ie;
     private String cpf;
@@ -32,7 +34,7 @@ public class Donor {
     private Long userCreatorId;
 
     private DonorAddress address;
-    private DonorContact[] contacts;
+    private List<DonorContact> contacts;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

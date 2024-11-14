@@ -15,20 +15,10 @@ import lombok.NoArgsConstructor;
  * @author cezar.britez
  */
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class DonorAddress {
+public class DonorAddress extends Address {
 
     private Long id;
     private Long donorId;
-    private String street;
-    private String neighborhood;
-    private String complement;
-    private String city;
-    private String state;
-    private String postalCode;
-    private String country = "Brazil";
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

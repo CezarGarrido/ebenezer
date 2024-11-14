@@ -118,7 +118,7 @@ public class LoginForm extends javax.swing.JPanel {
             var loggedUser = oUser.get();
             Application.login(loggedUser);
         } else {
-            JOptionPane.showMessageDialog(null, "Verifique o usuário e senha, e tente novamente!", "Opss...", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Erro ao acessar!", "Erro", JOptionPane.ERROR_MESSAGE);
         }
 
     }//GEN-LAST:event_cmdLoginActionPerformed

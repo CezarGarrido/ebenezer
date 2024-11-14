@@ -18,7 +18,7 @@ public interface DonorRepository {
 
     List<Donor> findAll();
 
-    void save(Donor donor);
+    Long save(Donor donor);
 
     void update(Donor donor);
 

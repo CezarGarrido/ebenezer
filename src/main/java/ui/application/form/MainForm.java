@@ -3,6 +3,7 @@ package ui.application.form;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.util.UIScale;
+import domain.repository.DonorRepository;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.ComponentOrientation;
@@ -29,8 +30,11 @@ import ui.menu.MenuAction;
  */
 public class MainForm extends JLayeredPane {
 
-    public MainForm() {
+    private DonorRepository donorRepo;
+
+    public MainForm(DonorRepository donorRepo) {
         init();
+        this.donorRepo = donorRepo;
     }
 
     private void init() {
@@ -40,7 +44,7 @@ public class MainForm extends JLayeredPane {
         if (Application.loggedUser() != null) {
             menu.setUserImage(Application.loggedUser().getPhoto());
         }
-        
+
         panelBody = new JPanel(new BorderLayout());
         initMenuArrowIcon();
         menuButton.putClientProperty(FlatClientProperties.STYLE, ""
@@ -87,7 +91,7 @@ public class MainForm extends JLayeredPane {
                 }
             } else if (index == 2) {
                 if (subIndex == 1) {
-                    Application.showForm(new FormDonor());
+                    Application.showForm(new FormDonor(this.donorRepo));
                 }
             } else if (index == 9) {
                 Application.logout();
@@ -124,12 +128,10 @@ public class MainForm extends JLayeredPane {
         menu.setSelectedMenu(index, subIndex);
     }
 
-    
     public void setUserImage(byte[] image) {
         menu.setUserImage(image);
     }
 
-    
     private Menu menu;
     private JPanel panelBody;
     private JButton menuButton;

@@ -9,7 +9,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.util.List;
 
 /**
  *
@@ -19,23 +18,12 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Donor {
+public class AgendaCall {
 
     private Long id;
-    private Long companyId;
-    private String name;
-    private String personType;
-    private String cnpj;
-    private String ie;
-    private String cpf;
-    private String rg;
-    private String rgIssuer;
-    private Boolean active = true;
-    private Long userCreatorId;
-
-    private DonorAddress address;
-    private List<DonorContact> contacts;
-    private User user;
+    private Long agendaId;
+    private Long donorId;
+    private String phone;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

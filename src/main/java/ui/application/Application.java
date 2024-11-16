@@ -4,9 +4,10 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
 import com.formdev.flatlaf.fonts.roboto.FlatRobotoFont;
-import com.formdev.flatlaf.themes.FlatMacDarkLaf;
+import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import domain.model.User;
 import domain.service.UserService;
+import infra.postgres.repository.AgendaRepositoryPgsql;
 import infra.postgres.repository.DonorRepositoryPgsql;
 import infra.postgres.repository.UserRepositoryPgsql;
 import java.awt.Component;
@@ -33,12 +34,13 @@ public class Application extends javax.swing.JFrame {
         initComponents();
         setSize(new Dimension(1366, 768));
         setLocationRelativeTo(null);
-        
+
         var userRepo = new UserRepositoryPgsql();
         var userService = new UserService(userRepo);
         var donorRepo = new DonorRepositoryPgsql();
+        var agendaRepo = new AgendaRepositoryPgsql();
 
-        mainForm = new MainForm(donorRepo);
+        mainForm = new MainForm(donorRepo, agendaRepo);
 
         loginForm = new LoginForm(userService);
         setContentPane(loginForm);
@@ -110,7 +112,7 @@ public class Application extends javax.swing.JFrame {
         FlatRobotoFont.install();
         FlatLaf.registerCustomDefaultsSource("theme");
         UIManager.put("defaultFont", new Font(FlatRobotoFont.FAMILY, Font.PLAIN, 13));
-        FlatMacDarkLaf.setup();
+        FlatMacLightLaf.setup();
         java.awt.EventQueue.invokeLater(() -> {
             app = new Application();
             //  app.applyComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);

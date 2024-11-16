@@ -3,6 +3,7 @@ package ui.application.form;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.util.UIScale;
+import domain.repository.AgendaRepository;
 import domain.repository.DonorRepository;
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -17,9 +18,9 @@ import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import ui.application.Application;
+import ui.application.form.agenda.AgendaForm;
 import ui.application.form.donor.FormDonor;
 import ui.application.form.other.FormDashboard;
-import ui.application.form.other.FormInbox;
 import ui.application.form.other.FormRead;
 import ui.menu.Menu;
 import ui.menu.MenuAction;
@@ -31,10 +32,12 @@ import ui.menu.MenuAction;
 public class MainForm extends JLayeredPane {
 
     private DonorRepository donorRepo;
+    private AgendaRepository agendaRepo;
 
-    public MainForm(DonorRepository donorRepo) {
+    public MainForm(DonorRepository donorRepo, AgendaRepository agendaRepo) {
         init();
         this.donorRepo = donorRepo;
+        this.agendaRepo = agendaRepo;
     }
 
     private void init() {
@@ -82,18 +85,12 @@ public class MainForm extends JLayeredPane {
             if (index == 0) {
                 Application.showForm(new FormDashboard());
             } else if (index == 1) {
-                if (subIndex == 1) {
-                    Application.showForm(new FormInbox());
-                } else if (subIndex == 2) {
-                    Application.showForm(new FormRead());
-                } else {
-                    action.cancel();
-                }
+                Application.showForm(new AgendaForm(this.agendaRepo, this.donorRepo));
             } else if (index == 2) {
                 if (subIndex == 1) {
                     Application.showForm(new FormDonor(this.donorRepo));
                 }
-            } else if (index == 9) {
+            } else if (index == 4) {
                 Application.logout();
             } else {
                 action.cancel();

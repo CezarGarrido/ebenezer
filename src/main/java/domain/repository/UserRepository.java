@@ -12,5 +12,5 @@ import java.util.Optional;
  * @author cezar.britez
  */
 public interface UserRepository {
-    public Optional<User> login(User user);
+    public User login(User user);
 }

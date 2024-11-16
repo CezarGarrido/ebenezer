@@ -66,17 +66,22 @@ CREATE TABLE donors (
     company_id BIGINT NOT NULL,
     person_type VARCHAR(20) NOT NULL CHECK (person_type IN ('Pessoa Física', 'Pessoa Jurídica')),
     name VARCHAR(255) NOT NULL,
-    cnpj VARCHAR(20) UNIQUE,                       -- CNPJ com 14 caracteres
-    ie VARCHAR(20),
-    cpf VARCHAR(20) UNIQUE,                        -- CPF com 11 caracteres
-    rg VARCHAR(20),
-    rg_issuer VARCHAR(20),
+    cnpj VARCHAR(30),                       -- CNPJ com 14 caracteres
+    ie VARCHAR(30),
+    cpf VARCHAR(30) ,                        -- CPF com 11 caracteres
+    rg VARCHAR(30),
+    rg_issuer VARCHAR(30),
     active BOOLEAN DEFAULT TRUE,
     user_creator_id BIGINT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_creator_id) REFERENCES users(id),
-    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
+    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE,
+    -- Restrição única para (cpf, person_type)
+    CONSTRAINT unique_cpf_person_type UNIQUE (cpf, person_type),
+    
+    -- Restrição única para (cnpj, person_type)
+    CONSTRAINT unique_cnpj_person_type UNIQUE (cnpj, person_type)
 );
 
 -- Tabela donor_contacts
@@ -85,8 +90,8 @@ CREATE TABLE donor_contacts (
     id BIGSERIAL PRIMARY KEY,
     donor_id BIGINT NOT NULL,
     name VARCHAR(255) NOT NULL,
-    phone VARCHAR(20) NOT NULL,
-    email VARCHAR(20),
+    phone VARCHAR(60) NOT NULL,
+    email VARCHAR(60),
     FOREIGN KEY (donor_id) REFERENCES donors(id) ON DELETE CASCADE,
     UNIQUE (donor_id, phone, email)  -- Restrição de unicidade para evitar duplicidade de contatos para o mesmo doador
 );
@@ -101,9 +106,36 @@ CREATE TABLE donor_addresses (
     complement VARCHAR(255),
     city VARCHAR(255) NOT NULL,
     state VARCHAR(2) NOT NULL,               -- Estado com 2 caracteres (UF)
-    postal_code VARCHAR(10),                  -- CEP com 8 caracteres
+    postal_code VARCHAR(20),                  -- CEP com 8 caracteres
     number VARCHAR(100) NOT NULL,
-    country VARCHAR(50) DEFAULT 'Brazil',
+    country VARCHAR(60) DEFAULT 'Brazil',
     FOREIGN KEY (donor_id) REFERENCES donors(id) ON DELETE CASCADE,
     UNIQUE (donor_id)  -- Adiciona a restrição de unicidade para donor_id
+);
+
+DROP TABLE IF EXISTS agenda;
+CREATE TABLE agenda (
+    id BIGSERIAL PRIMARY KEY,
+    company_id BIGINT NOT NULL,
+    user_creator_id BIGINT NOT NULL,
+    date TIMESTAMP,
+    hour VARCHAR(30),
+    event_type VARCHAR(20) NOT NULL CHECK (event_type IN ('Ligação')),
+    obs VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_creator_id) REFERENCES users(id),
+    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
+);
+
+DROP TABLE IF EXISTS agenda_calls;
+CREATE TABLE agenda_calls (
+    id BIGSERIAL PRIMARY KEY,
+    agenda_id BIGINT NOT NULL,
+    donor_id BIGINT NOT NULL,
+    phone VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (agenda_id) REFERENCES agenda(id),
+    FOREIGN KEY (donor_id) REFERENCES donors(id) ON DELETE CASCADE
 );

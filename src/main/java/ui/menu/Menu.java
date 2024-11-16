@@ -37,7 +37,7 @@ public class Menu extends JPanel {
         {"~MAIN~"},
         {"Dashboard"},
         {"~APP~"},
-        {"Ligações", "Realizar", "Read", "Compost"},
+        {"Agenda"},
         {"~COMPONENT~"},
         {"Cadastros", "Doadores", "Funcionários"},
         {"~OTHER~"},

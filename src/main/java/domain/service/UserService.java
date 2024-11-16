@@ -20,7 +20,7 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public Optional<User> login(User user) {
+    public User login(User user) {
         return userRepository.login(user);
     }
 }

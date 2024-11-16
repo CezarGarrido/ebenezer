@@ -5,11 +5,11 @@
 package domain.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.util.List;
 
 /**
  *
@@ -19,23 +19,17 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Donor {
+public class Agenda {
 
     private Long id;
     private Long companyId;
-    private String name;
-    private String personType;
-    private String cnpj;
-    private String ie;
-    private String cpf;
-    private String rg;
-    private String rgIssuer;
-    private Boolean active = true;
     private Long userCreatorId;
-
-    private DonorAddress address;
-    private List<DonorContact> contacts;
+    private LocalDateTime date;
+    private String hour;
+    private String eventType;
+    private String Obs;
     private User user;
+    private AgendaCall call;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

@@ -71,18 +71,18 @@ public class LoginForm extends javax.swing.JPanel {
         cmdLogin = new javax.swing.JButton();
 
         lbTitle.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lbTitle.setText("Login");
+        lbTitle.setText("Ebenezer - Login");
         panelLogin1.add(lbTitle);
 
-        lbUser.setText("User Name");
+        lbUser.setText("Usuário");
         panelLogin1.add(lbUser);
         panelLogin1.add(txtUser);
 
-        lbPass.setText("Password");
+        lbPass.setText("Senha");
         panelLogin1.add(lbPass);
         panelLogin1.add(txtPass);
 
-        cmdLogin.setText("Login");
+        cmdLogin.setText("Acessar");
         cmdLogin.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdLoginActionPerformed(evt);
@@ -110,17 +110,18 @@ public class LoginForm extends javax.swing.JPanel {
 
     private void cmdLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdLoginActionPerformed
         var user = new User();
+        String password = String.valueOf(txtPass.getPassword());
         user.setUsername(txtUser.getText().trim());
-        user.setPassword(txtPass.getText().trim());
-        var oUser = userService.login(user);
+        user.setPassword(password);
 
-        if (oUser.isPresent()) {
-            var loggedUser = oUser.get();
-            Application.login(loggedUser);
-        } else {
-            JOptionPane.showMessageDialog(this, "Erro ao acessar!", "Erro", JOptionPane.ERROR_MESSAGE);
+        try {
+            user = userService.login(user);
+            txtUser.setText("");
+            txtPass.setText("");
+            Application.login(user);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
-
     }//GEN-LAST:event_cmdLoginActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

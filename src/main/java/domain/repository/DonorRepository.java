@@ -10,13 +10,14 @@ package domain.repository;
  */
 import domain.model.Donor;
 import java.util.List;
-import java.util.Optional;
 
 public interface DonorRepository {
 
-    Optional<Donor> findById(Long id);
+    Donor findById(Long id);
 
     List<Donor> findAll();
+
+    List<Donor> findByQuery(Long companyId, String queryFilter);
 
     Long save(Donor donor);
 

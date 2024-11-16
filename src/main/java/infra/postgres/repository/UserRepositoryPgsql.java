@@ -4,6 +4,8 @@
  */
 package infra.postgres.repository;
 
+import domain.exception.IncorrectPasswordException;
+import domain.exception.UserNotFoundException;
 import domain.model.Role;
 import domain.model.User;
 import domain.repository.UserRepository;
@@ -19,7 +21,7 @@ import java.util.Optional;
 public class UserRepositoryPgsql extends PGConnection implements UserRepository {
 
     @Override
-    public Optional<User> login(User user) {
+    public User login(User user) {
         try {
             open();
             // Query SQL para verificar o login e realizar o join com a tabela roles
@@ -65,15 +67,18 @@ public class UserRepositoryPgsql extends PGConnection implements UserRepository 
                     role.setRole(rs.getString("role_name"));
                     foundUser.setRole(role);
 
-                    return Optional.of(foundUser);
+                    return foundUser;
+                } else {
+                    throw new IncorrectPasswordException("Senha incorreta para o usuário " + user.getUsername());
                 }
+            } else {
+                // Lança uma exceção personalizada de usuário não encontrado
+                throw new UserNotFoundException("Usuário não encontrado: " + user.getUsername());
             }
 
-            // Se não encontrou ou as senhas não coincidem, retorna um Optional vazio
-            return Optional.empty();
         } catch (Exception e) {
             e.printStackTrace();
-            return Optional.empty();
+            throw new RuntimeException(e.getMessage());
         } finally {
             close();
         }

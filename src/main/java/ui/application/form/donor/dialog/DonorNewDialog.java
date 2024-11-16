@@ -47,9 +47,7 @@ public class DonorNewDialog extends javax.swing.JDialog {
         setLocationRelativeTo(parent);  // Para centralizar na tela
         this.donor = donor;
         init();
-
-        txtName.setText(donor.getName());
-        txtName.setText(donor.getName());
+        fromDonor(this.donor);
     }
 
     public DonorNewDialog(java.awt.Frame parent, boolean modal) {
@@ -375,9 +373,9 @@ public class DonorNewDialog extends javax.swing.JDialog {
                             .addComponent(lblRgIe, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtRgIe, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtCpfCnpj, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtCpfCnpj, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtRgIe, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addComponent(jLabel6)
                 .addGap(2, 2, 2)
@@ -427,57 +425,59 @@ public class DonorNewDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
-        // TODO add your handling code here:
-        if (txtName.getText().isEmpty()) {
-            // Exibe o tooltip se o campo estiver vazio
-            txtName.setToolTipText("Por favor, preencha este campo!");
 
-        } else {
-            // Caso o campo esteja preenchido, limpa o tooltip
-            txtName.setToolTipText(null);
+        var newDonor = this.donor;
+        if (newDonor == null) {
+            newDonor = new Donor();
         }
-        if (donor == null) {
-            var newDonor = new Donor();
-            try {
-                newDonor.setCompanyId(Application.loggedUser().getCompanyId());
-                newDonor.setUserCreatorId(Application.loggedUser().getId());
 
-                newDonor.setName(txtName.getText());
-                newDonor.setPersonType(comboPersonType.getSelectedItem().toString());
-                //newDonor.setActive(checkActive.isSelected());
+        try {
+            newDonor.setCompanyId(Application.loggedUser().getCompanyId());
+            newDonor.setUserCreatorId(Application.loggedUser().getId());
 
-                if (comboPersonType.getSelectedItem().toString().equals("Pessoa Física")) {
-                    newDonor.setCpf(txtCpfCnpj.getText());
-                    newDonor.setRg(txtRgIe.getText());
-                } else {
-                    newDonor.setCnpj(txtCpfCnpj.getText());
-                    newDonor.setIe(txtRgIe.getText());
-                }
+            newDonor.setName(txtName.getText());
+            newDonor.setPersonType(comboPersonType.getSelectedItem().toString());
+            newDonor.setActive(checkActive.isSelected());
 
-                // Mapear contatos
-                List<DonorContact> contacts = getContactsFromTable();
-                newDonor.setContacts(contacts);
+            if (comboPersonType.getSelectedItem().toString().equals("Pessoa Física")) {
+                newDonor.setCpf(txtCpfCnpj.getText());
+                newDonor.setRg(txtRgIe.getText());
+            } else {
+                newDonor.setCnpj(txtCpfCnpj.getText());
+                newDonor.setIe(txtRgIe.getText());
+            }
 
-                // Mapear endereço
-                DonorAddress address = getAddressFromUI();
-                newDonor.setAddress(address);
+            // Mapear contatos
+            List<DonorContact> contacts = getContactsFromTable();
+            newDonor.setContacts(contacts);
 
-                //TODO mapear Contacts
-                //TODO mapear Address
+            // Mapear endereço
+            DonorAddress address = getAddressFromUI();
+            newDonor.setAddress(address);
+
+            if (this.donor == null) {
                 var id = this.repo.save(newDonor);
                 if (id != null) {
                     JOptionPane.showMessageDialog(btnSave, "Salvo com sucesso!");
                     this.dispose();
                 }
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+
+            } else {
+                this.repo.update(newDonor);
+                JOptionPane.showMessageDialog(btnSave, "Atualizado com sucesso!");
+                this.dispose();
             }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
+
 
     }//GEN-LAST:event_btnSaveActionPerformed
 
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
         // TODO add your handling code here:
+        this.dispose();
     }//GEN-LAST:event_btnCancelActionPerformed
 
     private void comboPersonTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comboPersonTypeActionPerformed
@@ -488,7 +488,6 @@ public class DonorNewDialog extends javax.swing.JDialog {
         if (selectedIndex == 0) {
             setCpfMask();
             lblRgIe.setText("RG");
-
             lblCpfCnpj.setText("CPF");
         } else if (selectedIndex == 1) {
             setCnpjMask();
@@ -595,6 +594,47 @@ public class DonorNewDialog extends javax.swing.JDialog {
             contacts.add(contact);
         }
         return contacts;
+    }
+
+    private void fromDonor(Donor donor) {
+        // Verifica se o objeto donor não é null
+        if (donor != null) {
+            // Preenche os campos com os valores do donor
+            txtName.setText(donor.getName());
+            comboPersonType.setSelectedItem(donor.getPersonType());
+            checkActive.setSelected(donor.getActive());
+            //txtObs.setText(donor.getObs())
+            // Verifica o tipo de pessoa (Física ou Jurídica)
+            if ("Pessoa Física".equals(donor.getPersonType())) {
+                txtCpfCnpj.setText(donor.getCpf());
+                txtRgIe.setText(donor.getRg());
+            } else {
+                txtCpfCnpj.setText(donor.getCnpj());
+                txtRgIe.setText(donor.getIe());
+            }
+
+            // Preenche o endereço
+            DonorAddress address = donor.getAddress();
+            if (address != null) {
+                txtAddress.setText(address.getStreet());
+                txtAddressNumber.setText(address.getNumber());
+                txtAddressComplement.setText(address.getComplement());
+                txtAddressNeighborhood.setText(address.getNeighborhood());
+                txtAddressCity.setText(address.getCity());
+                txtAddressState.setSelectedItem(address.getState());
+                txtCEP.setText(address.getPostalCode());
+            }
+
+            // Preenche os contatos
+            if (donor.getContacts() != null) {
+                DefaultTableModel model = (DefaultTableModel) tableContacts.getModel();
+                model.setRowCount(0); // Limpa as linhas existentes
+
+                for (DonorContact contact : donor.getContacts()) {
+                    model.addRow(new Object[]{contact.getName(), contact.getPhone(), contact.getEmail()});
+                }
+            }
+        }
     }
 
     /**

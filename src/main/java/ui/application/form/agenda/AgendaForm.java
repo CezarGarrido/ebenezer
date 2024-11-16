@@ -1,29 +1,27 @@
-package ui.application.form.donor;
+package ui.application.form.agenda;
 
 import com.formdev.flatlaf.FlatClientProperties;
-import domain.model.Donor;
+import domain.repository.AgendaRepository;
 import domain.repository.DonorRepository;
-import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
-import javax.swing.table.DefaultTableModel;
-import ui.application.form.donor.dialog.DonorNewDialog;
+import ui.application.form.agenda.dialog.AgendaNewDialog;
 
 /**
  *
  * @author Raven
  */
-public class FormDonor extends javax.swing.JPanel {
+public class AgendaForm extends javax.swing.JPanel {
 
-    private DonorRepository repo;
+    private AgendaRepository agendaRepo;
+    private DonorRepository donorRepo;
 
-    public FormDonor(DonorRepository repo) {
+    public AgendaForm(AgendaRepository agendaRepo, DonorRepository donorRepo) {
         initComponents();
-        this.repo = repo;
-
+        this.agendaRepo = agendaRepo;
+        this.donorRepo = donorRepo;
         init();
     }
 
@@ -45,29 +43,7 @@ public class FormDonor extends javax.swing.JPanel {
     }
 
     private void loadTableData() {
-        // Obtenha todos os doadores do repositório
-        List<Donor> donors = repo.findAll();
 
-        // Defina o modelo da tabela
-        DefaultTableModel model = (DefaultTableModel) tableDonors.getModel();
-        model.setRowCount(0); // Limpa a tabela antes de preencher com novos dados
-
-        // Adicione cada doador ao modelo da tabela
-        for (Donor donor : donors) {
-            var status = "Inativo";
-            if (donor.getActive()) {
-                status = "Ativo";
-            }
-
-            model.addRow(new Object[]{
-                donor.getId(), // Supondo que há um método getId() em Donor
-                donor.getName(), // Supondo que há um método getName() em Donor
-                donor.getCpf(), // Supondo que há um método getPhone() em Donor
-                status, // Supondo que há um método getStatus() em Donor
-                donor.getUser().getName(),
-                donor.getCreatedAt(),
-                donor.getUpdatedAt(),});
-        }
     }
 
     @SuppressWarnings("unchecked")
@@ -106,7 +82,7 @@ public class FormDonor extends javax.swing.JPanel {
             }
         });
 
-        jLabel1.setText("Doadores");
+        jLabel1.setText("Agenda");
 
         jScrollPane1.setViewportView(jTextPane1);
 
@@ -154,11 +130,11 @@ public class FormDonor extends javax.swing.JPanel {
 
             },
             new String [] {
-                "Código", "Nome", "CPF/CNPJ", "Situação", "Criado por", "Criado em", "Atualizado em"
+                "Código", "Data", "Hora", "Tipo", "Criado por", "Criado em"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false
+                false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -192,72 +168,16 @@ public class FormDonor extends javax.swing.JPanel {
 
     private void btnCreateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateActionPerformed
         // TODO add your handling code here:
-        DonorNewDialog dialog = new DonorNewDialog((JFrame) SwingUtilities.getWindowAncestor(this), true);
-        dialog.setRepository(this.repo);
+        AgendaNewDialog dialog = new AgendaNewDialog((JFrame) SwingUtilities.getWindowAncestor(this), true, this.agendaRepo, this.donorRepo);
         dialog.setVisible(true);
     }//GEN-LAST:event_btnCreateActionPerformed
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
         // TODO add your handling code here:
-
-        int selectedRow = tableDonors.getSelectedRow();
-
-        // Verifica se alguma linha está selecionada
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Selecione um doador para excluir.", "Aviso", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        // Confirmação de exclusão
-        int confirm = JOptionPane.showConfirmDialog(this,
-                "Tem certeza que deseja excluir o doador selecionado?",
-                "Confirmação de Exclusão",
-                JOptionPane.YES_NO_OPTION);
-
-        if (confirm == JOptionPane.YES_OPTION) {
-            // Obter o ID do doador selecionado na tabela
-            Long donorId = (Long) tableDonors.getValueAt(selectedRow, 0);
-
-            // Excluir doador do repositório
-            repo.deleteById(donorId);
-
-            // Atualizar a tabela após a exclusão
-            loadTableData();
-
-            // Mensagem de sucesso
-            JOptionPane.showMessageDialog(this, "Doador excluído com sucesso.");
-        }
     }//GEN-LAST:event_btnDeleteActionPerformed
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
-        // TODO add your handling code here:
-        // Obtém as linhas selecionadas
-        int[] selectedRows = tableDonors.getSelectedRows();
 
-        // Verifica se nenhuma ou mais de uma linha está selecionada
-        if (selectedRows.length == 0) {
-            JOptionPane.showMessageDialog(this, "Selecione um doador para atualizar.", "Aviso", JOptionPane.WARNING_MESSAGE);
-            return;
-        } else if (selectedRows.length > 1) {
-            JOptionPane.showMessageDialog(this, "Por favor, selecione apenas um doador para atualizar.", "Aviso", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        // Continua com a lógica para uma única seleção
-        Long donorId = (Long) tableDonors.getValueAt(selectedRows[0], 0);
-        Donor donor = repo.findById(donorId);
-
-        if (donor == null) {
-            JOptionPane.showMessageDialog(this, "Doador não encontrado.", "Erro", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        DonorNewDialog dialog = new DonorNewDialog((JFrame) SwingUtilities.getWindowAncestor(this), true, donor);
-        dialog.setRepository(this.repo);
-        // dialog.setDonor(donor);
-        dialog.setVisible(true);
-
-        loadTableData();
     }//GEN-LAST:event_btnUpdateActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

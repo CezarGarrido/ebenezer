@@ -6,6 +6,8 @@ package infra.postgres.repository;
 
 import domain.model.Agenda;
 import domain.model.AgendaCall;
+import domain.model.Donor;
+import domain.model.User;
 import domain.repository.AgendaRepository;
 import infra.postgres.config.PGConnection;
 import static infra.postgres.config.PGConnection.close;
@@ -15,6 +17,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -103,6 +106,101 @@ public class AgendaRepositoryPgsql extends PGConnection implements AgendaReposit
     @Override
     public void update(Agenda agenda) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public List<Agenda> findByQuery(Long companyId, String queryFilter) {
+        List<Agenda> events = new ArrayList<>();
+
+        // Monta a consulta com filtro opcional por companyId
+        String query = """
+            SELECT a.id, a.company_id, a.event_type, a.date, a.hour, a.obs, 
+                   a.user_creator_id, a.created_at, a.updated_at,
+                   ac.id AS call_id, ac.donor_id AS call_donor_id, ac.phone AS call_phone,
+                   u.id AS user_id, u.username AS user_name,
+                   d.id AS donor_id, d.name AS donor_name
+            FROM agenda a
+            LEFT JOIN agenda_calls ac ON a.id = ac.agenda_id
+            LEFT JOIN donors d ON d.id = ac.donor_id            
+            LEFT JOIN users u ON a.user_creator_id = u.id 
+            WHERE 1=1
+            """;
+
+        // Adiciona filtro de companyId, se presente
+        if (companyId != null) {
+            query += "AND a.company_id = ? ";
+        }
+
+        // Adiciona filtro de queryFilter, se presente
+        if (queryFilter != null && !queryFilter.isBlank()) {
+            query += "AND (d.name ILIKE ? OR CAST(a.id AS TEXT) ILIKE ?) ";
+        }
+
+        try {
+            open();
+            var connection = getConnection();
+
+            try (PreparedStatement stmt = connection.prepareStatement(query)) {
+                int paramIndex = 1;
+
+                // Configura o parâmetro companyId, se presente
+                if (companyId != null) {
+                    stmt.setLong(paramIndex++, companyId);
+                }
+
+                // Configura os parâmetros da queryFilter, se presente
+                if (queryFilter != null && !queryFilter.isBlank()) {
+                    String filter = "%" + queryFilter.trim() + "%";
+                    stmt.setString(paramIndex++, filter);
+                    stmt.setString(paramIndex++, filter);
+                }
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        // Cria um novo objeto Agenda com os dados do resultado
+                        Agenda agenda = new Agenda();
+                        agenda.setId(rs.getLong("id"));
+                        agenda.setCompanyId(rs.getLong("company_id"));
+                        agenda.setEventType(rs.getString("event_type"));
+                        agenda.setDate(rs.getObject("date", LocalDateTime.class));
+                        agenda.setHour(rs.getString("hour"));
+                        agenda.setObs(rs.getString("obs"));
+                        agenda.setUserCreatorId(rs.getLong("user_creator_id"));
+                        agenda.setCreatedAt(rs.getObject("created_at", LocalDateTime.class));
+                        agenda.setUpdatedAt(rs.getObject("updated_at", LocalDateTime.class));
+
+                        // Configura chamadas associadas à agenda
+                        if (rs.getLong("call_id") != 0) {
+                            AgendaCall agendaCall = new AgendaCall();
+                            agendaCall.setId(rs.getLong("call_id"));
+                            agendaCall.setDonorId(rs.getLong("call_donor_id"));
+                            agendaCall.setPhone(rs.getString("call_phone"));
+                            
+                            Donor donor = new Donor();
+                            donor.setName(rs.getString("donor_name"));
+                            agendaCall.setDonor(donor);
+                                    
+                            agenda.setCall(agendaCall);
+                        }
+
+                        if (rs.getLong("user_id") != 0) {
+                            User user = new User();
+                            user.setId(rs.getLong("user_id"));
+                            user.setName(rs.getString("user_name"));
+                            agenda.setUser(user);
+                        }
+
+                        events.add(agenda);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar eventos com o filtro: " + queryFilter + ", para companyId: " + companyId, e);
+        } finally {
+            close();
+        }
+
+        return events;
     }
 
 }

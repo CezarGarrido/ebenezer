@@ -4,11 +4,13 @@
  */
 package domain.model;
 
-import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 /**
  *
@@ -18,14 +20,22 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AgendaCall {
+public class Donation {
 
     private Long id;
-    private Long agendaId;
+    private Long companyId;
+    private Long userCreatorId;
+    private Long agendaId; // Opcional, pode ser null
     private Long donorId;
-    private String phone;
-    private Donor donor;
+    private BigDecimal receivedAmount;
+    private LocalDateTime receivedAt;
+    private String obs;
 
+    private User user; // Relacionamento com User
+    private Agenda agenda; // Relacionamento com Agenda
+    private Donor donor; // Relacionamento com Donor
+
+    private LocalDateTime deletedAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

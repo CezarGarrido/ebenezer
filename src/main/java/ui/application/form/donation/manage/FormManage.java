@@ -1,27 +1,28 @@
-package ui.application.form.agenda;
+package ui.application.form.donation.manage;
 
 import com.formdev.flatlaf.FlatClientProperties;
-import domain.repository.AgendaRepository;
+import domain.model.Donor;
 import domain.repository.DonorRepository;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
-import ui.application.form.agenda.dialog.AgendaNewDialog;
+import ui.application.form.donation.manage.dialog.DonationNewDialog;
+import ui.application.form.donor.dialog.DonorNewDialog;
 
 /**
  *
  * @author Raven
  */
-public class AgendaForm extends javax.swing.JPanel {
+public class FormManage extends javax.swing.JPanel {
 
-    private AgendaRepository agendaRepo;
     private DonorRepository donorRepo;
 
-    public AgendaForm(AgendaRepository agendaRepo, DonorRepository donorRepo) {
+    public FormManage(DonorRepository donorRepo) {
         initComponents();
-        this.agendaRepo = agendaRepo;
         this.donorRepo = donorRepo;
+
         init();
     }
 
@@ -43,7 +44,7 @@ public class AgendaForm extends javax.swing.JPanel {
     }
 
     private void loadTableData() {
-
+        // Obtenha todos os doadores do repositório
     }
 
     @SuppressWarnings("unchecked")
@@ -82,7 +83,7 @@ public class AgendaForm extends javax.swing.JPanel {
             }
         });
 
-        jLabel1.setText("Agenda");
+        jLabel1.setText("Doações");
 
         jScrollPane1.setViewportView(jTextPane1);
 
@@ -130,11 +131,11 @@ public class AgendaForm extends javax.swing.JPanel {
 
             },
             new String [] {
-                "Código", "Data", "Hora", "Tipo", "Criado por", "Criado em"
+                "Código", "Doador", "Valor", "Doado em", "Criado por", "Criado em", "Atualizado em"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false
+                false, false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -168,15 +169,46 @@ public class AgendaForm extends javax.swing.JPanel {
 
     private void btnCreateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateActionPerformed
         // TODO add your handling code here:
-        AgendaNewDialog dialog = new AgendaNewDialog((JFrame) SwingUtilities.getWindowAncestor(this), true, this.agendaRepo, this.donorRepo);
+        DonationNewDialog dialog = new DonationNewDialog((JFrame) SwingUtilities.getWindowAncestor(this), true, this.donorRepo);
+        //dialog.setRepository(this.repo);
         dialog.setVisible(true);
     }//GEN-LAST:event_btnCreateActionPerformed
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
         // TODO add your handling code here:
+
+        int selectedRow = tableDonors.getSelectedRow();
+
+        // Verifica se alguma linha está selecionada
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Selecione um doador para excluir.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Confirmação de exclusão
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Tem certeza que deseja excluir o doador selecionado?",
+                "Confirmação de Exclusão",
+                JOptionPane.YES_NO_OPTION);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            // Obter o ID do doador selecionado na tabela
+            Long donorId = (Long) tableDonors.getValueAt(selectedRow, 0);
+
+            // Excluir doador do repositório
+            //repo.deleteById(donorId);
+
+            // Atualizar a tabela após a exclusão
+            loadTableData();
+
+            // Mensagem de sucesso
+            JOptionPane.showMessageDialog(this, "Doador excluído com sucesso.");
+        }
     }//GEN-LAST:event_btnDeleteActionPerformed
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
+        // TODO add your handling code here:
+        // Obtém as linhas selecionadas
 
     }//GEN-LAST:event_btnUpdateActionPerformed
 

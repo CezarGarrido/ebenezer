@@ -71,7 +71,7 @@ public class LoginForm extends javax.swing.JPanel {
         cmdLogin = new javax.swing.JButton();
 
         lbTitle.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lbTitle.setText("Ebenezer - Login");
+        lbTitle.setText("Login");
         panelLogin1.add(lbTitle);
 
         lbUser.setText("Usuário");

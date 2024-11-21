@@ -48,6 +48,8 @@ public class DonorNewDialog extends javax.swing.JDialog {
         this.donor = donor;
         init();
         fromDonor(this.donor);
+        var title = "Doador #" + donor.getId().toString();
+        setTitle(title);
     }
 
     public DonorNewDialog(java.awt.Frame parent, boolean modal) {

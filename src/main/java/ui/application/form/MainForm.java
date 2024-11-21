@@ -18,10 +18,10 @@ import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import ui.application.Application;
-import ui.application.form.agenda.AgendaForm;
+import ui.application.form.donation.agenda.AgendaForm;
+import ui.application.form.donation.manage.FormManage;
 import ui.application.form.donor.FormDonor;
 import ui.application.form.other.FormDashboard;
-import ui.application.form.other.FormRead;
 import ui.menu.Menu;
 import ui.menu.MenuAction;
 
@@ -87,11 +87,14 @@ public class MainForm extends JLayeredPane {
             } else if (index == 1) {
                 Application.showForm(new AgendaForm(this.agendaRepo, this.donorRepo));
             } else if (index == 2) {
+                Application.showForm(new FormManage(this.donorRepo));
+            } else if (index == 3) {
                 if (subIndex == 1) {
                     Application.showForm(new FormDonor(this.donorRepo));
                 }
-            } else if (index == 4) {
+            } else if (index == 5) {
                 Application.logout();
+
             } else {
                 action.cancel();
             }

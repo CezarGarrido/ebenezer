@@ -178,6 +178,32 @@
             <artifactId>jackson-databind</artifactId>
             <version>2.18.1</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/io.github.bweng20/jSVG -->
+        <dependency>
+            <groupId>io.github.bweng20</groupId>
+            <artifactId>jSVG</artifactId>
+            <version>1.4</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.vdurmont</groupId>
+            <artifactId>emoji-java</artifactId>
+            <version>5.1.1</version>
+        </dependency>
+       
+        <dependency>
+            <groupId>unknown.binary</groupId>
+            <artifactId>datechooser-swing-1.4.2</artifactId>
+            <version>SNAPSHOT</version>
+        </dependency>
+        
+        <!-- https://mvnrepository.com/artifact/net.sourceforge.dynamicreports/dynamicreports-core -->
+        <dependency>
+            <groupId>net.sourceforge.dynamicreports</groupId>
+            <artifactId>dynamicreports-core</artifactId>
+            <version>6.20.1</version>
+        </dependency>
+  
     </dependencies>
     <name>Ebenezer</name>
     <repositories>

@@ -39,7 +39,7 @@
         <Component class="javax.swing.JLabel" name="lbTitle">
           <Properties>
             <Property name="horizontalAlignment" type="int" value="0"/>
-            <Property name="text" type="java.lang.String" value="Ebenezer - Login"/>
+            <Property name="text" type="java.lang.String" value="Login"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="lbUser">

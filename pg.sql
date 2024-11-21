@@ -55,9 +55,82 @@ CREATE TABLE users (
     FOREIGN KEY (role_id) REFERENCES roles(id)
 );
 
+-- Tabela funcionarios
+DROP TABLE IF EXISTS employees;
+CREATE TABLE employees (
+    id BIGSERIAL PRIMARY KEY,
+    company_id BIGINT NOT NULL,               -- Empresa associada
+    name VARCHAR(255) NOT NULL,               -- Nome do funcionário
+    date_of_birth DATE,                       -- Data de nascimento
+    hire_date DATE,                           -- Data de contratação
+    termination_date DATE,                    -- Data de desligamento (se houver)
+    ctps VARCHAR(100),                  -- CNPJ do funcionário (se aplicável)
+    cnpj VARCHAR(14) UNIQUE,                  -- CNPJ do funcionário (se aplicável)
+    cpf VARCHAR(11) UNIQUE,                   -- CPF do funcionário
+    rg VARCHAR(30),                           -- RG do funcionário
+    rg_issuer VARCHAR(30),                    -- Órgão emissor do RG
+    position VARCHAR(100),                    -- Cargo do funcionário
+    department VARCHAR(100),                  -- Departamento do funcionário
+    salary NUMERIC(15, 2),                    -- Salário do funcionário
+    active BOOLEAN DEFAULT TRUE,              -- Status do funcionário (ativo/inativo)
+    marital_status VARCHAR(255),
+    wife_name VARCHAR(255),
+    wife_date_of_birth DATE,
+    user_creator_id BIGINT NOT NULL,          -- Usuário que criou o registro
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Data de criação
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Data de atualização
+    deleted_at TIMESTAMP NULL,                -- Soft delete
+
+    -- Foreign Keys
+    FOREIGN KEY (user_creator_id) REFERENCES users(id),
+    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
+);
+
+
+-- Tabela donor_contacts
+DROP TABLE IF EXISTS employee_contacts;
+CREATE TABLE employee_contacts (
+    id BIGSERIAL PRIMARY KEY,
+    employee_id BIGINT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    phone VARCHAR(60) NOT NULL,
+    email VARCHAR(60),
+    FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE,
+    UNIQUE (employee_id, phone, email)  -- Restrição de unicidade para evitar duplicidade de contatos para o mesmo func
+);
+
+-- Tabela donor_addresses
+DROP TABLE IF EXISTS employee_addresses;
+CREATE TABLE employee_addresses (
+    id BIGSERIAL PRIMARY KEY,
+    employee_id BIGINT NOT NULL,
+    street VARCHAR(255) NOT NULL,
+    neighborhood VARCHAR(255),
+    complement VARCHAR(255),
+    city VARCHAR(255) NOT NULL,
+    state VARCHAR(2) NOT NULL,               -- Estado com 2 caracteres (UF)
+    postal_code VARCHAR(20),                  -- CEP com 8 caracteres
+    number VARCHAR(100) NOT NULL,
+    country VARCHAR(60) DEFAULT 'Brazil',
+    FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE,
+    UNIQUE (employee_id)  -- Adiciona a restrição de unicidade para donor_id
+);
+
 -- Inserção de exemplo na tabela users
 INSERT INTO users (company_id, username, password, email, role_id, active) VALUES 
 (1, 'admin', '$2a$10$St2AvRkC5G9g1R9HmNRTyuCkKyL8051CR2FGkBmpDOJaBznH7xnVK', 'admin@admin.com', 1, TRUE);
+
+
+DROP TABLE IF EXISTS employee_users;
+CREATE TABLE employees_users (
+    employee_id BIGINT NOT NULL,            -- Relacionamento com a tabela employees
+    user_id BIGINT NOT NULL,                -- Relacionamento com a tabela users
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (employee_id, user_id),     -- Chave primária composta para garantir unicidade
+    FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
 
 -- Tabela donors
 DROP TABLE IF EXISTS donors;
@@ -134,8 +207,28 @@ CREATE TABLE agenda_calls (
     agenda_id BIGINT NOT NULL,
     donor_id BIGINT NOT NULL,
     phone VARCHAR(255) NOT NULL,
+    status VARCHAR(20) NOT NULL CHECK (event_type IN ('Agendado', 'Realizado', 'Cancelado')),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (agenda_id) REFERENCES agenda(id),
     FOREIGN KEY (donor_id) REFERENCES donors(id) ON DELETE CASCADE
+);
+
+DROP TABLE IF EXISTS donations;
+CREATE TABLE donations (    
+    id BIGSERIAL PRIMARY KEY,
+    company_id BIGINT NOT NULL,
+    user_creator_id BIGINT NOT NULL,
+    agenda_id BIGINT NULL,
+    donor_id BIGINT NOT NULL,
+    received_amount NUMERIC(10, 2) NOT NULL CHECK (received_amount > 0),
+    received_at TIMESTAMP NOT NULL,
+    obs VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL, -- Campo para soft delete
+    FOREIGN KEY (agenda_id) REFERENCES agenda(id),
+    FOREIGN KEY (user_creator_id) REFERENCES users(id),
+    FOREIGN KEY (company_id) REFERENCES companies(id),
+    FOREIGN KEY (donor_id) REFERENCES donors(id)
 );

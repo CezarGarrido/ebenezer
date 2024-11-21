@@ -5,6 +5,7 @@
 package domain.repository;
 
 import domain.model.Agenda;
+import domain.model.Donor;
 import java.util.List;
 
 /**
@@ -16,6 +17,8 @@ public interface AgendaRepository {
     Agenda findById(Long id);
 
     List<Agenda> findAll();
+    
+    List<Agenda> findByQuery(Long companyId, String queryFilter);
 
     Long save(Agenda agenda);
 

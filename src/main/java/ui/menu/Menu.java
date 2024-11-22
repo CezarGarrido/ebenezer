@@ -37,7 +37,7 @@ public class Menu extends JPanel {
         {"~MAIN~"},
         {"Dashboard"},
         {"~APP~"},
-        {"Ligações"},
+       // {"Ligações"},
         {"Doações"},
         {"~COMPONENT~"},
         {"Cadastros", "Doadores", "Funcionários"},
@@ -50,7 +50,7 @@ public class Menu extends JPanel {
         "", // ~MAIN~ não tem imagem
         "dashboard.svg", // Dashboard
         "", // ~APP~ não tem imagem
-        "agenda.svg",
+        //"agenda.svg",
         "donate.svg",
         "",// ~COMPONENT~ não tem imagem
         "register.svg",

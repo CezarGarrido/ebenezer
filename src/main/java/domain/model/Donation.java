@@ -27,12 +27,12 @@ public class Donation {
     private Long userCreatorId;
     private Long agendaId; // Opcional, pode ser null
     private Long donorId;
-    private BigDecimal receivedAmount;
+    private BigDecimal Amount;
     private LocalDateTime receivedAt;
-    private String obs;
+    private LocalDateTime receivedHour;
+    private String notes;
 
     private User user; // Relacionamento com User
-    private Agenda agenda; // Relacionamento com Agenda
     private Donor donor; // Relacionamento com Donor
 
     private LocalDateTime deletedAt;

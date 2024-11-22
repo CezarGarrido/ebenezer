@@ -85,14 +85,13 @@ public class MainForm extends JLayeredPane {
             if (index == 0) {
                 Application.showForm(new FormDashboard());
             } else if (index == 1) {
-                Application.showForm(new AgendaForm(this.agendaRepo, this.donorRepo));
-            } else if (index == 2) {
                 Application.showForm(new FormManage(this.donorRepo));
-            } else if (index == 3) {
+                //  Application.showForm(new AgendaForm(this.agendaRepo, this.donorRepo));
+            } else if (index == 2) {
                 if (subIndex == 1) {
                     Application.showForm(new FormDonor(this.donorRepo));
                 }
-            } else if (index == 5) {
+            } else if (index == 4) {
                 Application.logout();
 
             } else {

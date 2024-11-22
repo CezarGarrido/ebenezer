@@ -1,0 +1,33 @@
+              LAR EBENEZER = HILDA MARIA CORREA - ADAS
+Utilidade Publica Municipal Lei N.º 1527 de 09/11/88                        Utilidade Publica Estadual Lei N.º 1493 de 13/05/94
+Utilidade Publica Federal Portaria N.º 735 de 13/08/01 DOU 14/08/01         CEBAS: CCEAS 0030 Resolução N.º 05 de 02/02/04 DOU 05/02/04
+                   Atest. de Reg. no Cons. Nasc. de Assist. Soc. R N.º 0018 Res n.º 05 de 02/02/04 DOU 05/02/04
+                                  RUA 20 DE DEZEMBRO, N.º 3170, JARDIM RASSLEN, CEP 79.813-280
+                                                    DOURADOS - MS
+TELEFONE N.º : 67 3425-4118                                -         CNPJ Nº 03.471.216/0001-23              
+                                                    
+                                                        
+                             RECIBO DE DOAÇÕES
+════════════════════════════════════════════════════════════════════════════════════════════════
+
+Recibo N.º .....: {{NUMERO_RECIBO}}                Emitido ....: {{DATA_EMISSAO}}
+
+
+Recebemos de ...: {{NOME_DOADOR}} ({{CODIGO_DOADOR}})
+Endereço .......: {{END_RUA_DOADOR}} Nº {{END_NUMERO_DOADOR}}
+Bairro .........: {{END_BAIRRO_DOADOR}}
+Contato ........: {{CONTATO_DOADOR}}
+Cidade .........: {{END_CIDADE_DOADOR}} - {{END_ESTADO_DOADOR}}
+Valor ..........: {{VALOR_DOADO}}  -  __________________________________
+Por Extenso ....: {VALOR_DOADO_EXTENSO}}
+
+Referente a ....: __________________________________________________
+                  __________________________________________________
+                  __________________________________________________
+
+
+                       _______________________________
+                                  Assinatura
+
+
+-------------------------------------------------------------------------------------------------

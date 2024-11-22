@@ -18,7 +18,7 @@ CREATE TABLE companies (
   name VARCHAR(255) DEFAULT NULL,
   cnpj VARCHAR(14) DEFAULT NULL,           -- CNPJ com 14 caracteres, sem pontos ou traços
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- Inserção de exemplo na tabela companies
@@ -50,7 +50,7 @@ CREATE TABLE users (
     active BOOLEAN DEFAULT TRUE,
     photo BYTEA,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE,
     FOREIGN KEY (role_id) REFERENCES roles(id)
 );
@@ -78,7 +78,7 @@ CREATE TABLE employees (
     wife_date_of_birth DATE,
     user_creator_id BIGINT NOT NULL,          -- Usuário que criou o registro
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Data de criação
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Data de atualização
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL,                -- Soft delete
 
     -- Foreign Keys
@@ -147,7 +147,7 @@ CREATE TABLE donors (
     active BOOLEAN DEFAULT TRUE,
     user_creator_id BIGINT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_creator_id) REFERENCES users(id),
     FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE,
     -- Restrição única para (cpf, person_type)
@@ -192,7 +192,7 @@ CREATE TABLE agenda (
     company_id BIGINT NOT NULL,
     user_creator_id BIGINT NOT NULL,
     date TIMESTAMP,
-    hour VARCHAR(30),
+    time TIME,
     event_type VARCHAR(20) NOT NULL CHECK (event_type IN ('Ligação')),
     obs VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -215,20 +215,20 @@ CREATE TABLE agenda_calls (
 );
 
 DROP TABLE IF EXISTS donations;
-CREATE TABLE donations (    
+CREATE TABLE donations (
     id BIGSERIAL PRIMARY KEY,
     company_id BIGINT NOT NULL,
     user_creator_id BIGINT NOT NULL,
-    agenda_id BIGINT NULL,
     donor_id BIGINT NOT NULL,
-    received_amount NUMERIC(10, 2) NOT NULL CHECK (received_amount > 0),
-    received_at TIMESTAMP NOT NULL,
-    obs VARCHAR(255),
+    amount NUMERIC(10, 2) NOT NULL CHECK (amount > 0),
+    received_at DATE NOT NULL,
+    received_time TIME NOT NULL,
+    paid BOOLEAN DEFAULT FALSE,
+    notes VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL, -- Campo para soft delete
-    FOREIGN KEY (agenda_id) REFERENCES agenda(id),
-    FOREIGN KEY (user_creator_id) REFERENCES users(id),
-    FOREIGN KEY (company_id) REFERENCES companies(id),
-    FOREIGN KEY (donor_id) REFERENCES donors(id)
+    FOREIGN KEY (user_creator_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE,
+    FOREIGN KEY (donor_id) REFERENCES donors(id) ON DELETE CASCADE
 );

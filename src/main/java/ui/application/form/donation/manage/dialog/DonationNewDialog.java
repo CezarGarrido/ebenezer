@@ -8,6 +8,9 @@ import domain.model.Donor;
 import domain.repository.DonorRepository;
 import java.text.DecimalFormat;
 import java.text.ParseException;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.text.DefaultFormatterFactory;
@@ -31,9 +34,16 @@ public class DonationNewDialog extends javax.swing.JDialog {
     public DonationNewDialog(java.awt.Frame parent, boolean modal, DonorRepository donorRepo) {
         super(parent, modal);
         initComponents();
+        this.donorRepo = donorRepo;
+
         setLocationRelativeTo(parent);  // Para centralizar na tela
         setTitle("Nova Doação");
-        this.donorRepo = donorRepo;
+
+        LocalTime now = LocalTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+        String formattedTime = now.format(formatter);
+        
+        txtDate.setDate(new Date()); // Define a data atual, se necessário
     }
 
     /**
@@ -49,9 +59,9 @@ public class DonationNewDialog extends javax.swing.JDialog {
         txtDonor = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
-        jDateChooser1 = new com.toedter.calendar.JDateChooser();
+        txtDate = new com.toedter.calendar.JDateChooser();
         jLabel4 = new javax.swing.JLabel();
-        jTextField2 = new javax.swing.JTextField();
+        txtHour = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTextArea1 = new javax.swing.JTextArea();
         jLabel5 = new javax.swing.JLabel();
@@ -89,6 +99,12 @@ public class DonationNewDialog extends javax.swing.JDialog {
         jLabel3.setText("Data da Doação");
 
         jLabel4.setText("Hora");
+
+        txtHour.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtHourActionPerformed(evt);
+            }
+        });
 
         jTextArea1.setColumns(20);
         jTextArea1.setRows(5);
@@ -143,14 +159,14 @@ public class DonationNewDialog extends javax.swing.JDialog {
                     .addComponent(jDateChooser2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jDateChooser1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel3)
                                 .addGap(0, 0, Short.MAX_VALUE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel4)
-                            .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(txtHour, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel1)
@@ -183,8 +199,8 @@ public class DonationNewDialog extends javax.swing.JDialog {
                     .addComponent(jLabel4))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jDateChooser1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtHour, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -223,12 +239,15 @@ public class DonationNewDialog extends javax.swing.JDialog {
         // TODO add your handling code here:
     }//GEN-LAST:event_txtDonorActionPerformed
 
+    private void txtHourActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtHourActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtHourActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JComboBox<String> jComboBox1;
-    private com.toedter.calendar.JDateChooser jDateChooser1;
     private com.toedter.calendar.JDateChooser jDateChooser2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -240,8 +259,9 @@ public class DonationNewDialog extends javax.swing.JDialog {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextArea jTextArea1;
-    private javax.swing.JTextField jTextField2;
+    private com.toedter.calendar.JDateChooser txtDate;
     private javax.swing.JTextField txtDonor;
+    private javax.swing.JTextField txtHour;
     private javax.swing.JTextField txtValue;
     // End of variables declaration//GEN-END:variables
 }

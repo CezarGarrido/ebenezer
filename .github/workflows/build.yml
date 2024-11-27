@@ -44,39 +44,16 @@ jobs:
       - name: Build and Test with Maven
         run: mvn clean install -DskipTests=false
         
-      # Passo 3: Gerar a imagem de tempo de execução com jlink (apenas no Windows)
-      - name: Generate runtime image with jlink (Windows)
-        if: ${{ contains(matrix.os, 'windows') }}
-        run: |
-          # Ajuste os módulos conforme necessário
-          jlink --module-path %JAVA_HOME%/jmods --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.security.auth,jdk.accessibility,jdk.management.jfr,jdk.net  --output ${{ matrix.os }}-${{ matrix.arch }}-runtime-image-windows
-
-      # Passo 4: Empacotar com jpackage
-      - name: Package with jpackage for Linux
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          jpackage --type app-image --input target/ --name Ebenezer --main-jar Ebenezer-1.0-SNAPSHOT.jar --main-class ui.application.Application --java-options "-Xmx512m"
-          ls
-
-      - name: Package with jpackage for Windows
-        if: ${{ contains(matrix.os, 'windows') }}
-        run: |
-          jpackage --type exe --input target/ --name Ebenezer --main-jar Ebenezer-1.0-SNAPSHOT.jar --main-class ui.application.Application --java-options "--enable-preview -Xmx512m" --dest target/windows --runtime-image ${{ matrix.os }}-${{ matrix.arch }}-runtime-image-windows
-
-      - name: Package with jpackage for macOS
-        if: matrix.os == 'macos-latest'
-        run: |
-          jpackage --type dmg --input target/ --name Ebenezer --main-jar Ebenezer-1.0-SNAPSHOT.jar --main-class ui.application.Application --java-options "-Xmx512m" --dest target/macos
-
       # Passo 5: Upload de artefatos (arquivos gerados pelo Maven e pacotes)
       - name: Upload Maven build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ebenezer-${{ matrix.os }}-${{ matrix.arch }}   # Nome único com ID da execução
           path: |
-            Ebenezer/
-            target/windows/*
-            target/macos/*
+            target/*.AppImage
+            target/*.exe
+            target/*.deb
+            target/*.rpm
             
       # Passo 6: Baixar artefatos para o ambiente local
       - name: Download artifacts

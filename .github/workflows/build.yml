@@ -75,9 +75,12 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          name: ebenezer-${{ matrix.os }}-${{ matrix.arch }}.zip  # Nome do artefato gerado no passo anterior
+          name: ebenezer-${{ matrix.os }}-${{ matrix.arch }}  # Nome do artefato gerado no passo anterior
           path: artifacts/  # Diretório onde os artefatos serão extraídos
       
+      # Listar arquivos baixados para debug
+      - name: List downloaded files
+        run: ls -R artifacts/
         
       - uses: svenstaro/upload-release-action@v2
         name: Upload binaries to release

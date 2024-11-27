@@ -54,6 +54,7 @@ jobs:
             target/*.exe
             target/*.deb
             target/*.rpm
+            target/*.msi
             
       # Passo 6: Baixar artefatos para o ambiente local
       - name: Download artifacts

@@ -44,23 +44,39 @@ jobs:
       - name: Build and Test with Maven
         run: mvn clean install -DskipTests=false
 
-      # Passo 4: Empacotar com jpackage
+      # Passo 4: Identificar módulos necessários com jdeps
+      - name: Identify required modules with jdeps
+        run: |
+          # Use jdeps para identificar dependências do JAR
+          jdeps --module-path target/dependency --list-deps target/Ebenezer-1.0-SNAPSHOT.jar > required-modules.txt
+          
+          # Exibir os módulos necessários
+          cat required-modules.txt
+
+          # Extrair os módulos e formatação para usar no jpackage
+          MODS=$(awk -F: '{print $1}' required-modules.txt | tr '\n' ',' | sed 's/,$//')
+          echo "Detected modules: $MODS"
+          echo "MODS=$MODS" >> $GITHUB_ENV
+
+      # Passo 5: Empacotar com jpackage para Linux
       - name: Package with jpackage for Linux
         if: matrix.os == 'ubuntu-latest'
         run: |
-          jpackage --type app-image --input target/ --name Ebenezer --main-jar Ebenezer-1.0-SNAPSHOT.jar --main-class ui.application.Application --java-options "-Xmx512m"
+          jpackage --type app-image --input target/ --name Ebenezer --main-jar Ebenezer-1.0-SNAPSHOT.jar --main-class ui.application.Application --java-options "-Xmx512m" --add-modules ${{ env.MODS }}
           ls
 
+      # Passo 6: Empacotar com jpackage para Windows
       - name: Package with jpackage for Windows
         if: matrix.os == 'windows-latest'
         run: |
-          jpackage --type exe --input target/ --name Ebenezer --main-jar Ebenezer-1.0-SNAPSHOT.jar --main-class ui.application.Application --java-options "-Xmx512m" --dest target/windows
+          jpackage --type exe --input target/ --name Ebenezer --main-jar Ebenezer-1.0-SNAPSHOT.jar --main-class ui.application.Application --java-options "-Xmx512m" --dest target/windows --add-modules ${{ env.MODS }}
 
+      # Passo 7: Empacotar com jpackage para macOS
       - name: Package with jpackage for macOS
         if: matrix.os == 'macos-latest'
         run: |
-          jpackage --type dmg --input target/ --name Ebenezer --main-jar Ebenezer-1.0-SNAPSHOT.jar --main-class ui.application.Application --java-options "-Xmx512m" --dest target/macos
-
+          jpackage --type dmg --input target/ --name Ebenezer --main-jar Ebenezer-1.0-SNAPSHOT.jar --main-class ui.application.Application --java-options "-Xmx512m" --dest target/macos --add-modules ${{ env.MODS }}
+      
       # Passo 5: Upload de artefatos (arquivos gerados pelo Maven e pacotes)
       - name: Upload Maven build artifacts
         uses: actions/upload-artifact@v4

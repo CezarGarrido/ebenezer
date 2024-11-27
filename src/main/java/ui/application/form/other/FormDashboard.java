@@ -41,7 +41,6 @@ public class FormDashboard extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        dateChooser1 = new com.raven.datechooser.DateChooser();
         lb = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
 
@@ -326,7 +325,6 @@ public class FormDashboard extends javax.swing.JPanel {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private com.raven.datechooser.DateChooser dateChooser1;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel lb;
     // End of variables declaration//GEN-END:variables

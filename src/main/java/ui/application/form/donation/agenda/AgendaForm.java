@@ -1,7 +1,6 @@
 package ui.application.form.donation.agenda;
 
 import com.formdev.flatlaf.FlatClientProperties;
-import com.vdurmont.emoji.EmojiParser;
 import domain.model.Event;
 import domain.repository.DonorRepository;
 import java.awt.Font;

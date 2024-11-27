@@ -44,19 +44,32 @@ jobs:
       - name: Build and Test with Maven
         run: mvn clean install -DskipTests=false
 
-      # Passo 4: Identificar módulos necessários com jdeps
+      # Passo 4: Listar a estrutura do diretório target
+      - name: List target directory
+        run: ls -R target
+
+      # Passo 5: Verificar disponibilidade do jdeps
+      - name: Check jdeps availability
+        run: jdeps -version
+
+      # Passo 6: Identificar módulos necessários com jdeps
       - name: Identify required modules with jdeps
         run: |
-          # Use jdeps para identificar dependências do JAR
-          jdeps --module-path target/dependency --list-deps target/Ebenezer-1.0-SNAPSHOT.jar > required-modules.txt
-          
-          # Exibir os módulos necessários
-          cat required-modules.txt
+          jdeps --module-path target/dependency --list-deps target/Ebenezer-1.0-SNAPSHOT.jar
 
-          # Extrair os módulos e formatação para usar no jpackage
-          MODS=$(awk -F: '{print $1}' required-modules.txt | tr '\n' ',' | sed 's/,$//')
+      # Passo 7: Extrair módulos para jpackage
+      - name: Extract modules for jpackage
+        run: |
+          MODS=$(jdeps --module-path target/dependency --list-deps target/Ebenezer-1.0-SNAPSHOT.jar | awk -F: '{print $1}' | tr '\n' ',' | sed 's/,$//')
           echo "Detected modules: $MODS"
           echo "MODS=$MODS" >> $GITHUB_ENV
+
+      # Passo 8: Empacotar com jpackage para Linux
+      - name: Package with jpackage for Linux
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          jpackage --type app-image --input target/ --name Ebenezer --main-jar Ebenezer-1.0-SNAPSHOT.jar --main-class ui.application.Application --java-options "-Xmx512m" --add-modules ${{ env.MODS }}
+          ls
 
       # Passo 5: Empacotar com jpackage para Linux
       - name: Package with jpackage for Linux

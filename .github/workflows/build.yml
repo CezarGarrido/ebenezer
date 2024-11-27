@@ -83,7 +83,7 @@ jobs:
         if: ${{ github.event_name == 'push' }}
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ebenezer-${{ matrix.os }}-${{ matrix.arch }}.zip
+          file: artifacts/ebenezer-${{ matrix.os }}-${{ matrix.arch }}.zip  # Caminho para o arquivo baixado
           asset_name: ebenezer-${{ matrix.os }}-${{ matrix.arch }}.zip
           tag: ${{ github.ref }}
           prerelease: ${{ !startsWith(github.ref, 'refs/tags/') }}

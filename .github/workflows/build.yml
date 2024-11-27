@@ -76,7 +76,7 @@ jobs:
         if: ${{ github.event_name == 'push' }}
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: fundos-${{ matrix.TARGET }}.zip
+          file: ebenezer-${{ matrix.os }}-${{ matrix.arch }}.zip
           asset_name: ebenezer-${{ matrix.os }}-${{ matrix.arch }}.zip
           tag: ${{ github.ref }}
           prerelease: ${{ !startsWith(github.ref, 'refs/tags/') }}

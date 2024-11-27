@@ -49,7 +49,7 @@ jobs:
         if: ${{ contains(matrix.os, 'windows') }}
         run: |
           # Ajuste os módulos conforme necessário
-          jlink --module-path %JAVA_HOME%/jmods --output ${{ matrix.os }}-${{ matrix.arch }}-runtime-image-windows
+          jlink --module-path %JAVA_HOME%/jmods --add-modules java.base,java.desktop,java.sql --output ${{ matrix.os }}-${{ matrix.arch }}-runtime-image-windows
 
       # Passo 4: Empacotar com jpackage
       - name: Package with jpackage for Linux

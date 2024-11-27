@@ -82,8 +82,15 @@ jobs:
       - name: List downloaded files
         run: ls -R artifacts/
         
-      # Passo 8: Compactar todos os arquivos em um arquivo zip
-      - name: Create ZIP file for release
+      # Passo 8: Compactar todos os arquivos em um arquivo zip (usando PowerShell no Windows)
+      - name: Create ZIP file for release (Windows)
+        if: ${{ contains(matrix.os, 'windows') }}
+        run: |
+          powershell -Command "Compress-Archive -Path artifacts\* -DestinationPath ebenezer-${{ matrix.os }}-${{ matrix.arch }}.zip"
+          
+      # Passo 9: Compactar todos os arquivos em um arquivo zip (usando zip no Linux/macOS)
+      - name: Create ZIP file for release (Linux/macOS)
+        if: ${{ !contains(matrix.TARGET, 'windows') }}
         run: |
           cd artifacts
           zip -r ebenezer-${{ matrix.os }}-${{ matrix.arch }}.zip *

@@ -49,7 +49,7 @@ jobs:
         if: ${{ contains(matrix.os, 'windows') }}
         run: |
           # Ajuste os módulos conforme necessário
-          jlink --module-path %JAVA_HOME%/jmods --add-modules java.base,java.desktop,java.sql --output ${{ matrix.os }}-${{ matrix.arch }}-runtime-image-windows
+          jlink --module-path %JAVA_HOME%/jmods --add-modules java.base,java.desktop,java.sql,java.xml,java.logging  --output ${{ matrix.os }}-${{ matrix.arch }}-runtime-image-windows
 
       # Passo 4: Empacotar com jpackage
       - name: Package with jpackage for Linux
@@ -61,7 +61,7 @@ jobs:
       - name: Package with jpackage for Windows
         if: ${{ contains(matrix.os, 'windows') }}
         run: |
-          jpackage --type exe --input target/ --name Ebenezer --main-jar Ebenezer-1.0-SNAPSHOT.jar --main-class ui.application.Application --java-options "-Xmx512m" --dest target/windows --runtime-image ${{ matrix.os }}-${{ matrix.arch }}-runtime-image-windows
+          jpackage --type exe --input target/ --name Ebenezer --main-jar Ebenezer-1.0-SNAPSHOT.jar --main-class ui.application.Application --java-options "--enable-preview -Xmx512m" --dest target/windows --runtime-image ${{ matrix.os }}-${{ matrix.arch }}-runtime-image-windows
 
       - name: Package with jpackage for macOS
         if: matrix.os == 'macos-latest'

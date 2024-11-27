@@ -44,7 +44,7 @@
                             <goal>package</goal>
                         </goals>
                         <configuration>
-                            <mainClass>fvarrui.sample.Main</mainClass>
+                            <mainClass>ui.application.Application</mainClass>
                             <bundleJre>true</bundleJre>
                             <customizedJre>false</customizedJre>
                         </configuration>

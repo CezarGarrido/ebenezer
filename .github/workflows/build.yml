@@ -44,54 +44,23 @@ jobs:
       - name: Build and Test with Maven
         run: mvn clean install -DskipTests=false
 
-      # Passo 4: Listar a estrutura do diretório target
-      - name: List target directory
-        run: ls -R target
-
-      # Passo 5: Verificar disponibilidade do jdeps
-      - name: Check jdeps availability
-        run: jdeps -version
-
-      # Use jdeps para identificar dependências do JAR
-      - name: Identify required modules with jdeps
-        run: |
-          # Copiar dependências para o diretório correto
-          mvn dependency:copy-dependencies -DoutputDirectory=target/dependency
-
-          # Listar dependências com jdeps
-          jdeps --module-path target/dependency --list-deps target/Ebenezer-1.0-SNAPSHOT.jar
-
-          # Extrair módulos para jpackage
-          MODS=$(jdeps --module-path target/dependency --list-deps target/Ebenezer-1.0-SNAPSHOT.jar | awk -F: '{print $1}' | tr '\n' ',' | sed 's/,$//')
-          echo "Detected modules: $MODS"
-          echo "MODS=$MODS" >> $GITHUB_ENV
-
-      # Passo 8: Empacotar com jpackage para Linux
+      # Passo 4: Empacotar com jpackage
       - name: Package with jpackage for Linux
         if: matrix.os == 'ubuntu-latest'
         run: |
-          jpackage --type app-image --input target/ --name Ebenezer --main-jar Ebenezer-1.0-SNAPSHOT.jar --main-class ui.application.Application --java-options "-Xmx512m" --add-modules ${{ env.MODS }}
+          jpackage --type app-image --input target/ --name Ebenezer --main-jar Ebenezer-1.0-SNAPSHOT.jar --main-class ui.application.Application --java-options "-Xmx512m" --add-modules com.formdev.flatlaf
           ls
 
-      # Passo 5: Empacotar com jpackage para Linux
-      - name: Package with jpackage for Linux
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          jpackage --type app-image --input target/ --name Ebenezer --main-jar Ebenezer-1.0-SNAPSHOT.jar --main-class ui.application.Application --java-options "-Xmx512m" --add-modules ${{ env.MODS }}
-          ls
-
-      # Passo 6: Empacotar com jpackage para Windows
       - name: Package with jpackage for Windows
         if: matrix.os == 'windows-latest'
         run: |
-          jpackage --type exe --input target/ --name Ebenezer --main-jar Ebenezer-1.0-SNAPSHOT.jar --main-class ui.application.Application --java-options "-Xmx512m" --dest target/windows --add-modules ${{ env.MODS }}
+          jpackage --type exe --input target/ --name Ebenezer --main-jar Ebenezer-1.0-SNAPSHOT.jar --main-class ui.application.Application --java-options "-Xmx512m" --dest target/windows --add-modules com.formdev.flatlaf
 
-      # Passo 7: Empacotar com jpackage para macOS
       - name: Package with jpackage for macOS
         if: matrix.os == 'macos-latest'
         run: |
-          jpackage --type dmg --input target/ --name Ebenezer --main-jar Ebenezer-1.0-SNAPSHOT.jar --main-class ui.application.Application --java-options "-Xmx512m" --dest target/macos --add-modules ${{ env.MODS }}
-      
+          jpackage --type dmg --input target/ --name Ebenezer --main-jar Ebenezer-1.0-SNAPSHOT.jar --main-class ui.application.Application --java-options "-Xmx512m" --dest target/macos --add-modules com.formdev.flatlaf
+
       # Passo 5: Upload de artefatos (arquivos gerados pelo Maven e pacotes)
       - name: Upload Maven build artifacts
         uses: actions/upload-artifact@v4

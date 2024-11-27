@@ -52,14 +52,16 @@ jobs:
       - name: Check jdeps availability
         run: jdeps -version
 
-      # Passo 6: Identificar módulos necessários com jdeps
+      # Use jdeps para identificar dependências do JAR
       - name: Identify required modules with jdeps
         run: |
+          # Copiar dependências para o diretório correto
+          mvn dependency:copy-dependencies -DoutputDirectory=target/dependency
+
+          # Listar dependências com jdeps
           jdeps --module-path target/dependency --list-deps target/Ebenezer-1.0-SNAPSHOT.jar
 
-      # Passo 7: Extrair módulos para jpackage
-      - name: Extract modules for jpackage
-        run: |
+          # Extrair módulos para jpackage
           MODS=$(jdeps --module-path target/dependency --list-deps target/Ebenezer-1.0-SNAPSHOT.jar | awk -F: '{print $1}' | tr '\n' ',' | sed 's/,$//')
           echo "Detected modules: $MODS"
           echo "MODS=$MODS" >> $GITHUB_ENV

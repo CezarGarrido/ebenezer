@@ -70,7 +70,14 @@ jobs:
             Ebenezer/
             target/windows/*
             target/macos/*
-           
+            
+      # Passo 6: Baixar artefatos para o ambiente local
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ebenezer-${{ matrix.os }}-${{ matrix.arch }}  # Nome do artefato gerado no passo anterior
+          path: artifacts/  # Diretório onde os artefatos serão extraídos
+          
       - uses: svenstaro/upload-release-action@v2
         name: Upload binaries to release
         if: ${{ github.event_name == 'push' }}

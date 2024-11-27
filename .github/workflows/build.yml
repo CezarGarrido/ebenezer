@@ -86,7 +86,7 @@ jobs:
       - name: Create ZIP file for release (Windows)
         if: ${{ contains(matrix.os, 'windows') }}
         run: |
-          powershell -Command "Compress-Archive -Path artifacts\* -DestinationPath ebenezer-${{ matrix.os }}-${{ matrix.arch }}.zip"
+          powershell -Command "Compress-Archive -Path artifacts\* -DestinationPath artifacts\ebenezer-${{ matrix.os }}-${{ matrix.arch }}.zip"
           
       # Passo 9: Compactar todos os arquivos em um arquivo zip (usando zip no Linux/macOS)
       - name: Create ZIP file for release (Linux/macOS)

@@ -82,6 +82,12 @@ jobs:
       - name: List downloaded files
         run: ls -R artifacts/
         
+      # Passo 8: Compactar todos os arquivos em um arquivo zip
+      - name: Create ZIP file for release
+        run: |
+          cd artifacts
+          zip -r ebenezer-${{ matrix.os }}-${{ matrix.arch }}.zip *
+          
       - uses: svenstaro/upload-release-action@v2
         name: Upload binaries to release
         if: ${{ github.event_name == 'push' }}

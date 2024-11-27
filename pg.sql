@@ -18,7 +18,7 @@ CREATE TABLE companies (
   name VARCHAR(255) DEFAULT NULL,
   cnpj VARCHAR(14) DEFAULT NULL,           -- CNPJ com 14 caracteres, sem pontos ou traços
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Inserção de exemplo na tabela companies
@@ -50,7 +50,7 @@ CREATE TABLE users (
     active BOOLEAN DEFAULT TRUE,
     photo BYTEA,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE,
     FOREIGN KEY (role_id) REFERENCES roles(id)
 );
@@ -78,7 +78,7 @@ CREATE TABLE employees (
     wife_date_of_birth DATE,
     user_creator_id BIGINT NOT NULL,          -- Usuário que criou o registro
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Data de criação
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL,                -- Soft delete
 
     -- Foreign Keys
@@ -147,7 +147,7 @@ CREATE TABLE donors (
     active BOOLEAN DEFAULT TRUE,
     user_creator_id BIGINT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_creator_id) REFERENCES users(id),
     FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE,
     -- Restrição única para (cpf, person_type)
@@ -186,31 +186,32 @@ CREATE TABLE donor_addresses (
     UNIQUE (donor_id)  -- Adiciona a restrição de unicidade para donor_id
 );
 
-DROP TABLE IF EXISTS agenda;
-CREATE TABLE agenda (
+DROP TABLE IF EXISTS events;
+CREATE TABLE events (
     id BIGSERIAL PRIMARY KEY,
     company_id BIGINT NOT NULL,
     user_creator_id BIGINT NOT NULL,
     date TIMESTAMP,
     time TIME,
     event_type VARCHAR(20) NOT NULL CHECK (event_type IN ('Ligação')),
-    obs VARCHAR(255),
+    notes VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_creator_id) REFERENCES users(id),
     FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
 );
 
-DROP TABLE IF EXISTS agenda_calls;
-CREATE TABLE agenda_calls (
+DROP TABLE IF EXISTS event_calls;
+CREATE TABLE event_calls (
     id BIGSERIAL PRIMARY KEY,
-    agenda_id BIGINT NOT NULL,
+    event_id BIGINT NOT NULL,
     donor_id BIGINT NOT NULL,
     phone VARCHAR(255) NOT NULL,
-    status VARCHAR(20) NOT NULL CHECK (event_type IN ('Agendado', 'Realizado', 'Cancelado')),
+    status VARCHAR(20) NOT NULL CHECK (status IN ('Agendado', 'Realizado', 'Cancelado')),
+    duration VARCHAR(30),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (agenda_id) REFERENCES agenda(id),
+    FOREIGN KEY (event_id) REFERENCES events(id),
     FOREIGN KEY (donor_id) REFERENCES donors(id) ON DELETE CASCADE
 );
 
@@ -219,6 +220,7 @@ CREATE TABLE donations (
     id BIGSERIAL PRIMARY KEY,
     company_id BIGINT NOT NULL,
     user_creator_id BIGINT NOT NULL,
+    event_id BIGINT,
     donor_id BIGINT NOT NULL,
     amount NUMERIC(10, 2) NOT NULL CHECK (amount > 0),
     received_at DATE NOT NULL,
@@ -226,9 +228,10 @@ CREATE TABLE donations (
     paid BOOLEAN DEFAULT FALSE,
     notes VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL, -- Campo para soft delete
     FOREIGN KEY (user_creator_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE,
-    FOREIGN KEY (donor_id) REFERENCES donors(id) ON DELETE CASCADE
+    FOREIGN KEY (donor_id) REFERENCES donors(id) ON DELETE CASCADE,
+    FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
 );

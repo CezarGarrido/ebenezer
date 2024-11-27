@@ -28,7 +28,7 @@ public class DonorSearchDialog extends javax.swing.JDialog {
         initComponents();
         setLocationRelativeTo(parent);  // Para centralizar na tela
         this.donorRepo = donorRepo;
-
+       // setModal(true);
         filter(jTextField1.getText());
 
         jTextField1.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -36,8 +36,10 @@ public class DonorSearchDialog extends javax.swing.JDialog {
                 filter(jTextField1.getText());
             }
         });
+        
         this.getRootPane().getInputMap(javax.swing.JComponent.WHEN_IN_FOCUSED_WINDOW)
                 .put(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_ESCAPE, 0), "close");
+        
         this.getRootPane().getActionMap().put("close", new javax.swing.AbstractAction() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -62,7 +64,6 @@ public class DonorSearchDialog extends javax.swing.JDialog {
 
         // Adiciona os dados da lista de doadores
         for (Donor donor : donors) {
-            System.out.println(donor.getContacts());
             model.addRow(new Object[]{
                 donor.getId(),
                 donor.getName()
@@ -150,15 +151,7 @@ public class DonorSearchDialog extends javax.swing.JDialog {
         int selectedRow = jTable1.getSelectedRow(); // Obtém a linha selecionada
         if (selectedRow != -1) {
             // Recupera os dados da linha selecionada
-            Long donorId = (Long) jTable1.getValueAt(selectedRow, 0);
-            String donorName = (String) jTable1.getValueAt(selectedRow, 1);
             var donor = this.donors.get(selectedRow);
-
-            // Cria um objeto Donor com os dados selecionados (ou passe os valores diretamente)
-            Donor sDonor = new Donor();
-            sDonor.setId(donorId);
-            sDonor.setName(donorName);
-
             // Passa o resultado para o pai do diálogo
             disposeWithResult(donor);
         }

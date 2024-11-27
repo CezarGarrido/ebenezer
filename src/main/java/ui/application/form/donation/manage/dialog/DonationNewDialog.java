@@ -4,18 +4,15 @@
  */
 package ui.application.form.donation.manage.dialog;
 
+import domain.model.Donation;
 import domain.model.Donor;
 import domain.repository.DonorRepository;
-import java.text.DecimalFormat;
-import java.text.ParseException;
+import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
-import javax.swing.text.DefaultFormatterFactory;
-import javax.swing.text.MaskFormatter;
-import javax.swing.text.NumberFormatter;
 import ui.application.form.donor.dialog.DonorSearchDialog;
 
 /**
@@ -25,8 +22,25 @@ import ui.application.form.donor.dialog.DonorSearchDialog;
 public class DonationNewDialog extends javax.swing.JDialog {
 
     private Donor donor;
+    private Donation donation;
     private DonorRepository donorRepo;
     //private MaskFormatter MoneyMask;
+
+    private Boolean sourceCall;
+
+    public void setSourceCall(Donor selectedDonor) {
+        this.donor = selectedDonor;
+        txtDonor.setText(this.donor.getName());
+        txtDonor.setEnabled(false);
+        checkPaid.setSelected(true);
+        checkPaid.setEnabled(false);
+        txtDate.setDate(new Date());
+        // Atualiza o campo de hora com a hora atual
+        LocalTime nowc = LocalTime.now();
+        DateTimeFormatter formatterc = DateTimeFormatter.ofPattern("HH:mm");
+        txtHour.setText(nowc.format(formatterc));
+        this.sourceCall = true;
+    }
 
     /**
      * Creates new form DonationNewDialog
@@ -39,11 +53,19 @@ public class DonationNewDialog extends javax.swing.JDialog {
         setLocationRelativeTo(parent);  // Para centralizar na tela
         setTitle("Nova Doação");
 
-        LocalTime now = LocalTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
-        String formattedTime = now.format(formatter);
-        
+        txtHour.setText("00:00");
         txtDate.setDate(new Date()); // Define a data atual, se necessário
+
+        checkPaid.addItemListener(e -> {
+            if (checkPaid.isSelected()) {
+                // Atualiza o campo de data com a data atual
+                txtDate.setDate(new Date());
+                // Atualiza o campo de hora com a hora atual
+                LocalTime nowc = LocalTime.now();
+                DateTimeFormatter formatterc = DateTimeFormatter.ofPattern("HH:mm");
+                txtHour.setText(nowc.format(formatterc));
+            }
+        });
     }
 
     /**
@@ -73,6 +95,7 @@ public class DonationNewDialog extends javax.swing.JDialog {
         jComboBox1 = new javax.swing.JComboBox<>();
         jLabel7 = new javax.swing.JLabel();
         txtValue = new javax.swing.JTextField();
+        checkPaid = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -115,6 +138,11 @@ public class DonationNewDialog extends javax.swing.JDialog {
         jButton1.setText("Cancelar");
 
         jButton2.setText("Salvar");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -144,6 +172,8 @@ public class DonationNewDialog extends javax.swing.JDialog {
         jLabel7.setText("Forma de Pagamento");
 
         new ui.money.JMoneyField(txtValue);
+
+        checkPaid.setText("Confirmar Doação");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -175,7 +205,10 @@ public class DonationNewDialog extends javax.swing.JDialog {
                             .addComponent(jLabel6)
                             .addComponent(jLabel2))
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(txtValue))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(txtValue)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(checkPaid)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -192,7 +225,9 @@ public class DonationNewDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtValue, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtValue, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(checkPaid))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -222,12 +257,8 @@ public class DonationNewDialog extends javax.swing.JDialog {
         sd.setVisible(true);
 
         donor = sd.getSelectedDonor(); // Captura o resultado após o fechamento
-
-        if (donor != null) {
-            System.out.println("Doador selecionado: " + donor.getName());
-            // Realiza outras ações com o doador selecionado
+        if (donor != null) {            // Realiza outras ações com o doador selecionado
             txtDonor.setText(donor.getName());
-            // updateContactsTable(donor);
         }
     }//GEN-LAST:event_txtDonorMouseClicked
 
@@ -243,8 +274,29 @@ public class DonationNewDialog extends javax.swing.JDialog {
         // TODO add your handling code here:
     }//GEN-LAST:event_txtHourActionPerformed
 
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+        donation = new Donation();
+
+        //donation.setAmount(txtValue.getText());
+        String rawValue = txtValue.getText(); // Exemplo: "R$ 1.234,56"
+
+        // Removendo a máscara de moeda (R$ e separadores de milhar)
+        String cleanedValue = rawValue.replaceAll("[^\\d,]", "").replace(",", ".");
+        BigDecimal amount = new BigDecimal(cleanedValue);
+        donation.setAmount(amount);
+        
+        if (this.sourceCall) {
+            this.dispose();
+        }
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    public Donation getDonation() {
+        return this.donation;
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JCheckBox checkPaid;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JComboBox<String> jComboBox1;

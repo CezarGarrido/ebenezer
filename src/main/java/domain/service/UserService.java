@@ -24,8 +24,7 @@ public class UserService {
         return userRepository.login(user);
     }
     
-    public Boolean can(User user) {
-       
+    public Boolean can(User user, String action) {
         return true;
     }
 }

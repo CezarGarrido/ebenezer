@@ -5,6 +5,7 @@ import domain.repository.DonationRepository;
 import infra.postgres.config.PGConnection;
 
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,9 +67,11 @@ public class DonationRepositoryPgsql extends PGConnection implements DonationRep
             preparedStatement.setLong(2, donation.getUserCreatorId());
             preparedStatement.setLong(3, donation.getDonorId());
             preparedStatement.setBigDecimal(4, donation.getAmount());
-            //  preparedStatement.setDate(5, Date.valueOf(donation.getReceivedAt()));
-            //preparedStatement.setTime(6, Time.valueOf(donation.getReceivedTime()));
-            //  preparedStatement.setBoolean(7, donation.isPaid());
+            LocalDateTime localDateTime = donation.getReceivedAt();
+            Timestamp timestamp = Timestamp.valueOf(localDateTime);
+            preparedStatement.setTimestamp(5, timestamp);
+            preparedStatement.setString(6, donation.getReceivedTime());
+            preparedStatement.setBoolean(7, donation.getPaid());
             preparedStatement.setString(8, donation.getNotes());
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
@@ -88,9 +91,11 @@ public class DonationRepositoryPgsql extends PGConnection implements DonationRep
             preparedStatement.setLong(2, donation.getUserCreatorId());
             preparedStatement.setLong(3, donation.getDonorId());
             preparedStatement.setBigDecimal(4, donation.getAmount());
-            //preparedStatement.setDate(5, Date.valueOf(donation.getReceivedAt()));
-            //   preparedStatement.setTime(6, Time.valueOf(donation.getReceivedTime()));
-            //  preparedStatement.setBoolean(7, donation.isPaid());
+            LocalDateTime localDateTime = donation.getReceivedAt();
+            Timestamp timestamp = Timestamp.valueOf(localDateTime);
+            preparedStatement.setTimestamp(5, timestamp);
+            preparedStatement.setString(6, donation.getReceivedTime());
+            preparedStatement.setBoolean(7, donation.getPaid());
             preparedStatement.setString(8, donation.getNotes());
             preparedStatement.setLong(9, donation.getId());
             preparedStatement.executeUpdate();

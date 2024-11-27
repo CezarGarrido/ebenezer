@@ -4,7 +4,7 @@
  */
 package domain.repository;
 
-import domain.model.Agenda;
+import domain.model.Event;
 import domain.model.Donor;
 import java.util.List;
 
@@ -12,16 +12,16 @@ import java.util.List;
  *
  * @author cezar.britez
  */
-public interface AgendaRepository {
+public interface EventRepository {
 
-    Agenda findById(Long id);
+    Event findById(Long id);
 
-    List<Agenda> findAll();
+    List<Event> findAll();
     
-    List<Agenda> findByQuery(Long companyId, String queryFilter);
+    List<Event> findByQuery(Long companyId, String queryFilter);
 
-    Long save(Agenda agenda);
+    Long save(Event event);
 
-    void update(Agenda agenda);
+    void update(Event event);
 
 }

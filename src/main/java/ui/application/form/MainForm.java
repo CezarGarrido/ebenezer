@@ -3,7 +3,6 @@ package ui.application.form;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.util.UIScale;
-import domain.repository.AgendaRepository;
 import domain.repository.DonorRepository;
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -24,6 +23,7 @@ import ui.application.form.donor.FormDonor;
 import ui.application.form.other.FormDashboard;
 import ui.menu.Menu;
 import ui.menu.MenuAction;
+import domain.repository.EventRepository;
 
 /**
  *
@@ -32,9 +32,9 @@ import ui.menu.MenuAction;
 public class MainForm extends JLayeredPane {
 
     private DonorRepository donorRepo;
-    private AgendaRepository agendaRepo;
+    private EventRepository agendaRepo;
 
-    public MainForm(DonorRepository donorRepo, AgendaRepository agendaRepo) {
+    public MainForm(DonorRepository donorRepo, EventRepository agendaRepo) {
         init();
         this.donorRepo = donorRepo;
         this.agendaRepo = agendaRepo;
@@ -85,9 +85,12 @@ public class MainForm extends JLayeredPane {
             if (index == 0) {
                 Application.showForm(new FormDashboard());
             } else if (index == 1) {
-                Application.showForm(new FormManage(this.donorRepo));
-                //  Application.showForm(new AgendaForm(this.agendaRepo, this.donorRepo));
+                Application.showForm(new AgendaForm(this.agendaRepo, this.donorRepo));
+
             } else if (index == 2) {
+                Application.showForm(new FormManage(this.donorRepo));
+
+            } else if (index == 3) {
                 if (subIndex == 1) {
                     Application.showForm(new FormDonor(this.donorRepo));
                 }

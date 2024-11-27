@@ -4,11 +4,10 @@
  */
 package infra.postgres.repository;
 
-import domain.model.Agenda;
-import domain.model.AgendaCall;
+import domain.model.Event;
+import domain.model.EventCall;
 import domain.model.Donor;
 import domain.model.User;
-import domain.repository.AgendaRepository;
 import infra.postgres.config.PGConnection;
 import static infra.postgres.config.PGConnection.close;
 import static infra.postgres.config.PGConnection.getConnection;
@@ -19,29 +18,30 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import domain.repository.EventRepository;
 
 /**
  *
  * @author cezar.britez
  */
-public class AgendaRepositoryPgsql extends PGConnection implements AgendaRepository {
+public class EventRepositoryPgsql extends PGConnection implements EventRepository {
 
     @Override
-    public Agenda findById(Long id) {
+    public Event findById(Long id) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
-    public List<Agenda> findAll() {
+    public List<Event> findAll() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
-    public Long save(Agenda agenda) {
-        String insertAgendaSql = "INSERT INTO agenda (company_id, user_creator_id, date, hour, event_type, obs) "
+    public Long save(Event agenda) {
+        String insertAgendaSql = "INSERT INTO events (company_id, user_creator_id, date, time, event_type, notes) "
                 + "VALUES (?, ?, ?, ?, ?, ?) RETURNING id";
 
-        String insertAgendaCallSQL = "INSERT INTO agenda_calls (agenda_id, donor_id, phone) "
+        String insertAgendaCallSQL = "INSERT INTO event_calls (event_id, donor_id, phone) "
                 + "VALUES (?, ?, ?)";
 
         try {
@@ -62,9 +62,9 @@ public class AgendaRepositoryPgsql extends PGConnection implements AgendaReposit
                 Timestamp timestamp = Timestamp.valueOf(localDateTime);
                 agendaStmt.setTimestamp(3, timestamp);
 
-                agendaStmt.setString(4, agenda.getHour());
+                agendaStmt.setString(4, agenda.getTime());
                 agendaStmt.setString(5, agenda.getEventType());
-                agendaStmt.setString(6, agenda.getObs());
+                agendaStmt.setString(6, agenda.getNotes());
 
                 // Execute e capture o `id` gerado
                 try (ResultSet rs = agendaStmt.executeQuery()) {
@@ -74,7 +74,7 @@ public class AgendaRepositoryPgsql extends PGConnection implements AgendaReposit
                 }
 
                 // Inserir ou atualizar endereço
-                AgendaCall call = agenda.getCall();
+                EventCall call = agenda.getCall();
                 if (call != null) {
                     agendaCallStmt.setLong(1, agenda.getId());
                     agendaCallStmt.setLong(2, call.getDonorId());
@@ -100,27 +100,26 @@ public class AgendaRepositoryPgsql extends PGConnection implements AgendaReposit
         }
 
         return agenda.getId();
-
     }
 
     @Override
-    public void update(Agenda agenda) {
+    public void update(Event agenda) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
-    public List<Agenda> findByQuery(Long companyId, String queryFilter) {
-        List<Agenda> events = new ArrayList<>();
+    public List<Event> findByQuery(Long companyId, String queryFilter) {
+        List<Event> events = new ArrayList<>();
 
         // Monta a consulta com filtro opcional por companyId
         String query = """
-            SELECT a.id, a.company_id, a.event_type, a.date, a.hour, a.obs, 
+            SELECT a.id, a.company_id, a.event_type, a.date, a.time, a.notes, 
                    a.user_creator_id, a.created_at, a.updated_at,
                    ac.id AS call_id, ac.donor_id AS call_donor_id, ac.phone AS call_phone,
                    u.id AS user_id, u.username AS user_name,
                    d.id AS donor_id, d.name AS donor_name
-            FROM agenda a
-            LEFT JOIN agenda_calls ac ON a.id = ac.agenda_id
+            FROM events a
+            LEFT JOIN event_calls ac ON a.id = ac.event_id
             LEFT JOIN donors d ON d.id = ac.donor_id            
             LEFT JOIN users u ON a.user_creator_id = u.id 
             WHERE 1=1
@@ -157,21 +156,21 @@ public class AgendaRepositoryPgsql extends PGConnection implements AgendaReposit
 
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
-                        // Cria um novo objeto Agenda com os dados do resultado
-                        Agenda agenda = new Agenda();
+                        // Cria um novo objeto Event com os dados do resultado
+                        Event agenda = new Event();
                         agenda.setId(rs.getLong("id"));
                         agenda.setCompanyId(rs.getLong("company_id"));
                         agenda.setEventType(rs.getString("event_type"));
                         agenda.setDate(rs.getObject("date", LocalDateTime.class));
-                        agenda.setHour(rs.getString("hour"));
-                        agenda.setObs(rs.getString("obs"));
+                        agenda.setTime(rs.getString("time"));
+                        agenda.setNotes(rs.getString("notes"));
                         agenda.setUserCreatorId(rs.getLong("user_creator_id"));
                         agenda.setCreatedAt(rs.getObject("created_at", LocalDateTime.class));
                         agenda.setUpdatedAt(rs.getObject("updated_at", LocalDateTime.class));
 
                         // Configura chamadas associadas à agenda
                         if (rs.getLong("call_id") != 0) {
-                            AgendaCall agendaCall = new AgendaCall();
+                            EventCall agendaCall = new EventCall();
                             agendaCall.setId(rs.getLong("call_id"));
                             agendaCall.setDonorId(rs.getLong("call_donor_id"));
                             agendaCall.setPhone(rs.getString("call_phone"));

@@ -5,11 +5,10 @@
 package ui.application.form.donation.agenda.dialog;
 
 import ui.application.form.donor.dialog.DonorSearchDialog;
-import domain.model.Agenda;
-import domain.model.AgendaCall;
+import domain.model.Event;
+import domain.model.EventCall;
 import domain.model.Donor;
 import domain.model.DonorContact;
-import domain.repository.AgendaRepository;
 import domain.repository.DonorRepository;
 import java.text.ParseException;
 import java.time.LocalDateTime;
@@ -26,6 +25,8 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.MaskFormatter;
 import ui.application.Application;
+import domain.repository.EventRepository;
+import ui.application.form.donation.manage.dialog.DonationNewDialog;
 
 /**
  *
@@ -34,13 +35,13 @@ import ui.application.Application;
 public class AgendaNewDialog extends javax.swing.JDialog {
 
     private DonorRepository donorRepo;
-    private AgendaRepository agendaRepo;
+    private EventRepository agendaRepo;
     private Donor selectedDonor;
 
     /**
      * Creates new form AgendaNewDialog
      */
-    public AgendaNewDialog(java.awt.Frame parent, boolean modal, AgendaRepository agendaRepo, DonorRepository donorRepo) {
+    public AgendaNewDialog(java.awt.Frame parent, boolean modal, EventRepository agendaRepo, DonorRepository donorRepo) {
         super(parent, modal);
         initComponents();
         setLocationRelativeTo(parent);  // Para centralizar na tela
@@ -52,7 +53,7 @@ public class AgendaNewDialog extends javax.swing.JDialog {
 
         txtDate.setDate(new Date()); // Define a data atual, se necessário
 
-        tableContacts.getTableHeader().setUI(null); // Oculta a barra de cabeçalho
+        tableDonation.getTableHeader().setUI(null); // Oculta a barra de cabeçalho
         // Configurar o editor de célula com máscara
         try {
             MaskFormatter hourMask = new MaskFormatter("##:##");
@@ -63,13 +64,13 @@ public class AgendaNewDialog extends javax.swing.JDialog {
             JFormattedTextField formattedField = new JFormattedTextField(phoneMask);
 
             DefaultCellEditor cellEditor = new DefaultCellEditor(formattedField);
-            tableContacts.getColumnModel().getColumn(0).setCellEditor(cellEditor);
+            tableDonation.getColumnModel().getColumn(0).setCellEditor(cellEditor);
 
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        txtHour.setText(formattedTime);
 
+        txtHour.setText(formattedTime);
     }
 
     /**
@@ -96,10 +97,15 @@ public class AgendaNewDialog extends javax.swing.JDialog {
         txtHour = new javax.swing.JFormattedTextField();
         txtDonor = new javax.swing.JTextField();
         jScrollPane2 = new javax.swing.JScrollPane();
-        tableContacts = new javax.swing.JTable();
+        tableDonation = new javax.swing.JTable();
         jButton3 = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
-        jCheckBox1 = new javax.swing.JCheckBox();
+        jLabel5 = new javax.swing.JLabel();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        tableContacts = new javax.swing.JTable();
+        jButton6 = new javax.swing.JButton();
+        jButton7 = new javax.swing.JButton();
+        jButton5 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -132,7 +138,7 @@ public class AgendaNewDialog extends javax.swing.JDialog {
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap(256, Short.MAX_VALUE)
                 .addComponent(jButton2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -145,12 +151,18 @@ public class AgendaNewDialog extends javax.swing.JDialog {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1)
                     .addComponent(jButton2))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(7, Short.MAX_VALUE))
         );
 
         jLabel3.setText("Doador");
 
         jLabel4.setText("Telefones");
+
+        txtHour.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtHourActionPerformed(evt);
+            }
+        });
 
         txtDonor.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -163,15 +175,23 @@ public class AgendaNewDialog extends javax.swing.JDialog {
             }
         });
 
-        tableContacts.setModel(new javax.swing.table.DefaultTableModel(
+        tableDonation.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
             new String [] {
-                "Telefone"
+                "Valor", "Data", "Pago"
             }
-        ));
-        jScrollPane2.setViewportView(tableContacts);
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Object.class, java.lang.Object.class, java.lang.Boolean.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
+        jScrollPane2.setViewportView(tableDonation);
 
         jButton3.setText("Add");
         jButton3.addActionListener(new java.awt.event.ActionListener() {
@@ -187,43 +207,58 @@ public class AgendaNewDialog extends javax.swing.JDialog {
             }
         });
 
-        jCheckBox1.setText("Confirmar Doação?");
+        jLabel5.setText("Doação");
+
+        tableContacts.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Telefone"
+            }
+        ));
+        jScrollPane4.setViewportView(tableContacts);
+
+        jButton6.setText("Add");
+
+        jButton7.setText("Ver");
+
+        jButton5.setText("Excluir");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jScrollPane1)
-                            .addComponent(txtDonor)
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                                .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(txtHour, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 324, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jButton4)
-                                    .addComponent(jButton3))
-                                .addGap(23, 23, 23))
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.LEADING))
-                                .addGap(0, 0, Short.MAX_VALUE)))))
-                .addContainerGap())
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jCheckBox1)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtHour, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtDonor)
+                    .addComponent(jScrollPane1)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jLabel3)
+                        .addComponent(jLabel4)
+                        .addComponent(jLabel1)
+                        .addComponent(jLabel2)
+                        .addComponent(jLabel5)
+                        .addGroup(jPanel1Layout.createSequentialGroup()
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 365, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 365, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(jButton6)
+                                .addComponent(jButton7)
+                                .addComponent(jButton5)
+                                .addComponent(jButton4)
+                                .addComponent(jButton3)))))
+                .addContainerGap(16, Short.MAX_VALUE))
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -242,19 +277,28 @@ public class AgendaNewDialog extends javax.swing.JDialog {
                 .addComponent(jLabel4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jButton3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton4)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jCheckBox1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 21, Short.MAX_VALUE)
+                        .addComponent(jButton4))
+                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(24, 24, 24)
+                .addComponent(jLabel5)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jButton6)
+                        .addGap(12, 12, 12)
+                        .addComponent(jButton7)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton5)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 26, Short.MAX_VALUE)
                 .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -264,7 +308,7 @@ public class AgendaNewDialog extends javax.swing.JDialog {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jTabbedPane1))
         );
@@ -306,17 +350,17 @@ public class AgendaNewDialog extends javax.swing.JDialog {
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
 
-        DefaultTableModel model = (DefaultTableModel) tableContacts.getModel();
+        DefaultTableModel model = (DefaultTableModel) tableDonation.getModel();
         model.addRow(new Object[]{null}); // Adiciona uma linha vazia com duas colunas
-        int newRowIndex = tableContacts.getRowCount() - 1;  // Índice da nova linha (última linha)
-        tableContacts.changeSelection(newRowIndex, 0, false, false);  // Seleciona a célula na nova linha, coluna 0
+        int newRowIndex = tableDonation.getRowCount() - 1;  // Índice da nova linha (última linha)
+        tableDonation.changeSelection(newRowIndex, 0, false, false);  // Seleciona a célula na nova linha, coluna 0
 
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
-        Agenda agenda = new Agenda();
-        agenda.setHour(txtHour.getText());
+        Event agenda = new Event();
+        agenda.setTime(txtHour.getText());
         var selectedDate = txtDate.getDate(); // Obtém o java.util.Date
 
         if (selectedDate != null) {
@@ -326,14 +370,14 @@ public class AgendaNewDialog extends javax.swing.JDialog {
             agenda.setDate(localDateTime); // Usa o LocalDateTime
         }
 
-        var call = new AgendaCall();
-        
+        var call = new EventCall();
+
         call.setDonorId(selectedDonor.getId());
 
         // Obter os telefones da tabela e concatená-los com um delimitador
         StringBuilder phones = new StringBuilder();
-        for (int row = 0; row < tableContacts.getRowCount(); row++) {
-            Object phoneValue = tableContacts.getValueAt(row, 0); // Supondo que a coluna de telefone seja a terceira (índice 2)
+        for (int row = 0; row < tableDonation.getRowCount(); row++) {
+            Object phoneValue = tableDonation.getValueAt(row, 0); // Supondo que a coluna de telefone seja a terceira (índice 2)
             if (phoneValue != null) {
                 if (phones.length() > 0) {
                     phones.append("; "); // Delimitador, por exemplo, "; "
@@ -348,8 +392,8 @@ public class AgendaNewDialog extends javax.swing.JDialog {
         agenda.setCompanyId(Application.loggedUser().getCompanyId());
         agenda.setUserCreatorId(Application.loggedUser().getId());
         agenda.setEventType("Ligação");
-        agenda.setObs(txtObs.getText());
-        
+        agenda.setNotes(txtObs.getText());
+
         var id = this.agendaRepo.save(agenda);
         if (id != null) {
             JOptionPane.showMessageDialog(this, "Salvo com sucesso!");
@@ -361,9 +405,13 @@ public class AgendaNewDialog extends javax.swing.JDialog {
         this.dispose();
     }//GEN-LAST:event_jButton1ActionPerformed
 
+    private void txtHourActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtHourActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtHourActionPerformed
+
     private void updateContactsTable(Donor donor) {
         // Modelo de tabela
-        DefaultTableModel model = (DefaultTableModel) tableContacts.getModel();
+        DefaultTableModel model = (DefaultTableModel) tableDonation.getModel();
         // Limpa a tabela
         model.setRowCount(0);
         // Adiciona os números de telefone do doador
@@ -377,17 +425,22 @@ public class AgendaNewDialog extends javax.swing.JDialog {
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
-    private javax.swing.JCheckBox jCheckBox1;
+    private javax.swing.JButton jButton5;
+    private javax.swing.JButton jButton6;
+    private javax.swing.JButton jButton7;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JTable tableContacts;
+    private javax.swing.JTable tableDonation;
     private com.toedter.calendar.JDateChooser txtDate;
     private javax.swing.JTextField txtDonor;
     private javax.swing.JFormattedTextField txtHour;

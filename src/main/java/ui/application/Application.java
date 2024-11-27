@@ -7,7 +7,7 @@ import com.formdev.flatlaf.fonts.roboto.FlatRobotoFont;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import domain.model.User;
 import domain.service.UserService;
-import infra.postgres.repository.AgendaRepositoryPgsql;
+import infra.postgres.repository.EventRepositoryPgsql;
 import infra.postgres.repository.DonorRepositoryPgsql;
 import infra.postgres.repository.UserRepositoryPgsql;
 import java.awt.Component;
@@ -38,7 +38,7 @@ public class Application extends javax.swing.JFrame {
         var userRepo = new UserRepositoryPgsql();
         var userService = new UserService(userRepo);
         var donorRepo = new DonorRepositoryPgsql();
-        var agendaRepo = new AgendaRepositoryPgsql();
+        var agendaRepo = new EventRepositoryPgsql();
 
         mainForm = new MainForm(donorRepo, agendaRepo);
 

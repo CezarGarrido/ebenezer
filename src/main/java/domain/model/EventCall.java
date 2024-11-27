@@ -5,7 +5,6 @@
 package domain.model;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,17 +18,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Agenda {
+public class EventCall {
 
     private Long id;
-    private Long companyId;
-    private Long userCreatorId;
-    private LocalDateTime date;
-    private String hour;
-    private String eventType;
-    private String Obs;
-    private User user;
-    private AgendaCall call;
+    private Long eventId;
+    private Long donorId;
+    private String phone;
+    private Donor donor;
+    private String status;
+    private String duration;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

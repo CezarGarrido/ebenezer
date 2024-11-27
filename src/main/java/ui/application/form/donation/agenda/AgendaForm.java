@@ -2,8 +2,7 @@ package ui.application.form.donation.agenda;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.vdurmont.emoji.EmojiParser;
-import domain.model.Agenda;
-import domain.repository.AgendaRepository;
+import domain.model.Event;
 import domain.repository.DonorRepository;
 import java.awt.Font;
 import java.time.format.DateTimeFormatter;
@@ -22,6 +21,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import ui.application.Application;
 import ui.application.form.donation.agenda.dialog.AgendaNewDialog;
+import domain.repository.EventRepository;
 //import com.vdurmont.emoji.EmojiParser;
 
 /**
@@ -30,10 +30,10 @@ import ui.application.form.donation.agenda.dialog.AgendaNewDialog;
  */
 public class AgendaForm extends javax.swing.JPanel {
 
-    private AgendaRepository agendaRepo;
+    private EventRepository agendaRepo;
     private DonorRepository donorRepo;
 
-    public AgendaForm(AgendaRepository agendaRepo, DonorRepository donorRepo) {
+    public AgendaForm(EventRepository agendaRepo, DonorRepository donorRepo) {
         initComponents();
         this.agendaRepo = agendaRepo;
         this.donorRepo = donorRepo;
@@ -92,7 +92,7 @@ public class AgendaForm extends javax.swing.JPanel {
     }
 
     private void loadEvents() {
-        List<Agenda> events = agendaRepo.findByQuery(Application.loggedUser().getCompanyId(), txtSearch.getText());
+        List<Event> events = agendaRepo.findByQuery(Application.loggedUser().getCompanyId(), txtSearch.getText());
 
         // Formato de data brasileiro
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -101,7 +101,7 @@ public class AgendaForm extends javax.swing.JPanel {
         Map<String, List<String>> agendaData = new TreeMap<>(Comparator.reverseOrder());
 
         //System.out.println(parsedText); // Saída: Eu amo programação
-        for (Agenda agenda : events) {
+        for (Event agenda : events) {
             // Formata a data para ser usada como chave
             String formattedDate = agenda.getDate() != null ? agenda.getDate().toLocalDate().format(dateFormatter) : "Sem data";
 
@@ -110,7 +110,7 @@ public class AgendaForm extends javax.swing.JPanel {
 
             // Adiciona o compromisso à lista da data
             String eventDetails = String.format("%s - %s para %s",
-                    agenda.getHour() != null ? agenda.getHour() : "Horário não definido",
+                    agenda.getTime() != null ? agenda.getTime() : "00:00",
                     agenda.getEventType(), agenda.getCall().getDonor().getName());
             agendaData.get(formattedDate).add(eventDetails);
         }
@@ -176,7 +176,7 @@ public class AgendaForm extends javax.swing.JPanel {
                             .addComponent(jScrollPane1)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 325, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 143, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 132, Short.MAX_VALUE)
                                 .addComponent(btnCreate)
                                 .addGap(18, 18, 18)
                                 .addComponent(btnUpdate)

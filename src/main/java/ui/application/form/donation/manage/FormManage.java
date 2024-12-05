@@ -1,15 +1,19 @@
 package ui.application.form.donation.manage;
 
 import com.formdev.flatlaf.FlatClientProperties;
-import domain.model.Donor;
+import domain.model.Donation;
 import domain.repository.DonorRepository;
+import domain.service.DonationService;
+import domain.service.DonorService;
+import java.time.LocalDateTime;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
+import ui.application.Application;
 import ui.application.form.donation.manage.dialog.DonationNewDialog;
-import ui.application.form.donor.dialog.DonorNewDialog;
 
 /**
  *
@@ -17,12 +21,13 @@ import ui.application.form.donor.dialog.DonorNewDialog;
  */
 public class FormManage extends javax.swing.JPanel {
 
-    private DonorRepository donorRepo;
+    private DonationService donationService;
+    private DonorService donorService;
 
-    public FormManage(DonorRepository donorRepo) {
+    public FormManage(DonorService donorService, DonationService donationService) {
         initComponents();
-        this.donorRepo = donorRepo;
-
+        this.donorService = donorService;
+        this.donationService = donationService;
         init();
     }
 
@@ -45,6 +50,24 @@ public class FormManage extends javax.swing.JPanel {
 
     private void loadTableData() {
         // Obtenha todos os doadores do repositório
+        var donations = this.donationService.findByQuery(Application.loggedUser(), txtSearch.getText(), LocalDateTime.now());
+
+        // Defina o modelo da tabela
+        DefaultTableModel model = (DefaultTableModel) tableDonors.getModel();
+        model.setRowCount(0); // Limpa a tabela antes de preencher com novos dados
+
+        // Adicione cada doador ao modelo da tabela
+        for (Donation donation : donations) {
+
+            model.addRow(new Object[]{
+                donation.getId(), // Supondo que há um método getId() em Donor
+                donation.getDonor().getName(), // Supondo que há um método getName() em Donor
+                donation.getAmount(), // Supondo que há um método getPhone() em Donor
+                donation.getReceivedAt(), // Supondo que há um método getStatus() em Donor
+                donation.getUser().getName(),
+                donation.getCreatedAt(),
+                donation.getUpdatedAt(),});
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -169,7 +192,7 @@ public class FormManage extends javax.swing.JPanel {
 
     private void btnCreateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateActionPerformed
         // TODO add your handling code here:
-        DonationNewDialog dialog = new DonationNewDialog((JFrame) SwingUtilities.getWindowAncestor(this), true, this.donorRepo);
+        DonationNewDialog dialog = new DonationNewDialog((JFrame) SwingUtilities.getWindowAncestor(this), true, this.donorService);
         //dialog.setRepository(this.repo);
         dialog.setVisible(true);
     }//GEN-LAST:event_btnCreateActionPerformed
@@ -197,7 +220,6 @@ public class FormManage extends javax.swing.JPanel {
 
             // Excluir doador do repositório
             //repo.deleteById(donorId);
-
             // Atualizar a tabela após a exclusão
             loadTableData();
 

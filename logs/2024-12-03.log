@@ -1,0 +1,190 @@
+{"@timestamp":"2024-12-03T10:28:22.62142245-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T10:28:22.627562653-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T10:28:22.627780488-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T10:28:29.318320094-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T10:29:00.571862817-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T10:29:00.576982144-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T10:29:00.577184779-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T10:29:06.170163554-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T10:30:25.069962703-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T10:30:25.075260494-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T10:30:25.075475009-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T10:30:31.15653037-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T10:30:31.498470807-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T10:31:54.503222522-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T10:31:54.510883579-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T10:31:54.511138468-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T10:32:00.315992388-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T10:32:46.839073834-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T10:32:46.845100261-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T10:32:46.845371925-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T10:32:52.836296264-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T10:33:17.313016612-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T10:33:17.320401269-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T10:33:17.320660975-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T10:33:23.444434109-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T10:35:25.3093204-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T10:35:25.314965336-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T10:35:25.31515549-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T10:35:31.52718747-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T10:37:28.290757067-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T10:37:28.295917036-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T10:37:28.296158367-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T10:37:34.680413376-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T10:40:49.65418182-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T10:40:49.659491725-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T10:40:49.659697547-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T10:40:55.769785183-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T10:48:47.518294529-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T10:48:47.525302693-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T10:48:47.525468713-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T10:48:53.348917639-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T10:49:32.263354199-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T10:49:32.269101607-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T10:49:32.269285396-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T10:49:39.065395775-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T10:56:52.999282534-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T10:56:53.004710767-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T10:56:53.004936602-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T10:56:59.613386814-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T11:02:58.579217187-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T11:02:58.584435337-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T11:02:58.584613196-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T11:03:04.758360338-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T11:04:56.762802364-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T11:04:56.768455902-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T11:04:56.768676542-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T11:05:03.203351255-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T11:06:15.541877247-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T11:06:15.549234729-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T11:06:15.549431785-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T11:06:21.242647861-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T11:09:34.513005922-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T11:09:34.518674352-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T11:09:34.518910507-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T11:09:40.244718984-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T11:10:17.268689589-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T11:10:17.274715004-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T11:10:17.274908264-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T11:10:24.984351549-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T11:11:24.868113619-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T11:11:24.876306747-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T11:11:24.876549093-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T11:11:51.264374535-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T11:12:58.348682461-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T11:12:58.35454273-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T11:12:58.354794844-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T11:13:04.906770287-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T11:14:03.460756426-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T11:14:03.46627998-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T11:14:03.466574548-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T11:14:09.382298121-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T11:33:55.408162922-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T11:33:55.413565022-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T11:33:55.413752293-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T11:34:05.39040467-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T11:35:35.394573624-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T11:35:35.400049523-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T11:35:35.400228934-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T11:35:44.882821812-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T11:43:11.32589685-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T11:43:11.331754652-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T11:43:11.332226789-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T11:43:21.024679695-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T11:46:35.467808456-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T11:46:35.472919743-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T11:46:35.47310089-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T11:46:41.912377388-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T11:47:17.583191577-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T11:47:17.588496514-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T11:47:17.588756898-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T11:47:39.630000853-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T15:28:08.625451764-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T15:28:08.631865943-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T15:28:08.632059546-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T15:28:36.966310372-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T15:28:36.9717689-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T15:28:36.97199114-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T15:28:42.940360864-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T15:32:49.316844279-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T15:32:49.326493341-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T15:32:49.326795519-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T15:32:57.185948236-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T15:33:57.962447613-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T15:33:57.968261787-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T15:33:57.968473576-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T15:34:04.00757567-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T15:37:27.151654133-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T15:37:27.156907596-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T15:37:27.157153744-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T15:37:33.13770027-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T15:38:31.752061019-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T15:38:31.757607091-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T15:38:31.757904044-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T15:38:38.201305046-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T15:39:41.938266741-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T15:39:41.948429758-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T15:39:41.948995675-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T15:41:58.050411609-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T15:41:58.055719399-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T15:41:58.055935795-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T15:42:07.358935655-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T15:44:01.067924039-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T15:44:01.073241361-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T15:44:01.073449237-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T15:44:07.831281525-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T15:45:50.731189946-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T15:45:50.738696061-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T15:45:50.739025122-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T15:45:56.721130319-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T15:49:39.529385781-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T15:49:39.534973704-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T15:49:39.535220398-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T15:49:49.633178185-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T15:53:29.374919693-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T15:53:29.381431642-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T15:53:29.381648031-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T15:53:37.412836175-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T15:55:05.515850524-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T15:55:05.521549512-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T15:55:05.521737258-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T15:55:13.201768788-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T15:57:29.118430232-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T15:57:29.124596074-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T15:57:29.124860348-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T15:57:35.495857115-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T16:07:18.983899824-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T16:07:18.98983546-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T16:07:18.990104484-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T16:07:24.769422-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T16:09:23.172354572-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T16:09:23.177590203-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T16:09:23.177765149-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T16:09:36.64340569-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T16:10:08.039429255-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T16:10:08.044907671-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T16:10:08.045088203-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T16:10:14.648574555-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T16:13:46.423356876-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T16:13:46.430779075-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T16:13:46.431016054-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T16:13:52.472021578-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T16:22:32.418395235-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T16:22:32.427263484-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T16:22:32.427559796-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T16:22:32.647744181-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T16:22:32.656304534-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T16:22:32.656579295-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T16:28:23.021666291-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T16:28:23.029708146-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T16:28:23.029979584-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T16:28:30.288961325-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T16:29:25.844730845-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T16:29:25.850001671-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T16:29:25.850175519-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T16:29:42.924621132-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T16:30:54.818410218-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-12-03T16:30:54.824491723-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-12-03T16:30:54.824764994-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-12-03T16:31:04.385182342-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}
+{"@timestamp":"2024-12-03T16:31:21.001941045-03:00","logger_name":"ui.application.form.donation.agenda.AgendaForm","level":"INFO","message":"Compromissos carregados com sucesso."}

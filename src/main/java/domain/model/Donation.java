@@ -25,13 +25,14 @@ public class Donation {
     private Long id;
     private Long companyId;
     private Long userCreatorId;
-    private Long eventId; // Opcional, pode ser null
+    private Long appointmentId; // Opcional, pode ser null
     private Long donorId;
     private BigDecimal Amount;
     private LocalDateTime receivedAt;
     private String receivedTime;
     private Boolean paid;
     private String notes;
+    private String paymentMethod;
 
     private User user; // Relacionamento com User
     private Donor donor; // Relacionamento com Donor

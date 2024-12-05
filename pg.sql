@@ -64,7 +64,7 @@ CREATE TABLE employees (
     date_of_birth DATE,                       -- Data de nascimento
     hire_date DATE,                           -- Data de contratação
     termination_date DATE,                    -- Data de desligamento (se houver)
-    ctps VARCHAR(100),                  -- CNPJ do funcionário (se aplicável)
+    ctps VARCHAR(100),                        -- CNPJ do funcionário (se aplicável)
     cnpj VARCHAR(14) UNIQUE,                  -- CNPJ do funcionário (se aplicável)
     cpf VARCHAR(11) UNIQUE,                   -- CPF do funcionário
     rg VARCHAR(30),                           -- RG do funcionário
@@ -186,13 +186,13 @@ CREATE TABLE donor_addresses (
     UNIQUE (donor_id)  -- Adiciona a restrição de unicidade para donor_id
 );
 
-DROP TABLE IF EXISTS events;
-CREATE TABLE events (
+DROP TABLE IF EXISTS appointments;
+CREATE TABLE appointments (
     id BIGSERIAL PRIMARY KEY,
     company_id BIGINT NOT NULL,
     user_creator_id BIGINT NOT NULL,
     date TIMESTAMP,
-    time TIME,
+    time VARCHAR(20),
     event_type VARCHAR(20) NOT NULL CHECK (event_type IN ('Ligação')),
     notes VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -201,17 +201,17 @@ CREATE TABLE events (
     FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
 );
 
-DROP TABLE IF EXISTS event_calls;
-CREATE TABLE event_calls (
+DROP TABLE IF EXISTS appointment_calls;
+CREATE TABLE appointment_calls (
     id BIGSERIAL PRIMARY KEY,
-    event_id BIGINT NOT NULL,
+    appointment_id BIGINT NOT NULL,
     donor_id BIGINT NOT NULL,
-    phone VARCHAR(255) NOT NULL,
+    phone VARCHAR(60),
     status VARCHAR(20) NOT NULL CHECK (status IN ('Agendado', 'Realizado', 'Cancelado')),
     duration VARCHAR(30),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (event_id) REFERENCES events(id),
+    FOREIGN KEY (appointment_id) REFERENCES appointments(id),
     FOREIGN KEY (donor_id) REFERENCES donors(id) ON DELETE CASCADE
 );
 
@@ -220,11 +220,11 @@ CREATE TABLE donations (
     id BIGSERIAL PRIMARY KEY,
     company_id BIGINT NOT NULL,
     user_creator_id BIGINT NOT NULL,
-    event_id BIGINT,
+    appointment_id BIGINT,
     donor_id BIGINT NOT NULL,
     amount NUMERIC(10, 2) NOT NULL CHECK (amount > 0),
     received_at DATE NOT NULL,
-    received_time TIME NOT NULL,
+    received_time VARCHAR(20) NOT NULL,
     paid BOOLEAN DEFAULT FALSE,
     notes VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -233,5 +233,27 @@ CREATE TABLE donations (
     FOREIGN KEY (user_creator_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE,
     FOREIGN KEY (donor_id) REFERENCES donors(id) ON DELETE CASCADE,
-    FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
+    FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE CASCADE
 );
+
+
+-- Inserção de doadores na tabela donors
+INSERT INTO donors (company_id, person_type, name, cpf, active, user_creator_id)
+VALUES 
+(1, 'Pessoa Física', 'João Silva', '12345678901', TRUE, 1),
+(1, 'Pessoa Física', 'Maria Oliveira', '98765432100', TRUE, 1),
+(1, 'Pessoa Jurídica', 'Empresa Generosa', NULL, TRUE, 1);
+
+-- Inserção de contatos dos doadores na tabela donor_contacts
+INSERT INTO donor_contacts (donor_id, name, phone, email)
+VALUES
+(1, 'João Silva', '(11) 99999-1234', 'joao.silva@example.com'),
+(2, 'Maria Oliveira', '(21) 98888-4321', 'maria.oliveira@example.com'),
+(3, 'Empresa Generosa', '(31) 91234-5678', 'contato@empresagenerosa.com');
+
+-- Inserção de endereços dos doadores na tabela donor_addresses
+INSERT INTO donor_addresses (donor_id, street, neighborhood, complement, city, state, postal_code, number)
+VALUES
+(1, 'Rua Alegria', 'Centro', NULL, 'São Paulo', 'SP', '01010-010', '123'),
+(2, 'Avenida das Flores', 'Jardim', NULL, 'Rio de Janeiro', 'RJ', '20020-020', '456'),
+(3, 'Praça Generosa', 'Comercial', 'Sala 101', 'Belo Horizonte', 'MG', '30030-030', '789');

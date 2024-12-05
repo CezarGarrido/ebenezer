@@ -26,7 +26,7 @@ import java.util.List;
 public class DonorRepositoryPgsql extends PGConnection implements DonorRepository {
 
     @Override
-    public Donor findById(Long id) {
+    public Donor findById(Long companyId, Long id) {
         if (id == null) {
             throw new IllegalArgumentException("ID não pode ser nulo.");
         }
@@ -44,7 +44,7 @@ public class DonorRepositoryPgsql extends PGConnection implements DonorRepositor
                 + "LEFT JOIN users u ON d.user_creator_id = u.id "
                 + "LEFT JOIN donor_contacts dc ON d.id = dc.donor_id "
                 + "LEFT JOIN donor_addresses da ON d.id = da.donor_id "
-                + "WHERE d.id = ?"; // Adiciona filtro pelo ID do doador
+                + "WHERE d.id = ? AND d.company_id=?"; // Adiciona filtro pelo ID do doador
 
         try {
             open();
@@ -52,6 +52,7 @@ public class DonorRepositoryPgsql extends PGConnection implements DonorRepositor
 
             try (PreparedStatement stmt = connection.prepareStatement(query)) {
                 stmt.setLong(1, id); // Setando o ID do doador
+                stmt.setLong(2, companyId); // Setando o ID da empresa
 
                 try (ResultSet rs = stmt.executeQuery()) {
 
@@ -122,7 +123,7 @@ public class DonorRepositoryPgsql extends PGConnection implements DonorRepositor
     }
 
     @Override
-    public List<Donor> findAll() {
+    public List<Donor> findAll(Long companyId) {
         List<Donor> donors = new ArrayList<>();
 
         // SQL para buscar os doadores com seus contatos e endereços usando JOINs
@@ -135,13 +136,15 @@ public class DonorRepositoryPgsql extends PGConnection implements DonorRepositor
                 + "FROM donors d "
                 + "LEFT JOIN users u ON d.user_creator_id = u.id "
                 + "LEFT JOIN donor_contacts dc ON d.id = dc.donor_id "
-                + "LEFT JOIN donor_addresses da ON d.id = da.donor_id";
+                + "LEFT JOIN donor_addresses da ON d.id = da.donor_id "
+                + "WHERE d.company_id=?";
 
         try {
             open();
             var connection = getConnection();
 
             try (PreparedStatement stmt = connection.prepareStatement(query); ResultSet rs = stmt.executeQuery()) {
+                stmt.setLong(1, companyId); // Setando o ID da empresa
 
                 Donor currentDonor = null;
 

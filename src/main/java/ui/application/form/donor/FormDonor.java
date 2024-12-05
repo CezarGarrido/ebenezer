@@ -2,7 +2,7 @@ package ui.application.form.donor;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import domain.model.Donor;
-import domain.repository.DonorRepository;
+import domain.service.DonorService;
 import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
@@ -10,6 +10,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
+import ui.application.Application;
 import ui.application.form.donor.dialog.DonorNewDialog;
 
 /**
@@ -18,11 +19,11 @@ import ui.application.form.donor.dialog.DonorNewDialog;
  */
 public class FormDonor extends javax.swing.JPanel {
 
-    private DonorRepository repo;
+    private DonorService service;
 
-    public FormDonor(DonorRepository repo) {
+    public FormDonor(DonorService service) {
         initComponents();
-        this.repo = repo;
+        this.service = service;
 
         init();
     }
@@ -46,7 +47,7 @@ public class FormDonor extends javax.swing.JPanel {
 
     private void loadTableData() {
         // Obtenha todos os doadores do repositório
-        List<Donor> donors = repo.findAll();
+        List<Donor> donors = this.service.findAll(Application.loggedUser());
 
         // Defina o modelo da tabela
         DefaultTableModel model = (DefaultTableModel) tableDonors.getModel();
@@ -193,7 +194,7 @@ public class FormDonor extends javax.swing.JPanel {
     private void btnCreateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateActionPerformed
         // TODO add your handling code here:
         DonorNewDialog dialog = new DonorNewDialog((JFrame) SwingUtilities.getWindowAncestor(this), true);
-        dialog.setRepository(this.repo);
+        dialog.setService(this.service);
         dialog.setVisible(true);
     }//GEN-LAST:event_btnCreateActionPerformed
 
@@ -219,8 +220,7 @@ public class FormDonor extends javax.swing.JPanel {
             Long donorId = (Long) tableDonors.getValueAt(selectedRow, 0);
 
             // Excluir doador do repositório
-            repo.deleteById(donorId);
-
+            //repo.deleteById(donorId);
             // Atualizar a tabela após a exclusão
             loadTableData();
 
@@ -245,7 +245,7 @@ public class FormDonor extends javax.swing.JPanel {
 
         // Continua com a lógica para uma única seleção
         Long donorId = (Long) tableDonors.getValueAt(selectedRows[0], 0);
-        Donor donor = repo.findById(donorId);
+        Donor donor = this.service.findById(Application.loggedUser(), donorId);
 
         if (donor == null) {
             JOptionPane.showMessageDialog(this, "Doador não encontrado.", "Erro", JOptionPane.ERROR_MESSAGE);
@@ -253,7 +253,7 @@ public class FormDonor extends javax.swing.JPanel {
         }
 
         DonorNewDialog dialog = new DonorNewDialog((JFrame) SwingUtilities.getWindowAncestor(this), true, donor);
-        dialog.setRepository(this.repo);
+        dialog.setService(this.service);
         // dialog.setDonor(donor);
         dialog.setVisible(true);
 

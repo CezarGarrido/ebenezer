@@ -13,9 +13,9 @@ import java.util.List;
 
 public interface DonorRepository {
 
-    Donor findById(Long id);
+    Donor findById(Long companyId, Long id);
 
-    List<Donor> findAll();
+    List<Donor> findAll(Long companyId);
 
     List<Donor> findByQuery(Long companyId, String queryFilter);
 

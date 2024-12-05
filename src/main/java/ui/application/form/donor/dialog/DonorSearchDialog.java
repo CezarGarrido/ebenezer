@@ -5,7 +5,7 @@
 package ui.application.form.donor.dialog;
 
 import domain.model.Donor;
-import domain.repository.DonorRepository;
+import domain.service.DonorService;
 import java.util.List;
 import javax.swing.table.DefaultTableModel;
 import ui.application.Application;
@@ -16,19 +16,18 @@ import ui.application.Application;
  */
 public class DonorSearchDialog extends javax.swing.JDialog {
 
-    private DonorRepository donorRepo;
+    private DonorService donorService;
     private Donor selectedDonor = null;
     private List<Donor> donors;
 
     /**
      * Creates new form DonorSearchDialog
      */
-    public DonorSearchDialog(java.awt.Frame parent, boolean modal, DonorRepository donorRepo) {
+    public DonorSearchDialog(java.awt.Frame parent, boolean modal, DonorService donorService) {
         super(parent, modal);
         initComponents();
         setLocationRelativeTo(parent);  // Para centralizar na tela
-        this.donorRepo = donorRepo;
-       // setModal(true);
+        this.donorService = donorService;
         filter(jTextField1.getText());
 
         jTextField1.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -36,10 +35,10 @@ public class DonorSearchDialog extends javax.swing.JDialog {
                 filter(jTextField1.getText());
             }
         });
-        
+
         this.getRootPane().getInputMap(javax.swing.JComponent.WHEN_IN_FOCUSED_WINDOW)
                 .put(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_ESCAPE, 0), "close");
-        
+
         this.getRootPane().getActionMap().put("close", new javax.swing.AbstractAction() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -51,7 +50,7 @@ public class DonorSearchDialog extends javax.swing.JDialog {
 
     private void filter(String query) {
         // Aplica o filtro com base no texto digitado
-        this.donors = donorRepo.findByQuery(Application.loggedUser().getCompanyId(), query);
+        this.donors = this.donorService.findByQuery(Application.loggedUser(), query);
         updateTable(this.donors);
     }
 
@@ -64,9 +63,19 @@ public class DonorSearchDialog extends javax.swing.JDialog {
 
         // Adiciona os dados da lista de doadores
         for (Donor donor : donors) {
+            StringBuilder phones = new StringBuilder(); // Use StringBuilder para eficiência
+
+            for (var contact : donor.getContacts()) {
+                if (phones.length() > 0) {
+                    phones.append(","); // Adiciona vírgula somente se já houver conteúdo
+                }
+                phones.append(contact.getPhone());
+            }
+
             model.addRow(new Object[]{
                 donor.getId(),
-                donor.getName()
+                donor.getName(),
+                phones.toString()
             });
         }
     }
@@ -88,17 +97,17 @@ public class DonorSearchDialog extends javax.swing.JDialog {
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null},
-                {null, null},
-                {null, null},
-                {null, null}
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null}
             },
             new String [] {
-                "Código", "Nome"
+                "Código", "Nome", "Telefones"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false
+                false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -112,7 +121,7 @@ public class DonorSearchDialog extends javax.swing.JDialog {
         });
         jScrollPane1.setViewportView(jTable1);
         if (jTable1.getColumnModel().getColumnCount() > 0) {
-            jTable1.getColumnModel().getColumn(0).setPreferredWidth(10);
+            jTable1.getColumnModel().getColumn(0).setPreferredWidth(5);
         }
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -123,7 +132,7 @@ public class DonorSearchDialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE))
+                    .addComponent(jTextField1, javax.swing.GroupLayout.DEFAULT_SIZE, 379, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -132,7 +141,7 @@ public class DonorSearchDialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 275, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 352, Short.MAX_VALUE)
                 .addContainerGap())
         );
 

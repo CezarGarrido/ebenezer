@@ -1,0 +1,9 @@
+{"@timestamp":"2024-11-30T19:28:04.045914348-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-11-30T19:28:04.051322945-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-11-30T19:28:04.051561265-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-11-30T19:28:15.145631796-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-11-30T19:28:15.15130031-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-11-30T19:28:15.151538431-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}
+{"@timestamp":"2024-11-30T19:28:23.709234075-03:00","logger_name":"ui.application.Application","level":"INFO","message":"User logged in: john"}
+{"@timestamp":"2024-11-30T19:28:23.714651998-03:00","logger_name":"ui.application.Application","level":"WARN","message":"Connection to server lost. Retrying..."}
+{"@timestamp":"2024-11-30T19:28:23.714880021-03:00","logger_name":"ui.application.Application","level":"ERROR","message":"Failed to write data to file: myFile.txt"}

@@ -216,7 +216,30 @@
             <artifactId>dynamicreports-core</artifactId>
             <version>6.20.1</version>
         </dependency>
-  
+        
+        <!-- https://mvnrepository.com/artifact/eu.mindfusion/scheduling -->
+        <dependency>
+            <groupId>eu.mindfusion</groupId>
+            <artifactId>scheduling</artifactId>
+            <version>2.2.2</version>
+            <type>jar</type>
+        </dependency>
+        
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>1.4.7</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.4.7</version>
+        </dependency>
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>7.3</version>
+        </dependency>
     </dependencies>
     <name>Ebenezer</name>
     <repositories>

@@ -5,7 +5,6 @@
 package domain.repository;
 
 import domain.model.User;
-import java.util.Optional;
 
 /**
  *

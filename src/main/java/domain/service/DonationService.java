@@ -5,26 +5,25 @@
 package domain.service;
 
 import domain.model.Donation;
-import domain.model.Event;
 import domain.model.User;
 import domain.repository.DonationRepository;
-import domain.repository.EventRepository;
+import java.time.LocalDateTime;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 /**
  *
  * @author cezar.britez
  */
-public class ScheduleDonationService {
+@NoArgsConstructor
+@AllArgsConstructor
+public class DonationService {
 
     private DonationRepository donationRepo;
-    private EventRepository eventRepo;
 
-    public void scheduleEvent(User user, Event event){
-        
-    }
-
-    public void scheduleDonation(User user, Event event, Donation donation){
-        
+    public List<Donation> findByQuery(User user, String queryFilter, LocalDateTime date) {
+        return donationRepo.findByQuery(user.getCompanyId(), queryFilter);
     }
 
 }

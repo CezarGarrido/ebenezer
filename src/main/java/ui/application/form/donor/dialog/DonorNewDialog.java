@@ -8,7 +8,7 @@ import domain.model.Address;
 import domain.model.Donor;
 import domain.model.DonorAddress;
 import domain.model.DonorContact;
-import domain.repository.DonorRepository;
+import domain.service.DonorService;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,10 +35,10 @@ public class DonorNewDialog extends javax.swing.JDialog {
     private MaskFormatter CEPMask;
     private MaskFormatter PhoneMask;
     private Donor donor;
-    private DonorRepository repo;
+    private DonorService service;
 
-    public void setRepository(DonorRepository repo) {
-        this.repo = repo;
+    public void setService(DonorService service) {
+        this.service = service;
     }
 
     public DonorNewDialog(java.awt.Frame parent, boolean modal, Donor donor) {
@@ -434,9 +434,6 @@ public class DonorNewDialog extends javax.swing.JDialog {
         }
 
         try {
-            newDonor.setCompanyId(Application.loggedUser().getCompanyId());
-            newDonor.setUserCreatorId(Application.loggedUser().getId());
-
             newDonor.setName(txtName.getText());
             newDonor.setPersonType(comboPersonType.getSelectedItem().toString());
             newDonor.setActive(checkActive.isSelected());
@@ -458,14 +455,14 @@ public class DonorNewDialog extends javax.swing.JDialog {
             newDonor.setAddress(address);
 
             if (this.donor == null) {
-                var id = this.repo.save(newDonor);
+                var id = this.service.save(Application.loggedUser(), newDonor);
                 if (id != null) {
                     JOptionPane.showMessageDialog(btnSave, "Salvo com sucesso!");
                     this.dispose();
                 }
 
             } else {
-                this.repo.update(newDonor);
+                this.service.update(Application.loggedUser(), newDonor);
                 JOptionPane.showMessageDialog(btnSave, "Atualizado com sucesso!");
                 this.dispose();
             }

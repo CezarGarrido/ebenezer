@@ -3,7 +3,6 @@ package ui.application.form;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.util.UIScale;
-import domain.repository.DonorRepository;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.ComponentOrientation;
@@ -19,11 +18,12 @@ import javax.swing.border.EmptyBorder;
 import ui.application.Application;
 import ui.application.form.donation.agenda.AgendaForm;
 import ui.application.form.donation.manage.FormManage;
-import ui.application.form.donor.FormDonor;
 import ui.application.form.other.FormDashboard;
 import ui.menu.Menu;
 import ui.menu.MenuAction;
-import domain.repository.EventRepository;
+import domain.service.DonationService;
+import domain.service.AppointmentService;
+import domain.service.DonorService;
 
 /**
  *
@@ -31,13 +31,15 @@ import domain.repository.EventRepository;
  */
 public class MainForm extends JLayeredPane {
 
-    private DonorRepository donorRepo;
-    private EventRepository agendaRepo;
+    private AppointmentService appointmentService;
+    private DonationService donationService;
+    private DonorService donorService;
 
-    public MainForm(DonorRepository donorRepo, EventRepository agendaRepo) {
+    public MainForm(DonorService donorService, AppointmentService appointmentService, DonationService donationService) {
         init();
-        this.donorRepo = donorRepo;
-        this.agendaRepo = agendaRepo;
+        this.donorService = donorService;
+        this.appointmentService = appointmentService;
+        this.donationService = donationService;
     }
 
     private void init() {
@@ -85,14 +87,14 @@ public class MainForm extends JLayeredPane {
             if (index == 0) {
                 Application.showForm(new FormDashboard());
             } else if (index == 1) {
-                Application.showForm(new AgendaForm(this.agendaRepo, this.donorRepo));
+                Application.showForm(new AgendaForm(this.appointmentService, this.donorService));
 
             } else if (index == 2) {
-                Application.showForm(new FormManage(this.donorRepo));
+                Application.showForm(new FormManage(this.donorService, this.donationService));
 
             } else if (index == 3) {
                 if (subIndex == 1) {
-                    Application.showForm(new FormDonor(this.donorRepo));
+                    //Application.showForm(new FormDonor(this.donorService));
                 }
             } else if (index == 4) {
                 Application.logout();

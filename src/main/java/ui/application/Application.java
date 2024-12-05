@@ -6,8 +6,12 @@ import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
 import com.formdev.flatlaf.fonts.roboto.FlatRobotoFont;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import domain.model.User;
+import domain.service.DonationService;
+import domain.service.AppointmentService;
+import domain.service.DonorService;
 import domain.service.UserService;
-import infra.postgres.repository.EventRepositoryPgsql;
+import infra.postgres.repository.DonationRepositoryPgsql;
+import infra.postgres.repository.AppointmentRepositoryPgsql;
 import infra.postgres.repository.DonorRepositoryPgsql;
 import infra.postgres.repository.UserRepositoryPgsql;
 import java.awt.Component;
@@ -18,12 +22,16 @@ import javax.swing.UIManager;
 import ui.application.form.LoginForm;
 import ui.application.form.MainForm;
 //import raven.toast.Notifications;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 /**
  *
  * @author Raven
  */
 public class Application extends javax.swing.JFrame {
+
+    private static final Logger logger = LoggerFactory.getLogger(Application.class);
 
     private static Application app;
     private final MainForm mainForm;
@@ -36,16 +44,23 @@ public class Application extends javax.swing.JFrame {
         setLocationRelativeTo(null);
 
         var userRepo = new UserRepositoryPgsql();
-        var userService = new UserService(userRepo);
         var donorRepo = new DonorRepositoryPgsql();
-        var agendaRepo = new EventRepositoryPgsql();
+        var agendaRepo = new AppointmentRepositoryPgsql();
+        var donationRepo = new DonationRepositoryPgsql();
 
-        mainForm = new MainForm(donorRepo, agendaRepo);
+        var userService = new UserService(userRepo);
+        var eventService = new AppointmentService(agendaRepo);
+        var donationService = new DonationService(donationRepo);
+        var donorService = new DonorService(donorRepo);
+
+        mainForm = new MainForm(donorService, eventService, donationService);
 
         loginForm = new LoginForm(userService);
         setContentPane(loginForm);
         getRootPane().putClientProperty(FlatClientProperties.FULL_WINDOW_CONTENT, true);
         // Notifications.getInstance().setJFrame(this);
+        //pack();  // Ajusta automaticamente o tamanho da janela
+
     }
 
     public static void showForm(Component component) {
@@ -109,9 +124,15 @@ public class Application extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     public static void main(String args[]) {
+        logger.trace("Entering method foo()");
+        logger.debug("Received request from 198.12.34.56");
+        logger.info("User logged in: john");
+        logger.warn("Connection to server lost. Retrying...");
+        logger.error("Failed to write data to file: myFile.txt");
+
         FlatRobotoFont.install();
         FlatLaf.registerCustomDefaultsSource("theme");
-        UIManager.put("defaultFont", new Font(FlatRobotoFont.FAMILY, Font.PLAIN, 13));
+        UIManager.put("defaultFont", new Font(FlatRobotoFont.FAMILY, Font.PLAIN, 16));
         FlatMacLightLaf.setup();
         java.awt.EventQueue.invokeLater(() -> {
             app = new Application();

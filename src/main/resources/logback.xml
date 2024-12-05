@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration>
+
+<configuration>
+    <import class="ch.qos.logback.classic.encoder.PatternLayoutEncoder" />
+    <import class="ch.qos.logback.core.ConsoleAppender" />
+
+    <appender name="STDOUT" class="ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp />
+                <loggerName />
+                <logLevel />
+                <message />
+            </providers>
+        </encoder>
+    </appender>
+
+    <appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/app.log</file>
+        
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/%d{yyyy-MM-dd}.log</fileNamePattern>
+            <totalSizeCap>10MB</totalSizeCap>
+        </rollingPolicy>
+        
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp />
+                <loggerName />
+                <logLevel />
+                <message />
+            </providers>
+        </encoder>
+        
+    </appender>
+    
+    <root level="trace">
+        <appender-ref ref="STDOUT" />
+    </root>
+    
+     <root level="info">
+        <appender-ref ref="ROLLING" />
+    </root>
+    
+</configuration>

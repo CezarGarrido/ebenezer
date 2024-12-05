@@ -13,7 +13,7 @@ import java.sql.SQLException;
  * @author cezar.britez
  */
 public class PGConnection {
-
+    //TODO: .ini
     String url = "jdbc:postgresql://localhost:5432/ebenezer";
     String username = "admin";
     String password = "admin";

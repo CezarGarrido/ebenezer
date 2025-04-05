@@ -1,0 +1,197 @@
+from django import forms
+from django.contrib import admin
+from .models.company import Company, UserProfile, GroupCompany
+from .models.employee import Employee, EmployeeUser
+from .models.donor import Donor
+from .models.base import Individual, LegalEntity, Address, Email, Phone
+from django.contrib.auth.models import User, Group
+from django.contrib.auth.admin import UserAdmin
+from django.utils.html import format_html
+
+class IndividualInline(admin.StackedInline):
+    model = Individual
+    can_delete = False
+    max_num = 1
+    verbose_name = "Pessoa Física"
+    verbose_name_plural = "Dados de Pessoa Física"
+    classes = ["individual-inline-tab"]
+    
+class LegalEntityInline(admin.StackedInline):
+    model = LegalEntity
+    can_delete = False
+    max_num = 1
+    verbose_name = "Pessoa Jurídica"
+    verbose_name_plural = "Dados de Pessoa Jurídica"
+    classes = ["legal-inline-tab"]
+
+class AddressInline(admin.StackedInline):
+    model = Address
+    extra = 1
+    verbose_name = "Endereço"
+    verbose_name_plural = "Endereços"
+
+class EmailInline(admin.TabularInline):
+    model = Email
+    extra = 1
+    verbose_name = "Email"
+    verbose_name_plural = "Emails"
+
+class PhoneInline(admin.TabularInline):
+    model = Phone
+    extra = 1
+    verbose_name = "Telefone"
+    verbose_name_plural = "Telefones"
+
+class EmployeeUserInline(admin.TabularInline):
+    model = EmployeeUser
+    extra = 1
+    verbose_name = "Usuário"
+    verbose_name_plural = "Usuários Vinculados"
+    
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
+        if db_field.name == "user" and not request.user.is_superuser:
+            company = request.user.profile.company
+            # Só usuários da empresa e que ainda não estão vinculados
+            kwargs["queryset"] = User.objects.filter(profile__company=company).exclude(
+                id__in=EmployeeUser.objects.values_list("user_id", flat=True)
+            )
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+    
+class BasePersonAdmin(admin.ModelAdmin):
+    inlines = [IndividualInline, LegalEntityInline, AddressInline, EmailInline, PhoneInline]
+    
+    list_display = ("name", "created_at", "updated_at")
+    search_fields = ("name", "cpf_cnpj")  # Depende dos campos de identificação disponíveis
+    list_filter = ("created_at",)
+    ordering = ("name",)
+    readonly_fields = ('created_at', 'updated_at')
+
+
+@admin.register(Employee)
+class EmployeeAdmin(BasePersonAdmin):
+    list_display = ("name", "position", "created_at")
+    search_fields = ("name", "position")
+    verbose_name = "Funcionário"
+    verbose_name_plural = "Funcionários"
+    exclude = ("owner", "person_type", "created_by")
+    inlines = [IndividualInline, AddressInline, EmailInline, PhoneInline, EmployeeUserInline]
+
+    def save_model(self, request, obj, form, change):
+        if not obj.created_by:  # Define apenas se for um novo objeto
+            obj.created_by = request.user
+            obj.owner = request.user.profile.company
+        super().save_model(request, obj, form, change)
+    
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(owner=request.user.profile.company)
+
+@admin.register(Donor)
+class DonorAdmin(BasePersonAdmin):
+    search_fields = ("name",)
+    verbose_name = "Doador"
+    verbose_name_plural = "Doadores"
+    exclude = ("owner", "created_by")
+    
+    class Media:
+        js = ('js/inline.js',)  # Carrega o script no Django Admin
+        
+    def save_model(self, request, obj, form, change):
+        if not obj.created_by:  # Define apenas se for um novo objeto
+            obj.created_by = request.user
+            obj.owner = request.user.profile.company
+        super().save_model(request, obj, form, change)
+    
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(owner=request.user.profile.company)
+    
+@admin.register(Company)
+class CompanyAdmin(BasePersonAdmin):
+    inlines = [LegalEntityInline, AddressInline, EmailInline, PhoneInline]
+
+    list_display = ('image_tag', "name", "created_at")
+    search_fields = ("name", "cnpj")
+    verbose_name = "Empresa"
+    verbose_name_plural = "Empresas"
+    exclude = ("person_type", "created_by")
+    def save_model(self, request, obj, form, change):
+        if not obj.created_by:  # Define apenas se for um novo objeto
+            obj.created_by = request.user
+            obj.person_type = 'J'
+        super().save_model(request, obj, form, change)
+        
+    def get_queryset(self, request):
+        """ Filtra usuários da mesma empresa do admin logado. """
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs  # Superusuário vê todos os usuários
+        return qs.filter(id=request.user.profile.company.id)
+
+    def image_tag(self, obj):
+        return format_html('<img src="/{}" width="40" height="40" />'.format(obj.logo_file))
+
+    image_tag.short_description = 'Logo'
+    image_tag.allow_tags = True
+class UserProfileInline(admin.StackedInline):
+    model = UserProfile
+    can_delete = False
+    verbose_name = "Empresa"
+    verbose_name_plural = "Empresa"
+
+class CustomUserAdmin(UserAdmin):
+    inlines = (UserProfileInline,)
+
+    def get_queryset(self, request):
+        """ Filtra usuários da mesma empresa do admin logado. """
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs  # Superusuário vê todos os usuários
+        return qs.filter(profile__company=request.user.profile.company)
+
+    def save_model(self, request, obj, form, change):
+        """ Garante que um novo usuário seja vinculado à empresa do admin logado """
+        if not obj.pk:  # Novo usuário
+            obj.save()
+            UserProfile.objects.create(user=obj, company=request.user.profile.company)
+        else:
+            obj.save()
+
+admin.site.unregister(User)
+admin.site.register(User, CustomUserAdmin)
+
+class GroupCompanyInline(admin.StackedInline):
+    model = GroupCompany
+    can_delete = False
+    verbose_name = "Empresa"
+    verbose_name_plural = "Empresa"
+    
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
+        if db_field.name == "company" and not request.user.is_superuser:
+            kwargs["queryset"] = Company.objects.filter(id=request.user.profile.company.id)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+    
+class CustomGroupAdmin(admin.ModelAdmin):
+    inlines = (GroupCompanyInline,)
+
+    def get_queryset(self, request):
+        """ Filtra grupos da mesma empresa do admin logado. """
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(group_company__company=request.user.profile.company)
+
+    def save_model(self, request, obj, form, change):
+        """ Garante que um novo grupo seja vinculado à empresa do admin logado """
+        if not obj.pk:
+            obj.save()
+            GroupCompany.objects.create(group=obj, company=request.user.profile.company)
+        else:
+            obj.save()
+
+admin.site.unregister(Group)
+admin.site.register(Group, CustomGroupAdmin)

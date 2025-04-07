@@ -26,9 +26,3 @@ jobs:
       - name: Build com PyInstaller
         run: |
           pyinstaller --onefile --noconsole client.py
-
-      - name: Upload binário
-        uses: actions/upload-artifact@v3
-        with:
-          name: app-win32
-          path: dist/client.exe

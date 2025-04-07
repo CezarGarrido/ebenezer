@@ -28,12 +28,12 @@ jobs:
         run: |
           pyinstaller --noconsole client.py
 
-      - name: Upload binário
+      - name: Store the distribution packages
         uses: actions/upload-artifact@v4
         with:
           name: windows-dist
-          path: dist/windows/
-
+          path: dist/
+          
   github-release:
     name: GitHub Release
     needs: [build]

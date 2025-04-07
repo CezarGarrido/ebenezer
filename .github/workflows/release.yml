@@ -5,6 +5,7 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:  # opcional: permite rodar manualmente
 
 jobs:
   build:
@@ -16,7 +17,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          architecture: 'x86'  # 👈 importante para 32 bits
+          architecture: 'x86'
 
       - name: Instalar dependências
         run: |
@@ -27,8 +28,49 @@ jobs:
         run: |
           pyinstaller --onefile --noconsole client.py
 
+      - name: Preparar pasta para release
+        run: |
+          mkdir dist/windows
+          move dist/client.exe dist/windows/client.exe
+
       - name: Upload binário
         uses: actions/upload-artifact@v4
         with:
-          name: app-win32
-          path: dist/client.exe
+          name: windows-dist
+          path: dist/windows/
+
+  github-release:
+    name: GitHub Release
+    needs: [build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - name: Instalar GitHub CLI
+        uses: cli/cli-action@v2
+
+      - name: Download Windows 32-bit dist
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-dist
+          path: dist/windows/
+
+      - name: Criar pacotes ZIP
+        run: |
+          cd dist
+          zip -r windows-build.zip windows/
+
+      - name: Criar Release no GitHub (se não existir)
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "${{ github.ref_name }}" --repo "${{ github.repository }}" || \
+          gh release create "${{ github.ref_name }}" --repo "${{ github.repository }}" --generate-notes
+
+      - name: Enviar artefatos ZIP para a Release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "${{ github.ref_name }}" dist/windows-build.zip --repo "${{ github.repository }}" --clobber

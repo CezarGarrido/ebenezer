@@ -22,7 +22,7 @@ class Employee(Person):
     salary = models.DecimalField("Salário", max_digits=15, decimal_places=2, null=True, blank=True)    
 
     def __str__(self):
-        return f"{self.name} ({self.position})"
+        return f"{self.name}"
 
     class Meta:
         verbose_name = "Funcionário"
@@ -42,8 +42,8 @@ class EmployeeUser(models.Model):
     )
 
     class Meta:
-        verbose_name = "Usuário vinculado"
-        verbose_name_plural = "Usuários vinculados"
+        verbose_name = "Funcionário Vinculado"
+        verbose_name_plural = "Funcionários Vinculados"
 
     def __str__(self):
         return f"{self.user} → {self.employee}"

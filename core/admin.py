@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib import admin
+from django.db import IntegrityError
 from .models.company import Company, UserProfile, GroupCompany
 from .models.employee import Employee, EmployeeUser
 from .models.donor import Donor
@@ -8,39 +9,112 @@ from django.contrib.auth.models import User, Group
 from django.contrib.auth.admin import UserAdmin
 from django.utils.html import format_html
 
+        
+class PhoneForm(forms.ModelForm):
+    class Meta:
+        model = Phone
+        fields = "__all__"
+        
+        widgets = {
+            'phone': forms.TextInput(attrs={'data-mask-phone': ""}),
+        }
+        
+    class Media:
+        js = ("js/vendor/jquery.mask.min.js", "js/mask/phone.js",)  # Adicionamos um script personalizado
+
+class EmailForm(forms.ModelForm):
+    class Meta:
+        model = Email
+        fields = "__all__"
+        
+        widgets = {
+            'email': forms.TextInput(attrs={'data-mask-email': "", "placeholder":"exemplo@dominio.com"}),
+        }
+        
+    class Media:
+        js = ("js/vendor/jquery.mask.min.js", "js/mask/email.js",)  # Adicionamos um script personalizado
+
+
+class AddressForm(forms.ModelForm):
+    class Meta:
+        model = Address
+        fields = "__all__"
+        
+        widgets = {
+            'postal_code': forms.TextInput(attrs={'data-mask-cep': "00000-000",  "id": "id_cep"}),
+        }
+        
+    class Media:
+        js = ("js/vendor/jquery.mask.min.js", "js/mask/cep.js",)  # Adicionamos um script personalizado
+
+class IndividualForm(forms.ModelForm):
+    class Meta:
+        model = Address
+        fields = "__all__"
+        
+        widgets = {
+            'cpf': forms.TextInput(attrs={'data-mask-cpf': ""}),
+        }
+        
+    class Media:
+        js = ("js/vendor/jquery.mask.min.js", "js/mask/cpf.js",)  # Adicionamos um script personalizado
+
+class LegalEntityForm(forms.ModelForm):
+    class Meta:
+        model = Address
+        fields = "__all__"
+        
+        widgets = {
+            'cnpj': forms.TextInput(attrs={'data-mask-cnpj': ""}),
+        }
+        
+    class Media:
+        js = ("js/vendor/jquery.mask.min.js", "js/mask/cnpj.js",)  # Adicionamos um script personalizado
+
+
 class IndividualInline(admin.StackedInline):
     model = Individual
+    form = IndividualForm
     can_delete = False
     max_num = 1
     verbose_name = "Pessoa Física"
     verbose_name_plural = "Dados de Pessoa Física"
     classes = ["individual-inline-tab"]
-    
+    ordering_field = ("cpf",)
 class LegalEntityInline(admin.StackedInline):
     model = LegalEntity
+    form = LegalEntityForm
     can_delete = False
     max_num = 1
     verbose_name = "Pessoa Jurídica"
     verbose_name_plural = "Dados de Pessoa Jurídica"
     classes = ["legal-inline-tab"]
+    ordering_field = ("cnpj",)
+
 
 class AddressInline(admin.StackedInline):
     model = Address
+    form = AddressForm
     extra = 1
     verbose_name = "Endereço"
     verbose_name_plural = "Endereços"
+    ordering_field = ("cep",)
 
 class EmailInline(admin.TabularInline):
     model = Email
+    form = EmailForm
     extra = 1
     verbose_name = "Email"
     verbose_name_plural = "Emails"
+    ordering_field = ("email",)
 
 class PhoneInline(admin.TabularInline):
+    form = PhoneForm
     model = Phone
     extra = 1
     verbose_name = "Telefone"
     verbose_name_plural = "Telefones"
+    ordering_field = ("phone",)
 
 class EmployeeUserInline(admin.TabularInline):
     model = EmployeeUser
@@ -63,7 +137,6 @@ class BasePersonAdmin(admin.ModelAdmin):
     list_display = ("name", "created_at", "updated_at")
     search_fields = ("name", "cpf_cnpj")  # Depende dos campos de identificação disponíveis
     list_filter = ("created_at",)
-    ordering = ("name",)
     readonly_fields = ('created_at', 'updated_at')
 
 

@@ -1,0 +1,8 @@
+{% extends "admin/change_form.html" %}
+
+{% block content %}
+<a href="#" onclick="goBack()" class="btn btn-secondary ml-2 mb-3">
+    <i class="fas fa-arrow-left"></i> Voltar
+</a>
+{{ block.super }}
+{% endblock %}

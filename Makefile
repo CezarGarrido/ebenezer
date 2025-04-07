@@ -26,9 +26,12 @@ createadmin:
 	python manage.py shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(email='admin@admin.com').exists() or User.objects.create_superuser('admin@admin.com', 'admin@admin.com', 'admin')"
 
 reset:
-	find core/migrations -name "*.pyc" -delete
-	find core/migrations -name "*.py" -not -name "__init__.py" -delete
+	find */migrations -name "*.pyc" -delete
+	find */migrations -name "*.py" -not -name "__init__.py" -delete
 	rm -rf db.sqlite3
 
 createadmin2:
 	python manage.py shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(email='root@root.com').exists() or User.objects.create_superuser('root@root.com', 'root@root.com', 'root')"
+
+locale:
+	django-admin makemessages -l pt_BR --ignore=env/*

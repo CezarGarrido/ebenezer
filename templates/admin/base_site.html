@@ -1,0 +1,24 @@
+{% extends "admin/base.html" %}
+
+{% block extrahead %}
+<style>
+    body {
+        margin: 0;
+        font-family: 'Inter', sans-serif;
+        -webkit-user-select: none;
+        -webkit-app-region: drag; /* Se usar barra custom */
+      }
+
+    * {
+        transition: none !important;
+        animation: none !important;
+    }
+    
+      
+</style>
+
+    {{ block.super }}
+    <link rel="prefetch" href="/admin/">
+{% endblock %}
+
+

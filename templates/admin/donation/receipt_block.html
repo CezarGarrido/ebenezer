@@ -1,0 +1,5 @@
+.<h3>Recibo de Doação</h3>
+<p><strong>Doador:</strong> {{ donation.donor }}</p>
+<p><strong>Valor:</strong> R$ {{ donation.amount }}</p>
+<p><strong>Data:</strong> {{ donation.received_at|date:"d/m/Y" }}</p>
+<p><strong>Recibo gerado em:</strong> {{ now|date:"d/m/Y H:i" }}</p>

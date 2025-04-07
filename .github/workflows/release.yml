@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Instalar Python 32-bit
         uses: actions/setup-python@v5
@@ -26,3 +26,9 @@ jobs:
       - name: Build com PyInstaller
         run: |
           pyinstaller --onefile --noconsole client.py
+
+      - name: Upload binário
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-win32
+          path: dist/client.exe

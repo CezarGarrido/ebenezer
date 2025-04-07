@@ -26,7 +26,7 @@ jobs:
 
       - name: Build com PyInstaller
         run: |
-          pyinstaller --onefile --noconsole client.py
+          pyinstaller --noconsole client.py
 
       - name: Preparar pasta para release
         run: |

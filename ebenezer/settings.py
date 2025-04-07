@@ -12,11 +12,14 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 import os
 from pathlib import Path
+import sys
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-
+if getattr(sys, 'frozen', False):
+    BASE_DIR = Path(sys._MEIPASS)       # Usado para templates, static, etc.
+    EXEC_DIR = Path(sys.executable).parent  # Diretório do executável (fora do pacote)
+else:
+    BASE_DIR = Path(__file__).resolve().parent.parent
+    EXEC_DIR = BASE_DIR
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
@@ -84,7 +87,7 @@ WSGI_APPLICATION = 'ebenezer.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': EXEC_DIR / 'db.sqlite3',
     }
 }
 
@@ -135,74 +138,14 @@ STATICFILES_DIRS = [
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # ou outro caminho absoluto no sistema
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(EXEC_DIR, 'media')
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-
-JAZZMIN_SETTINGS = {
-    # Title of the window (Will default to current_admin_site.site_title if absent or None)
-    'site_title': 'Ebenezer',
-    # Title on the login screen (19 chars max) (defaults to current_admin_site.site_header if absent or None)
-    'site_header': 'Ebenezer',
-    # Title on the brand (19 chars max) (defaults to current_admin_site.site_header if absent or None)
-    'site_brand': 'Ebenezer',
-    'icons': {
-        'auth': 'fas fa-users-cog',           # Geral para autenticação/gestão de usuários
-        'auth.user': 'fas fa-user',           # Um único usuário
-        'auth.Group': 'fas fa-user-friends',  # Grupo de usuários
-        'core.Donor': 'fas fa-hand-holding-heart',  # Doadores → caridade
-        'core.Employee': 'fas fa-id-badge',   # Funcionários → crachá
-        'core.Company': 'fas fa-building',    # Empresa → prédio comercial
-        'donation.Donation': 'fas fa-building',    # Empresa → prédio comercial
-    },
-    # Welcome text on the login screen
-    'welcome_sign': 'Bem-vindo(a) ao Ebenezer',
-    # Copyright on the footer
-    'copyright': 'Ebenezer LTDA',
-    # List of model admins to search from the search bar, search bar omitted if excluded
-    # If you want to use a single search field you dont need to use a list, you can use a simple string 
-    'search_model': ['core.Donor',],
-    # Whether to show the UI customizer on the sidebar
-    'show_ui_builder': True,
-    "custom_js": "js/main.js",
-    "related_modal_active": True,
-}
-
-JAZZMIN_UI_TWEAKS = {
-    'navbar_small_text': False,
-    'footer_small_text': False,
-    'body_small_text': False,
-    'brand_small_text': False,
-    'brand_colour': False,
-    'accent': 'accent-primary',
-    'navbar': 'navbar-white navbar-light',
-    'no_navbar_border': False,
-    'navbar_fixed': True,
-    'layout_boxed': False,
-    'footer_fixed': True,
-    'sidebar_fixed': True,
-    'sidebar': 'sidebar-dark-primary',
-    'sidebar_nav_small_text': False,
-    'sidebar_disable_expand': False,
-    'sidebar_nav_child_indent': False,
-    'sidebar_nav_compact_style': False,
-    'sidebar_nav_legacy_style': False,
-    'sidebar_nav_flat_style': False,
-    'theme': 'yeti',
-    'dark_mode_theme': None,
-    'related_modal_active': True,
-    'button_classes': {
-        'primary': 'btn-outline-primary',
-        'secondary': 'btn-outline-secondary',
-        'info': 'btn-info',
-        'warning': 'btn-warning',
-        'danger': 'btn-danger',
-        'success': 'btn-success'
-    }
-}
 
 JAZZMIN_SETTINGS = {
     'site_title': 'Ebenezer',

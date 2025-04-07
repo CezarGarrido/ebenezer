@@ -1,0 +1,47 @@
+name: Build Windows 32-bit
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-windows-32:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Install dependencies
+        working-directory: ./app
+        run: go mod tidy
+
+      - name: Build for Windows 32-bit
+        working-directory: ./app
+        run: |
+          $env:GOOS = "windows"
+          $env:GOARCH = "386"
+          go build -ldflags="-H windowsgui" -o minhaapp-32bit.exe
+
+      - uses: actions/upload-artifact@master
+        with:
+          name: aminhaapp-32bit.exe
+          path: minhaapp-32bit.exe
+
+      - uses: svenstaro/upload-release-action@v2
+        name: Upload binaries to release
+        if: ${{ github.event_name == 'push' }}
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: minhaapp-32bit.exe
+          asset_name: minhaapp-32bit.exe
+          tag: ${{ github.ref }}
+          prerelease: ${{ !startsWith(github.ref, 'refs/tags/') }}
+          overwrite: true

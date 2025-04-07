@@ -7,11 +7,11 @@ from django.contrib.auth.models import User, Group
 
 def logo_directory_path(instance, filename):
     extension = os.path.splitext(filename)[1]
-    return 'static/images/company/logo_{0}_{1}{2}'.format(instance.name, instance.id, extension)
+    return f'images/company/logo_{instance.name}_{instance.id}{extension}'
 
 class Company(Person):
     logo_file = models.ImageField(
-        upload_to=logo_directory_path, default='imagens/logo.png', blank=True, null=True, verbose_name="Logo")
+        upload_to=logo_directory_path, default='images/logo.png', blank=True, null=True, verbose_name="Logo")
     cnae = models.CharField(max_length=10, blank=True, null=True, verbose_name="CNAE")
     iest = models.CharField(max_length=32, null=True, blank=True, verbose_name="Inscrição Estadual")
 
@@ -21,8 +21,8 @@ class Company(Person):
 
 
     def get_complete_path(self):
-        if self.logo_file.name != 'imagens/logo.png':
-            return os.path.join("MEDIA_ROOT", self.logo_file.name)
+        if self.logo_file.name != 'images/logo.png':
+            return os.path.join("MEDIA_ROOT", self.logo_file)
         else:
             return ''
 

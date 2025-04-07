@@ -1,3 +1,5 @@
+JAZZMIN_PATH := $(shell python -c "import jazzmin, os; print(os.path.dirname(jazzmin.__file__))")
+
 install:
 	pip install -r requirements.txt
 
@@ -35,3 +37,18 @@ createadmin2:
 
 locale:
 	django-admin makemessages -l pt_BR --ignore=env/*
+
+build:
+	python manage.py collectstatic --noinput
+	pyinstaller --onefile main.py --name app_executable \
+	--hidden-import=django \
+	--hidden-import=whitenoise \
+	--hidden-import=whitenoise.middleware \
+	--hidden-import=whitenoise.storage \
+	--hidden-import=jazzmin \
+	--hidden-import=jazzmin.templatetags.jazzmin_tags \
+	--hidden-import=jazzmin.compat \
+	--hidden-import=ebenezer.wsgi \
+	--add-data "staticfiles:staticfiles" \
+	--add-data "$(JAZZMIN_PATH):jazzmin" \
+	--add-data "templates:templates"

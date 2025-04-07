@@ -1,3 +1,4 @@
+import os
 from django import forms
 from django.contrib import admin
 from django.db import IntegrityError
@@ -206,7 +207,9 @@ class CompanyAdmin(BasePersonAdmin):
         return qs.filter(id=request.user.profile.company.id)
 
     def image_tag(self, obj):
-        return format_html('<img src="/{}" width="40" height="40" />'.format(obj.logo_file))
+        if obj.logo_file:
+            return format_html('<img src="{}" width="40" height="40" style="object-fit: contain;"/>', obj.logo_file.url)
+        return "-"
 
     image_tag.short_description = 'Logo'
     image_tag.allow_tags = True

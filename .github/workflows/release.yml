@@ -28,11 +28,6 @@ jobs:
         run: |
           pyinstaller --noconsole client.py
 
-      - name: Preparar pasta para release
-        run: |
-          mkdir dist/windows
-          move dist/client.exe dist/windows/client.exe
-
       - name: Upload binário
         uses: actions/upload-artifact@v4
         with:
@@ -46,28 +41,28 @@ jobs:
     permissions:
       contents: write
       id-token: write
-
     steps:
       - name: Download Windows 32-bit dist
         uses: actions/download-artifact@v4
         with:
           name: windows-dist
           path: dist/windows/
-
-      - name: Criar pacotes ZIP
+      - name: Create ZIP packages
         run: |
           cd dist
           zip -r windows-build.zip windows/
-
-      - name: Criar Release no GitHub (se não existir)
+      - name: Create GitHub Release
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: |
-          gh release view "${{ github.ref_name }}" --repo "${{ github.repository }}" || \
-          gh release create "${{ github.ref_name }}" --repo "${{ github.repository }}" --generate-notes
-
-      - name: Enviar artefatos ZIP para a Release
+        run: >-
+          if gh release view '${{ github.ref_name }}' --repo '${{ github.repository }}'; then
+            echo "Release exists"
+          else
+            echo "Creating release"
+            gh release create '${{ github.ref_name }}' --repo '${{ github.repository }}' --generate-notes
+          fi
+      - name: Upload ZIPs to GitHub Release
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: |
-          gh release upload "${{ github.ref_name }}" dist/windows-build.zip --repo "${{ github.repository }}" --clobber
+        run: >-
+          gh release upload '${{ github.ref_name }}' dist/windows-build.zip --repo '${{ github.repository }}'

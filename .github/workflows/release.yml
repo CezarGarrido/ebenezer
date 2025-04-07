@@ -33,7 +33,7 @@ jobs:
         with:
           name: windows-dist
           path: dist/
-          
+
   github-release:
     name: GitHub Release
     needs: [build]
@@ -65,4 +65,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: >-
-          gh release upload '${{ github.ref_name }}' dist/windows-build.zip --repo '${{ github.repository }}'
+          gh release upload '${{ github.ref_name }}' dist/windows-build.zip --repo '${{ github.repository }}' --clobber

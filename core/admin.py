@@ -208,7 +208,7 @@ class CompanyAdmin(BasePersonAdmin):
 
     def image_tag(self, obj):
         if obj.logo_file:
-            return format_html('<img src="{}" width="40" height="40" style="object-fit: contain;"/>', obj.logo_file.url)
+            return format_html('<img src="{}" width="40" height="40"/>', obj.logo_file.url)
         return "-"
 
     image_tag.short_description = 'Logo'

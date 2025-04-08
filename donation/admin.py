@@ -96,7 +96,7 @@ class DonationForm(forms.ModelForm):
         fields = "__all__"
         
         widgets = {
-            'amount': forms.TextInput(attrs={'data-mask-money': "", 'id': 'id_amount'}),
+            'amount': forms.TextInput(attrs={'data-mask-money': ""}),
         }
 
         
@@ -115,6 +115,7 @@ class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
         'plural': 'Doações',
         'gender': 'feminine',
     }
+    #autocomplete_fields = ['donor']
     def save_model(self, request, obj, form, change):
         if not obj.created_by:  # Define apenas se for um novo objeto
             obj.created_by = request.user

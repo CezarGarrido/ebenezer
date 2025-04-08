@@ -13,47 +13,9 @@
         transition: none !important;
         animation: none !important;
     }
-
-        /* 1. Não permita seleção de textos */
-    * {
-    user-select: none;
-    }
-
-    /* 2. Retire estados de foco */
-    *:focus {
-    outline: none;
-    }
-
-    /* 3. Font-size 14px */
-    body {
-    font-size: 14px;
-    }
-
-    /* 4. Border-radius de 7px */
-    button, input, textarea, select, .box, .card {
-    border-radius: 7px;
-    }
-
-    /* 5. Font-family recomendada */
-    body {
-    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont;
-    }
-
-    /* 6. Não usar cursor pointer em botões e links */
-    button, a {
-    cursor: default;
-    }
-
-    
       
 </style>
 
     {{ block.super }}
-    <link rel="prefetch" href="/admin/">
 
-    <script>
-        document.addEventListener('contextmenu', event => event.preventDefault());
-      </script>
 {% endblock %}
-
-

@@ -46,6 +46,7 @@ jobs:
 
       - name: Build com PyInstaller (Windows)
         if: runner.os == 'windows'
+        shell: cmd
         run: |
           pyinstaller --onefile main.py --name ${{ matrix.artifact_name }} ^
             --hidden-import=django ^

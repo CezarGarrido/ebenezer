@@ -44,7 +44,23 @@ jobs:
       - name: Collect static files
         run: python manage.py collectstatic --noinput
 
-      - name: Build with PyInstaller
+      - name: Build com PyInstaller (Windows)
+        if: runner.os == 'windows'
+        run: |
+          pyinstaller --onefile main.py --name ${{ matrix.artifact_name }} ^
+            --hidden-import=django ^
+            --hidden-import=whitenoise ^
+            --hidden-import=whitenoise.middleware ^
+            --hidden-import=whitenoise.storage ^
+            --hidden-import=jazzmin ^
+            --hidden-import=jazzmin.templatetags.jazzmin_tags ^
+            --hidden-import=jazzmin.compat ^
+            --hidden-import=ebenezer.wsgi ^
+            --add-data "staticfiles;staticfiles" ^
+            --add-data "templates;templates"
+
+      - name: Build com PyInstaller (Linux)
+        if: runner.os == 'linux'
         run: |
           pyinstaller --onefile main.py --name ${{ matrix.artifact_name }} \
             --hidden-import=django \
@@ -55,7 +71,8 @@ jobs:
             --hidden-import=jazzmin.templatetags.jazzmin_tags \
             --hidden-import=jazzmin.compat \
             --hidden-import=ebenezer.wsgi \
-            ${{ matrix.os == 'windows' && '--add-data "staticfiles;staticfiles" --add-data "templates;templates"' || '--add-data "staticfiles:staticfiles" --add-data "templates:templates"' }}
+            --add-data "staticfiles:staticfiles" \
+            --add-data "templates:templates"
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4

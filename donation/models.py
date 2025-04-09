@@ -3,6 +3,15 @@ from django.contrib.auth.models import User
 from core.models.company import Company
 from core.models.donor import Donor
 
+PAYMENT_METHOD_CHOICES = [
+    ('cash', 'Dinheiro'),
+    ('pix', 'Pix'),
+    ('transfer', 'Transferência Bancária'),
+    ('boleto', 'Boleto'),
+    ('credit_card', 'Cartão de Crédito'),
+    ('debit_card', 'Cartão de Débito'),
+    ('other', 'Outro'),
+]
 
 class Donation(models.Model):
     owner = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='donations')
@@ -11,9 +20,10 @@ class Donation(models.Model):
     donor = models.ForeignKey(Donor, on_delete=models.CASCADE, verbose_name="Doador")
     amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor (R$)")
     expected_at = models.DateTimeField(null=True, blank=True, verbose_name="Data") #  Data de expectativa de recebimento
-    
+    method = models.CharField(max_length=20,null=True, blank=True, choices=PAYMENT_METHOD_CHOICES, verbose_name="Método")
+
     paid = models.BooleanField(default=False, verbose_name="Foi Pago?")
-    received_at = models.DateTimeField(null=True, blank=True, verbose_name="Data de pagamento") #Data em que foi pago
+    paid_at = models.DateTimeField(null=True, blank=True, verbose_name="Data de pagamento") #Data em que foi pago
     notes = models.TextField(max_length=255, null=True, blank=True, verbose_name="Observação")
     
     created_at = models.DateTimeField(auto_now_add=True, editable=False, verbose_name="Data de Criação")

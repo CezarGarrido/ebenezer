@@ -169,6 +169,7 @@ JAZZMIN_SETTINGS = {
     'related_modal_active': True,
     'site_logo_classes': 'img-circle elevation-3',
     'navigation_expanded': True,
+    "changeform_format_overrides": {"donation.Donation": ""},
 }
 
 JAZZMIN_UI_TWEAKS = {

@@ -13,9 +13,17 @@
         transition: none !important;
         animation: none !important;
     }
+
       
 </style>
 
     {{ block.super }}
+    <link rel="prefetch" href="/admin/">
+    <link rel="prefetch" href="/admin/core/company">
 
+    <script>
+        //document.addEventListener('contextmenu', event => event.preventDefault());
+      </script>
 {% endblock %}
+
+

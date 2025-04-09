@@ -135,7 +135,7 @@ class EmployeeUserInline(admin.TabularInline):
 class BasePersonAdmin(admin.ModelAdmin):
     inlines = [IndividualInline, LegalEntityInline, AddressInline, EmailInline, PhoneInline]
     
-    list_display = ("name", "created_at", "updated_at")
+    list_display = ("name", "created_by", "created_at", "updated_at")
     search_fields = ("name", "cpf_cnpj")  # Depende dos campos de identificação disponíveis
     list_filter = ("created_at",)
     readonly_fields = ('created_at', 'updated_at')

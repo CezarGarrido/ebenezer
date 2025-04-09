@@ -21,6 +21,11 @@ def gerar_preview(dados, salvar_arquivo=False):
     # Construir o recibo linha por linha
     recibo_lines.append(linha_dupla_separacao())
     recibo_lines.append(centralizar("LAR EBENEZER - HILDA MARIA CORREA - ADAS"))
+    #recibo_lines.append(centralizar("Sistema de Vendas v1.0 - (11) 98765-4321"))
+    recibo_lines.append(centralizar("Utilidade Pública Municipal - Lei Nº 1527 de 09/11/88      Utilidade Pública Estadual - Lei Nº 1493 de 13/05/94", largura=largura_max))
+    recibo_lines.append(centralizar("Utilidade Pública Federal - Portaria Nº 735 de 13/08/01 DOU 14/08/01       CEBAS: 0030 - Resolução Nº 05 de 02/02/04 DOU 05/02/04", largura=largura_max))
+    recibo_lines.append(centralizar("Registro no Conselho Municipal de Assistência Social       Registro nº 0018 - Resolução nº 05 de 02/02/04 - DOU 05/02/04", largura=largura_max))
+    recibo_lines.append("")
     recibo_lines.append(centralizar("RUA 20 DE BEZENRO, Nº 3170, JARDIM RASSLEN, CEP 79.813-280"))
     recibo_lines.append(centralizar("CNPJ: 12.345.678/0001-90 - Tel: (11) 98765-4321"))
     recibo_lines.append(linha_separacao("-"))
@@ -68,13 +73,11 @@ def gerar_preview(dados, salvar_arquivo=False):
 
     recibo_lines.append(centralizar("QUE JESUS RETRIBUA EM BÊNÇÃOS DE VIDA E SAÚDE"))
     recibo_lines.append(centralizar("O LAR EBENEZER AGRADECE SUA DOAÇÃO"))
-    recibo_lines.append("")
-    #recibo_lines.append(centralizar("Sistema de Vendas v1.0 - (11) 98765-4321"))
-    recibo_lines.append("\n")  # Espaço antes da assinatura
-    
+
+
     # Assinatura centralizada com linha tracejada
     recibo_lines.append(centralizar("_" * 30))  # Linha para assinatura
-    recibo_lines.append(centralizar("Assinatura do Responsável"))
+    recibo_lines.append(centralizar("Assinatura"))
     recibo_lines.append("\n" * 5)  # Espaço para corte do papel
     
     # Mostrar no console

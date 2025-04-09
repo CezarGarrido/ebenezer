@@ -2,11 +2,9 @@
 
 {% block object-tools-items %}
 
-<li>
-    <a onclick="receipt" class="btn btn-success mb-3 form-control">
-        🖨️ Gerar Recibo
-    </a>
-</li>
+<div class="form-group">
+    <input type="submit" class="btn btn-outline-success form-control" value=" 🖨️ Gerar Recibo" name="_print_receipt">
+</div>
 
 {{ block.super }}
 {% endblock %}

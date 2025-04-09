@@ -2,19 +2,12 @@
 from django.contrib import messages
 from django.contrib import admin
 from django import forms
-from django.urls import reverse
 from .models import Donation
-from django.contrib.admin.utils import quote
 from django.utils.html import format_html
-
-from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
-from django.contrib import messages
-
-from django.template.loader import render_to_string
-
-from django.contrib import messages
-from django.utils.html import format_html
+from django.utils.safestring import mark_safe
+from django.urls import reverse
+from django.http import HttpResponseRedirect
 
 class GenderedMessageMixin:
     """
@@ -106,7 +99,7 @@ class DonationForm(forms.ModelForm):
 class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
     form=DonationForm
     exclude = ('created_by', 'company')  # Esconde o campo no formulário
-    list_display = ("donor", "amount", "paid", "received_at", "created_by", "created_at")  # Campos visíveis na listagem
+    list_display = ("donor", "amount", "paid", "paid_at", "created_by", "created_at")  # Campos visíveis na listagem
     exclude = ("owner", "created_by")
     verbose_name = "Doação"
     verbose_name_plural = "Doações"
@@ -121,11 +114,28 @@ class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
             obj.created_by = request.user
             obj.owner = request.user.profile.company
         super().save_model(request, obj, form, change)
-    def change_view(self, request, object_id, form_url='', extra_context=None):
-        extra_context = extra_context or {}
-        donation = self.model.objects.get(pk=object_id)
-        extra_context['receipt_html'] = render_to_string("admin/donation/receipt_block.html", {"donation": donation})
-        return super().change_view(request, object_id, form_url, extra_context)
+    fieldsets = (
+        ("Informações da Doação", {
+            "fields": ("donor", "amount", "expected_at", "notes")
+        }),
+        ("Informações de Pagamento", {
+            "fields": ("paid", "paid_at", "method"),
+            "classes": ("collapse",)  # ou remova isso para deixar sempre visível
+        }),
+    )
+    readonly_fields = ("created_at", "updated_at")
 
+    def response_change(self, request, obj):
+        if '_print_receipt' in request.POST:
+            # Lógica personalizada aqui
+            print("gerando....")
+            messages.success(request, "Recibo gerado com sucesso.")
+
+            # Redireciona de volta para a mesma página (edição do objeto)
+            url = reverse('admin:%s_%s_change' % (obj._meta.app_label, obj._meta.model_name), args=[obj.pk])
+            return HttpResponseRedirect(url)
+
+        return super().response_change(request, obj)
+    
 # Register your models here.
 admin.site.register(Donation, DonationAdmin)

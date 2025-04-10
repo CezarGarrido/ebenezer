@@ -103,7 +103,7 @@ class DonationForm(forms.ModelForm):
 class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
     form=DonationForm
     exclude = ('created_by', 'company')  # Esconde o campo no formulário
-    list_display = ("donor", "amount", "paid", "paid_at", "created_by", "created_at")  # Campos visíveis na listagem
+    list_display = ("id", "donor", "amount", "paid", "paid_at", "created_by", "created_at", "updated_at")  # Campos visíveis na listagem
     exclude = ("owner", "created_by")
     verbose_name = "Doação"
     verbose_name_plural = "Doações"
@@ -121,8 +121,8 @@ class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
 
     # Campos pesquisáveis
     search_fields = (
+        "id",
         "donor__name",     # Nome do doador
-        "donor__cpf",      # CPF do doador (se tiver)
         "notes",           # Notas da doação
     )
     #autocomplete_fields = ['donor']

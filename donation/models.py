@@ -26,8 +26,8 @@ class Donation(models.Model):
     paid_at = models.DateTimeField(null=True, blank=True, verbose_name="Data de pagamento") #Data em que foi pago
     notes = models.TextField(max_length=255, null=True, blank=True, verbose_name="Observação")
     
-    created_at = models.DateTimeField(auto_now_add=True, editable=False, verbose_name="Data de Criação")
-    updated_at = models.DateTimeField(auto_now=True, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True, editable=False, verbose_name="Criado em")
+    updated_at = models.DateTimeField(auto_now=True, editable=False, verbose_name="Atualizado em")
     deleted_at = models.DateTimeField(null=True, blank=True, editable=False)  # Soft delete
     
     class Meta:

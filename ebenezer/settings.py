@@ -162,6 +162,7 @@ JAZZMIN_SETTINGS = {
         'core.Employee': 'fas fa-id-badge',
         'core.Company': 'fas fa-building',
         'donation.Donation': 'fas fa-donate',
+        'donation.Report': 'fas fa-file-alt',
     },
     'search_model': ['core.Donor'],
     'show_ui_builder': False,  # Desativa o personalizador (menos “web-like”)

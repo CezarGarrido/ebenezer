@@ -2,12 +2,17 @@
 from django.contrib import messages
 from django.contrib import admin
 from django import forms
+from django.contrib.auth.models import User
+from django.db import models
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import Donation
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from django.utils.safestring import mark_safe
 from django.urls import reverse
 from django.http import HttpResponseRedirect
+from django.template.response import TemplateResponse
+from django import forms
 
 class GenderedMessageMixin:
     """
@@ -68,7 +73,6 @@ class GenderedMessageMixin:
         # Detecta tipo de operação (rústico mas funcional)
         action = 'change'  # padrão
         lowered = message.lower()
-        print(lowered)
         if 'adicionado' in lowered or 'adicionada' in lowered:
             action = 'add'
         elif 'deletado' in lowered or 'deletada' in lowered:
@@ -108,6 +112,19 @@ class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
         'plural': 'Doações',
         'gender': 'feminine',
     }
+        # Filtros para facilitar a navegação
+    list_filter = (
+        "paid",             # Se foi paga ou não
+        "method",           # Método de pagamento
+        "created_by",       # Usuário que criou
+    )
+
+    # Campos pesquisáveis
+    search_fields = (
+        "donor__name",     # Nome do doador
+        "donor__cpf",      # CPF do doador (se tiver)
+        "notes",           # Notas da doação
+    )
     #autocomplete_fields = ['donor']
     def save_model(self, request, obj, form, change):
         if not obj.created_by:  # Define apenas se for um novo objeto
@@ -129,8 +146,9 @@ class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
         if '_print_receipt' in request.POST:
             # Lógica personalizada aqui
             print("gerando....")
+            
             messages.success(request, "Recibo gerado com sucesso.")
-
+            
             # Redireciona de volta para a mesma página (edição do objeto)
             url = reverse('admin:%s_%s_change' % (obj._meta.app_label, obj._meta.model_name), args=[obj.pk])
             return HttpResponseRedirect(url)
@@ -139,3 +157,95 @@ class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
     
 # Register your models here.
 admin.site.register(Donation, DonationAdmin)
+
+
+class DonationReportForm(forms.Form):
+    start_date = forms.DateField(label="Data inicial", required=False, widget=forms.DateInput(attrs={'type': 'date'}))
+    end_date = forms.DateField(label="Data final", required=False, widget=forms.DateInput(attrs={'type': 'date'}))
+    created_by = forms.ModelChoiceField(
+        label="Usuário",
+        required=False,
+        queryset=User.objects.none(),  # Inicialmente vazio
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+
+        if self.request:
+            user = self.request.user
+            if user.is_superuser:
+                self.fields['created_by'].queryset = User.objects.all()
+            else:
+                self.fields['created_by'].queryset = User.objects.filter(profile__company=user.profile.company)
+
+
+class ReportsAdminView(admin.ModelAdmin):
+    def has_view_permission(self, request, obj=None):
+        return request.user.is_superuser or request.user.has_perm('donation.view_report')
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def changelist_view(self, request, extra_context=None):
+                # Verifica a permissão antes de continuar
+        if not self.has_view_permission(request):
+            from django.core.exceptions import PermissionDenied
+            raise PermissionDenied
+
+        form = DonationReportForm(request.GET or None, request=request)
+        donations = Donation.objects.all()
+
+        user = request.user
+        if not user.is_superuser:
+            donations = donations.filter(owner=user.profile.company)
+
+        if form.is_valid():
+            start = form.cleaned_data.get('start_date')
+            end = form.cleaned_data.get('end_date')
+            created_by = form.cleaned_data.get('created_by')
+
+            if start:
+                donations = donations.filter(paid_at__date__gte=start)
+            if end:
+                donations = donations.filter(paid_at__date__lte=end)
+            if created_by:
+                donations = donations.filter(created_by=created_by)
+
+        # PAGINAÇÃO
+        paginator = Paginator(donations, 20)  # 20 por página
+        page_number = request.GET.get('page')
+        try:
+            page_obj = paginator.page(page_number)
+        except PageNotAnInteger:
+            page_obj = paginator.page(1)
+        except EmptyPage:
+            page_obj = paginator.page(paginator.num_pages)
+
+        context = dict(
+            self.admin_site.each_context(request),
+            title="Relatórios de Doações",
+            donations=page_obj,
+            form=form,
+            paginator=paginator,
+            page_obj=page_obj,
+            is_paginated=page_obj.has_other_pages(),
+        )
+        return TemplateResponse(request, "admin/donation/reports.html", context)
+
+
+class Report(models.Model):
+    class Meta:
+        verbose_name = "Relatório"
+        verbose_name_plural = "Relatórios"
+        app_label = "donation"  # para agrupar no mesmo menu se quiser
+        managed = False  # não cria tabela no banco
+
+admin.site.register(Report, ReportsAdminView)

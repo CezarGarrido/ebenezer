@@ -15,11 +15,10 @@ Antes de começar, você vai precisar ter instalado:
 
 - Python 3.6+
 - pip
-
+- jazzmin https://django-jazzmin.readthedocs.io/
 ## ⚙️ Instalação
 
 Clone o repositório:
-
 ```bash
 git clone https://github.com/CezarGarrido/ebenezer
 cd ebenezer
@@ -28,17 +27,22 @@ cd ebenezer
 ### Env
 ```bash
 python -m venv env
-source env/bin/activate  # no Windows: venv\Scripts\activate
+source env/bin/activate  # no Windows: env\Scripts\activate
 pip install -r requirements.txt
 ```
 
 ### Aplique as migrações e crie um superusuário:
 ```bash
+python manage.py makemigrations
 python manage.py migrate
-python manage.py createsuperuser
 ```
 
 ### ▶️ Executando o projeto
 ```bash
-python manage.py runserver
+python manage.py create_admin (admin@admin.com, admin)
+python manage.py createsuperuser (Opcional) Usuario personalizado
+
+python manage.py runserver "0.0.0.0:8099"
 ```
+
+Abra no navegador: http://127.0.0.1:8099/admin

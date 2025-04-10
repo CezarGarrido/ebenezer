@@ -38,6 +38,7 @@ def start_django_server():
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ebenezer.settings')
     execute_from_command_line(['manage.py', 'makemigrations'])
     execute_from_command_line(['manage.py', 'migrate'])
+    execute_from_command_line(['manage.py', 'create_admin'])
     # Cria o superusuário se não existir
     create_superuser()
     

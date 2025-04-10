@@ -48,7 +48,7 @@ jobs:
         if: runner.os == 'windows'
         shell: cmd
         run: |
-          pyinstaller --onefile main.py --name ${{ matrix.artifact_name }} ^
+          pyinstaller --onefile --noconsole main.py --name ${{ matrix.artifact_name }} ^
             --hidden-import=django ^
             --hidden-import=whitenoise ^
             --hidden-import=whitenoise.middleware ^
@@ -58,12 +58,13 @@ jobs:
             --hidden-import=jazzmin.compat ^
             --hidden-import=ebenezer.wsgi ^
             --add-data "staticfiles;staticfiles" ^
-            --add-data "templates;templates"
+            --add-data "templates;templates" ^
+            --add-data "core\\management;core\\management"
 
       - name: Build com PyInstaller (Linux)
         if: runner.os == 'linux'
         run: |
-          pyinstaller --onefile main.py --name ${{ matrix.artifact_name }} \
+          pyinstaller --onefile --noconsole main.py --name ${{ matrix.artifact_name }} \
             --hidden-import=django \
             --hidden-import=whitenoise \
             --hidden-import=whitenoise.middleware \
@@ -73,7 +74,8 @@ jobs:
             --hidden-import=jazzmin.compat \
             --hidden-import=ebenezer.wsgi \
             --add-data "staticfiles:staticfiles" \
-            --add-data "templates:templates"
+            --add-data "templates:templates" \
+            --add-data "core/management:core/management"
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4

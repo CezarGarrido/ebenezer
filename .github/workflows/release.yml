@@ -49,6 +49,7 @@ jobs:
         shell: cmd
         run: |
           pyinstaller --onefile main.py --name ${{ matrix.artifact_name }} ^
+            --collect-all jazzmin ^
             --hidden-import=django ^
             --hidden-import=whitenoise ^
             --hidden-import=whitenoise.middleware ^
@@ -65,6 +66,7 @@ jobs:
         if: runner.os == 'linux'
         run: |
           pyinstaller --onefile main.py --name ${{ matrix.artifact_name }} \
+            --collect-all jazzmin ^
             --hidden-import=django \
             --hidden-import=whitenoise \
             --hidden-import=whitenoise.middleware \

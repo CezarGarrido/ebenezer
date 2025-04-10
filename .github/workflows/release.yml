@@ -66,7 +66,7 @@ jobs:
       - name: Build com PyInstaller (Linux)
         if: runner.os == 'linux'
         run: |
-          pyinstaller main.py --name ${{ matrix.artifact_name }} \
+          pyinstaller --onefile main.py --name ${{ matrix.artifact_name }} \
             --collect-all jazzmin \
             --hidden-import=django \
             --hidden-import=whitenoise \

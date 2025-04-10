@@ -15,15 +15,6 @@ import os
 from pathlib import Path
 from django.conf import settings
 
-print("🚨 Diagnóstico estático:")
-print("BASE_DIR:", settings.BASE_DIR)
-print("EXEC_DIR:", settings.EXEC_DIR)
-print("STATIC_ROOT:", settings.STATIC_ROOT)
-print("STATIC_URL:", settings.STATIC_URL)
-
-main_js = Path(settings.STATIC_ROOT) / "js" / "main.js"
-print("main.js existe?", main_js.exists())
-print("Local completo:", main_js)
 
 
 def get_first_ipv4():
@@ -55,8 +46,18 @@ def start_django_server():
     execute_from_command_line(['manage.py', 'migrate'])
     execute_from_command_line(['manage.py', 'create_admin'])
     # Cria o superusuário se não existir
-    create_superuser()
+    # create_superuser()
     
+    print("🚨 Diagnóstico estático:")
+    print("BASE_DIR:", settings.BASE_DIR)
+    print("EXEC_DIR:", settings.EXEC_DIR)
+    print("STATIC_ROOT:", settings.STATIC_ROOT)
+    print("STATIC_URL:", settings.STATIC_URL)
+
+    main_js = Path(settings.STATIC_ROOT) / "js" / "main.js"
+    print("main.js existe?", main_js.exists())
+    print("Local completo:", main_js)
+
     execute_from_command_line(['manage.py', 'runserver', '0.0.0.0:8099', '--noreload'])
 
 def start_server():

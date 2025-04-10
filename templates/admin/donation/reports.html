@@ -5,7 +5,7 @@
   <div class="container-fluid">
     <ul class="nav nav-tabs" id="relatorioTabs" role="tablist">
       <li class="nav-item">
-        <a class="nav-link active" id="vendas-tab" data-toggle="tab" href="#vendas" role="tab">Recibo de Doações</a>
+        <a class="nav-link active" id="receipt-tab" data-toggle="tab" href="#receipt" role="tab">Recibo de Doações</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" id="doacoes-tab" data-toggle="tab" href="#doacoes" role="tab">Por Usuário</a>
@@ -13,11 +13,11 @@
     </ul>
 
     <div class="tab-content pt-3">
-      <!-- Aba Vendas (Data) -->
-      <div class="tab-pane fade show active" id="vendas" role="tabpanel">
+      <!-- Aba receipt (Data) -->
+      <div class="tab-pane fade show active" id="receipt" role="tabpanel">
         <div class="card mb-3">
           <div class="card-body">
-            <form class="form-row" method="get" action="#vendas">
+            <form class="form-row" method="get" action="#receipt">
               <div class="form-group col-md-3">{{ form.start_date.label_tag }}
                 {{ form.start_date }}</div>
               <div class="form-group col-md-3">{{ form.end_date.label_tag }}
@@ -44,7 +44,7 @@
             </tr>
           </thead>
           <tbody>
-            <!-- Dados de exemplo estáticos. Pode ser substituído por vendas reais -->
+            <!-- Dados de exemplo estáticos. Pode ser substituído por receipt reais -->
             <tr>
               <td>V001</td>
               <td>2025-04-01</td>

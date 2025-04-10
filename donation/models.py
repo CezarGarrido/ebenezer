@@ -37,6 +37,8 @@ class Donation(models.Model):
         
         verbose_name = "Doação"
         verbose_name_plural = "Doações"
-
+        permissions = [
+            ("can_update_paid", "Can update paid field"),
+        ]
     def __str__(self):
         return f"Doação #{self.id}"

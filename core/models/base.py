@@ -33,7 +33,7 @@ class Person(models.Model):
         ('J', 'Pessoa Jurídica'),
     )
 
-    person_type = models.CharField("Tipo de pessoa", max_length=1, choices=PERSON_TYPE_CHOICES)
+    person_type = models.CharField("Tipo", max_length=1, choices=PERSON_TYPE_CHOICES)
     name = models.CharField("Nome", max_length=255)
     created_by = models.ForeignKey(User, verbose_name="Criado por", on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField("Criado em", auto_now_add=True)

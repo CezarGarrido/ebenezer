@@ -168,7 +168,8 @@ class DonorAdmin(BasePersonAdmin):
     verbose_name = "Doador"
     verbose_name_plural = "Doadores"
     exclude = ("owner", "created_by")
-    
+    list_filter = ("created_at", "person_type")
+
     class Media:
         js = ('js/inline.js',)  # Carrega o script no Django Admin
         
@@ -203,7 +204,7 @@ class CompanyAdmin(BasePersonAdmin):
         """ Filtra usuários da mesma empresa do admin logado. """
         qs = super().get_queryset(request)
         if request.user.is_superuser:
-            return qs  # Superusuário vê todos os usuários
+            return qs  # Superusuário vê as empresas
         return qs.filter(id=request.user.profile.company.id)
 
     def image_tag(self, obj):

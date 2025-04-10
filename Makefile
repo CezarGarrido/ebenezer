@@ -40,7 +40,7 @@ locale:
 
 build:
 	python manage.py collectstatic --noinput
-	pyinstaller --onefile main.py --name app_executable \
+	pyinstaller main.py --name app_executable \
 	--hidden-import=django \
 	--hidden-import=whitenoise \
 	--hidden-import=whitenoise.middleware \

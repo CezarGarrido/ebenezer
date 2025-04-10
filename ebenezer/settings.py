@@ -131,9 +131,12 @@ LOCALE_PATHS = [
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
+
+# STATICFILES_DIRS só será usado se a pasta 'static' existir no ambiente atual
+STATICFILES_DIRS = []
+_static_dir = os.path.join(BASE_DIR, 'static')
+if os.path.isdir(_static_dir):
+    STATICFILES_DIRS.append(_static_dir)
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # ou outro caminho absoluto no sistema
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'

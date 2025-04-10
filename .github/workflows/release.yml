@@ -48,7 +48,7 @@ jobs:
         if: runner.os == 'windows'
         shell: cmd
         run: |
-          pyinstaller --onefile --noconsole main.py --name ${{ matrix.artifact_name }} ^
+          pyinstaller --onefile main.py --name ${{ matrix.artifact_name }} ^
             --hidden-import=django ^
             --hidden-import=whitenoise ^
             --hidden-import=whitenoise.middleware ^
@@ -64,7 +64,7 @@ jobs:
       - name: Build com PyInstaller (Linux)
         if: runner.os == 'linux'
         run: |
-          pyinstaller --onefile --noconsole main.py --name ${{ matrix.artifact_name }} \
+          pyinstaller --onefile main.py --name ${{ matrix.artifact_name }} \
             --hidden-import=django \
             --hidden-import=whitenoise \
             --hidden-import=whitenoise.middleware \

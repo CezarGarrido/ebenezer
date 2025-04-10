@@ -135,15 +135,15 @@ class EmployeeUserInline(admin.TabularInline):
 class BasePersonAdmin(admin.ModelAdmin):
     inlines = [IndividualInline, LegalEntityInline, AddressInline, EmailInline, PhoneInline]
     
-    list_display = ("name", "created_by", "created_at", "updated_at")
-    search_fields = ("name", "cpf_cnpj")  # Depende dos campos de identificação disponíveis
+    list_display = ("id", "name", "created_by", "created_at", "updated_at")
+    search_fields = ("name", "id")  # Depende dos campos de identificação disponíveis
     list_filter = ("created_at",)
     readonly_fields = ('created_at', 'updated_at')
 
 
 @admin.register(Employee)
 class EmployeeAdmin(BasePersonAdmin):
-    list_display = ("name", "position", "created_at")
+    list_display = ("id", "name", "position", "created_by", "created_at", "updated_at")
     search_fields = ("name", "position")
     verbose_name = "Funcionário"
     verbose_name_plural = "Funcionários"
@@ -189,8 +189,8 @@ class DonorAdmin(BasePersonAdmin):
 class CompanyAdmin(BasePersonAdmin):
     inlines = [LegalEntityInline, AddressInline, EmailInline, PhoneInline]
 
-    list_display = ('image_tag', "name", "created_at")
-    search_fields = ("name", "cnpj")
+    list_display = ('image_tag', "name", "created_at", "updated_at")
+    search_fields = ("name", )
     verbose_name = "Empresa"
     verbose_name_plural = "Empresas"
     exclude = ("person_type", "created_by")

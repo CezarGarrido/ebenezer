@@ -11,6 +11,21 @@ from django.contrib.auth import get_user_model
 server_thread = None
 running = False
 
+import os
+from pathlib import Path
+from django.conf import settings
+
+print("🚨 Diagnóstico estático:")
+print("BASE_DIR:", settings.BASE_DIR)
+print("EXEC_DIR:", settings.EXEC_DIR)
+print("STATIC_ROOT:", settings.STATIC_ROOT)
+print("STATIC_URL:", settings.STATIC_URL)
+
+main_js = Path(settings.STATIC_ROOT) / "js" / "main.js"
+print("main.js existe?", main_js.exists())
+print("Local completo:", main_js)
+
+
 def get_first_ipv4():
     system = platform.system()
     try:

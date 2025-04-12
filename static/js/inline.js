@@ -1,44 +1,41 @@
-document.addEventListener("DOMContentLoaded", function () {
-    function findTabLinkForPane(paneId) {
-        return document.querySelector(`a.nav-link[href="#${paneId}"]`);
-    }
+(function ($) {
+    $(document).ready(function () {
 
-    function toggleInlines() {
-        const tipoPessoa = document.getElementById("id_person_type")?.value;
-        console.log("Tipo de pessoa selecionado:", tipoPessoa);
+        function findTabLinkForPane(paneId) {
+            return $('a.nav-link[href="#' + paneId + '"]').first();
+        }
+        function toggleInlines() {
+            var tipoPessoa = $('#id_person_type').val();
 
-        // Encontrar os elementos de aba via classe adicionada no `classes = [...]` do inline
-        const pfPane = document.querySelector('.individual-inline-tab');
-        const pjPane = document.querySelector('.legal-inline-tab');
+            var $pfPane = $('.individual-inline-tab').first();
+            var $pjPane = $('.legal-inline-tab').first();
 
-        if (!pfPane || !pjPane) {
-            console.warn("Inlines não encontrados. Verifique os nomes das classes.");
-            return;
+            if (!$pfPane.length || !$pjPane.length) {
+                return;
+            }
+
+            var pfPaneId = $pfPane.attr('id');
+            var pjPaneId = $pjPane.attr('id');
+
+            var $pfLink = findTabLinkForPane(pfPaneId);
+            var $pjLink = findTabLinkForPane(pjPaneId);
+
+            $pfLink.parent().addClass('d-none');
+            $pjLink.parent().addClass('d-none');
+
+            $pfPane.removeClass('show active');
+            $pjPane.removeClass('show active');
+
+            if (tipoPessoa === "F") {
+                $pfLink.parent().removeClass('d-none');
+            } else if (tipoPessoa === "J") {
+                $pjLink.parent().removeClass('d-none');
+            }
         }
 
-        const pfPaneId = pfPane.id;
-        const pjPaneId = pjPane.id;
+        toggleInlines();
 
-        const pfLink = findTabLinkForPane(pfPaneId);
-        const pjLink = findTabLinkForPane(pjPaneId);
+        jQuery('#id_person_type').on('select2:select', toggleInlines);
 
-        // Esconde todas as abas
-        [pfLink, pjLink].forEach(link => link?.parentElement?.classList.add("d-none"));
-        [pfPane, pjPane].forEach(pane => pane?.classList.remove("show", "active"));
-
-        // Mostra a aba correspondente
-        if (tipoPessoa === "F") {
-            pfLink?.parentElement?.classList.remove("d-none");
-        } else if (tipoPessoa === "J") {
-            pjLink?.parentElement?.classList.remove("d-none");
-        }
-    }
-
-    toggleInlines();
-
-    if (window.jQuery) {
-        $('#id_person_type').on('select2:select', toggleInlines);
-    } else {
-        document.getElementById("id_person_type")?.addEventListener("change", toggleInlines);
-    }
-});
+    });
+})(window.jQuery);

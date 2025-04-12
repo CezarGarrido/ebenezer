@@ -183,7 +183,7 @@ JAZZMIN_UI_TWEAKS = {
     'no_navbar_border': True,
     'footer_fixed': True,
     'sidebar_fixed': True,
-    'sidebar': 'sidebar-light-primary',  # Sidebar clara, visual “de painel”
+    #'sidebar': 'sidebar-light-primary',  # Sidebar clara, visual “de painel”
     'sidebar_nav_flat_style': True,
     'sidebar_nav_child_indent': True,
     'sidebar_nav_legacy_style': False,

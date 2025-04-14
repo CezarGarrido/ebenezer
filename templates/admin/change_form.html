@@ -2,4 +2,46 @@
 
 {% block content %}
 {{ block.super }}
+<style>
+    input[type="checkbox"] {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        width: 60px;  /* Diminua o valor da largura */
+        height: 36px;
+        background-color: #bd5757;
+        border-radius: 18px;
+        position: relative;
+        cursor: pointer;
+        outline: none;
+        transition: background-color 0.3s;
+      }
+      
+      input[type="checkbox"]::before {
+        content: "";
+        position: absolute;
+        width: 28px;  /* Ajuste a largura do círculo interno */
+        height: 28px;  /* Ajuste a altura do círculo interno */
+        left: 4px;
+        top: 4px;  /* Ajuste a posição do círculo interno */
+        background-color: white;
+        color: black;
+        font-size: 13px;
+        text-align: center;
+        line-height: 28px;
+        border-radius: 50%;
+        transition: transform 0.3s, content 0.3s;
+      }
+      
+      input[type="checkbox"]:checked {
+        background-color: #4caf50;
+      }
+      
+      input[type="checkbox"]:checked::before {
+        content: "";
+        transform: translateX(24px);  /* Ajuste a posição do círculo interno quando marcado */
+      }
+      
+  </style>
+
 {% endblock %}

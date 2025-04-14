@@ -1,14 +1,13 @@
-{% extends "admin/base.html" %}
+{% extends 'admin/base.html' %}
+{% load static %}
 
 {% block extrahead %}
+  {{ block.super }}
+  <link rel="prefetch" href="/admin/" />
+  <link rel="prefetch" href="/admin/core/company" />
+  <script src="{% static 'js/vendor/hotkeys.min.js' %}"></script>
+  <script>
+    //document.addEventListener('contextmenu', event => event.preventDefault());
+  </script>
 
-    {{ block.super }}
-    <link rel="prefetch" href="/admin/">
-    <link rel="prefetch" href="/admin/core/company">
-
-    <script>
-        //document.addEventListener('contextmenu', event => event.preventDefault());
-      </script>
 {% endblock %}
-
-

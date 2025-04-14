@@ -154,7 +154,7 @@ JAZZMIN_SETTINGS = {
     'site_header': 'Ebenezer',
     'site_brand': 'Ebenezer',
     'welcome_sign': 'Bem-vindo(a) ao Ebenezer',
-    'copyright': '© Ebenezer LTDA',
+    'copyright': 'UEMS',
     'site_logo': 'images/company/logo.jpg',
     'icons': {
         'auth': 'fas fa-users-cog',

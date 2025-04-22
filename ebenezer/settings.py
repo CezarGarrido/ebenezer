@@ -14,7 +14,7 @@ import os
 from pathlib import Path
 import sys
 from logging.handlers import RotatingFileHandler
-
+from pythonjsonlogger import jsonlogger
 if getattr(sys, 'frozen', False):
     BASE_DIR = Path(sys._MEIPASS)       # Usado para templates, static, etc.
     EXEC_DIR = Path(sys.executable).parent  # Diretório do executável (fora do pacote)
@@ -218,16 +218,16 @@ JAZZMIN_UI_TWEAKS = {
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
-os.makedirs(os.path.join(BASE_DIR, 'logs'), exist_ok=True)
+os.makedirs(os.path.join(EXEC_DIR, 'logs'), exist_ok=True)
 
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
 
     'formatters': {
-        'verbose': {
-            'format': '{asctime} [{levelname}] {name}: {message}',
-            'style': '{',
+        'json': {
+            '()': 'pythonjsonlogger.jsonlogger.JsonFormatter',
+            'format': '%(asctime)s %(levelname)s %(name)s %(filename)s %(funcName)s %(lineno)d %(message)s',
         },
     },
 
@@ -235,14 +235,19 @@ LOGGING = {
         'rotating_file': {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs', 'django.log'),
-            'maxBytes': 1024 * 1024 * 5,  # 5 MB
-            'backupCount': 5,             # mantém até 5 arquivos antigos
-            'formatter': 'verbose',
+            'filename': os.path.join(EXEC_DIR, 'logs', 'django.log'),
+            'maxBytes': 1024 * 1024 * 5,
+            'backupCount': 5,
+            'formatter': 'json',  # use o formatter JSON aqui
         },
     },
 
     'loggers': {
+        '': {  # Logger raiz pega tudo
+            'handlers': ['rotating_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
         'django': {
             'handlers': ['rotating_file'],
             'level': 'INFO',

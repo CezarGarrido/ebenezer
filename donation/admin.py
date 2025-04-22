@@ -12,6 +12,10 @@ from django import forms
 from .models import ThankYouMessage, ThankYouMessageLine
 import platform
 
+import logging
+logger = logging.getLogger(__name__)
+
+
 # Só importa win32print se for Windows
 if platform.system() == "Windows":
     import win32print
@@ -228,52 +232,72 @@ class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
 
     def response_change(self, request, obj):
         if '_print_receipt' in request.POST:
-            # Lógica personalizada aqui
-            print("gerando....")
-            if platform.system() == "Windows":
-                self.print_with_win32(obj.receipt())
-                messages.success(request, "Recibo gerado com sucesso.")
-            else:
-                messages.warning(request, "Disponível apenas para Windows")
+            try:
+                logger.info("Solicitação para imprimir recibo recebida.")
+
+                if platform.system() == "Windows":
+                    if hasattr(obj, "receipt") and callable(obj.receipt):
+                        self.print_with_win32(obj.receipt())
+                        messages.success(request, "Recibo gerado com sucesso.")
+                    else:
+                        messages.error(request, "O objeto não possui o método 'receipt'.")
+                        logger.info("Recibo gerado com sucesso.")
+                else:
+                    messages.warning(request, "Disponível apenas para Windows")
+                    logger.warning("Tentativa de impressão em SO não suportado: %s", platform.system())
+
+            except Exception as e:
+                logger.error("Erro ao gerar recibo", exc_info=True)
+                messages.error(request, "Erro ao gerar recibo.")
 
             return HttpResponseRedirect(request.get_full_path())
 
         return super().response_change(request, obj)
-    
-        
+
+
     def get_printers(self):
-        if platform.system() == "Windows":
-            return [p[2] for p in win32print.EnumPrinters(win32print.PRINTER_ENUM_LOCAL | win32print.PRINTER_ENUM_CONNECTIONS)]
-        else:
-            return []
-        
-    def print_with_win32(self, text, printer="EPSON LX-350"):
-        printers = self.get_printers()
-        
-        bytes_text = text.encode("latin1", errors="replace")
-
-        if printer in printers:
-            printer_name = printer
-            print(f"Usando impressora preferida: {printer_name}")
-        else:
-            printer_name = win32print.GetDefaultPrinter()
-            print(f"A impressora '{printer}' não foi encontrada. Usando padrão: {printer_name}")
-
         try:
+            if platform.system() == "Windows":
+                printers = [p[2] for p in win32print.EnumPrinters(
+                    win32print.PRINTER_ENUM_LOCAL | win32print.PRINTER_ENUM_CONNECTIONS)]
+                logger.info("Impressoras detectadas: %s", printers)
+                return printers
+            else:
+                logger.info("Listagem de impressoras ignorada (SO não suportado: %s)", platform.system())
+                return []
+        except Exception:
+            logger.error("Erro ao obter lista de impressoras", exc_info=True)
+            return []
+
+
+    def print_with_win32(self, text, printer="EPSON LX-350"):
+        try:
+            printers = self.get_printers()
+
+            if printer in printers:
+                printer_name = printer
+                logger.info("Usando impressora preferida: %s", printer_name)
+            else:
+                printer_name = win32print.GetDefaultPrinter()
+                logger.warning("Impressora '%s' não encontrada. Usando padrão: %s", printer, printer_name)
+
             hPrinter = win32print.OpenPrinter(printer_name)
             hJob = win32print.StartDocPrinter(hPrinter, 1, ("Recibo de Doação", None, "RAW"))
             win32print.StartPagePrinter(hPrinter)
-            win32print.WritePrinter(hPrinter, bytes_text)
+            win32print.WritePrinter(hPrinter, text)
             win32print.EndPagePrinter(hPrinter)
             win32print.EndDocPrinter(hPrinter)
-            print(f"Recibo impresso com sucesso na '{printer_name}'.")
-        except Exception as e:
-            print("Erro ao imprimir:", e)
+
+            logger.info("Recibo impresso com sucesso na '%s'.", printer_name)
+
+        except Exception:
+            logger.error("Erro ao imprimir recibo", exc_info=True)
+
         finally:
             try:
                 win32print.ClosePrinter(hPrinter)
-            except:
-                print("Erro ao fechar impressora:", e)
+            except Exception:
+                logger.error("Erro ao fechar impressora", exc_info=True)
             
 admin.site.register(Donation, DonationAdmin)
 admin.site.register(Report, ReportsAdminView)

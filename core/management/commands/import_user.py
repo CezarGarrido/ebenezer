@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from pathlib import Path
 import unicodedata
 import re
+from django.contrib.auth.models import Group
 
 def normalize_text(text: str) -> str:
     # Remove acentos
@@ -69,6 +70,39 @@ class Command(BaseCommand):
                     last_name=' '.join(nome.split()[1:]) if len(nome.split()) > 1 else '',
                     is_staff=True,
                 )
+
+                # -----------------------------------------------------------------------------------
+                # Lê o valor do campo 'DES_SET' do CSV
+                setor = row.get('DES_SET', '').strip().upper()
+
+                # Verifica se o setor contém a palavra 'ADMINISTRATIVO'
+                if 'ADMINISTRATIVO' in setor:
+                    grupo_nome = 'ADMINISTRATIVO'
+                # Se não, verifica se é 'TELEMARKETING'
+                elif 'TELEMARKETING' in setor:
+                    grupo_nome = 'TELEMARKETING'
+                # Caso não seja nenhum dos dois, não atribui grupo
+                else:
+                    grupo_nome = None
+
+                # Se foi identificado um grupo válido ('ADMINISTRATIVO' ou 'TELEMARKETING')
+                if grupo_nome:
+                    try:
+                        # Busca no banco o grupo pelo nome
+                        grupo = Group.objects.get(name=grupo_nome)
+
+                        # Adiciona o usuário recém-criado ao grupo
+                        user.groups.add(grupo)
+
+                        # Informa no terminal que o vínculo foi feito com sucesso
+                        self.stdout.write(self.style.SUCCESS(f"Usuário {username} adicionado ao grupo {grupo_nome}"))
+
+                    except Group.DoesNotExist:
+                        # Caso o grupo não exista, avisa no terminal
+                        self.stderr.write(self.style.ERROR(f"Grupo {grupo_nome} não encontrado para {username}"))
+                else:
+                    # Caso o setor não tenha correspondência com nenhum grupo, emite um aviso
+                    self.stderr.write(self.style.WARNING(f"Grupo indefinido para {username}, DES_SET: '{setor}'"))
 
                 count += 1
                 self.stdout.write(self.style.SUCCESS(f"Usuário criado: {username} {senha}"))

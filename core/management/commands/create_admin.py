@@ -1,6 +1,11 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from core.models.company import Company, UserProfile
+#----------------------------------------------------
+from django.contrib.auth.models import Group, Permission    # permissões e grupos
+from core.models.donor import Donor     # modelos que vão ter permissões específicas
+from donation.models import Donation
+from django.contrib.contenttypes.models import ContentType  # filtrar permissões por modelo
 
 class Command(BaseCommand):
     help = 'Criar empresa e usuário iniciais'
@@ -34,3 +39,36 @@ class Command(BaseCommand):
 
         # Cria perfil do usuário com a empresa
         UserProfile.objects.get_or_create(user=user, company=company)
+
+        #-------------------------------------------------------------------------------
+        # cria (se não existir) o grupo ADMINISTRATIVO
+        admin_group, admin_created = Group.objects.get_or_create(name='ADMINISTRATIVO') 
+
+        # cria (se não existir) o grupo TELEMARKETING
+        tele_group, tele_created = Group.objects.get_or_create(name='TELEMARKETING')
+
+        if admin_created:
+            # Só define todas as permissões se o grupo foi criado agora
+            admin_permissions = Permission.objects.all()
+            admin_group.permissions.set(admin_permissions)
+            self.stdout.write(self.style.SUCCESS(f'Permissões atribuídas ao grupo {admin_group.name}.'))
+        else:
+            self.stdout.write(f'Grupo {admin_group.name} já existia, permissões não foram alteradas.')
+
+        if tele_created:
+            # Pega todas as permissões de Donor
+            donor_ct = ContentType.objects.get_for_model(Donor)
+            donor_permissions = Permission.objects.filter(content_type=donor_ct)
+
+            # Pega todas as permissões de Donation
+            donation_ct = ContentType.objects.get_for_model(Donation)
+            donation_permissions = Permission.objects.filter(content_type=donation_ct)
+
+            # Junta as permissões
+            tele_permissions = list(donor_permissions) + list(donation_permissions)
+
+            # Aplica ao grupo TELEMARKETING
+            tele_group.permissions.set(tele_permissions)
+            self.stdout.write(self.style.SUCCESS(f'Permissões atribuídas ao grupo {tele_group.name}.'))
+        else:
+            self.stdout.write(f'Grupo {tele_group.name} já existia, permissões não foram alteradas.')

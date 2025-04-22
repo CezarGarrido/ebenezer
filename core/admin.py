@@ -287,6 +287,8 @@ class CustomGroupAdmin(admin.ModelAdmin):
     
     # Adicionando ao list_display a função capitalized_name
     list_display = ('capitalized_name',)
-
+    
+    capitalized_name.short_description = "Nome"
+    
 admin.site.unregister(Group)
 admin.site.register(Group, CustomGroupAdmin)

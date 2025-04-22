@@ -3,9 +3,17 @@
 import os
 import sys
 import locale
+import platform
 
 def main():
-    locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
+    try:
+        if platform.system() == 'Windows':
+            locale.setlocale(locale.LC_ALL, 'Portuguese_Brazil.1252')
+        else:
+            locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
+    except locale.Error:
+        print("Aviso: Locale não pôde ser definido.")
+    
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ebenezer.settings')
     try:

@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 from pathlib import Path
 import sys
+from logging.handlers import RotatingFileHandler
 
 if getattr(sys, 'frozen', False):
     BASE_DIR = Path(sys._MEIPASS)       # Usado para templates, static, etc.
@@ -164,11 +165,18 @@ JAZZMIN_SETTINGS = {
         'core.Employee': 'fas fa-id-badge',
         'core.Company': 'fas fa-building',
         'donation.Donation': 'fas fa-donate',
-        'donation.Report': 'fas fa-file-alt',
+        'donation.Report': 'fas fa-chart-line',
+        'donation.ThankYouMessage': 'fas fa-comment-dots',  
     },
     'search_model': ['core.Donor'],
-    'show_ui_builder': False,  # Desativa o personalizador (menos “web-like”)
+    "usermenu_links": [
+        {"name": "Config. Recibo", "url": "/admin/donation/thankyoumessage/", "icon": "fas fa-gear"},
+    ],
+    "use_google_fonts_cdn": True,
+    "order_with_respect_to": ["auth", "core", "donation.Donation", "donation.Report"],
+    'show_ui_builder': True,  # Desativa o personalizador (menos “web-like”)
     'custom_js': 'js/main.js',
+    'custom_css': 'css/ebenezer.css',
     'related_modal_active': True,
     'site_logo_classes': 'img-circle elevation-3',
     'navigation_expanded': True,
@@ -176,33 +184,69 @@ JAZZMIN_SETTINGS = {
 }
 
 JAZZMIN_UI_TWEAKS = {
-    'theme': 'cosmo',  # Mais sóbrio que yeti, lembra interface nativa
-    'accent': 'accent-primary',
-    'navbar': 'navbar-white navbar-light',
-    'navbar_fixed': True,
-    'no_navbar_border': True,
-    'footer_fixed': True,
-    'sidebar_fixed': True,
-    #'sidebar': 'sidebar-light-primary',  # Sidebar clara, visual “de painel”
-    'sidebar_nav_flat_style': True,
-    'sidebar_nav_child_indent': True,
-    'sidebar_nav_legacy_style': False,
-    'sidebar_nav_compact_style': True,  # Menor, mais “app”
-    'layout_boxed': False,
-    'body_small_text': False,
-    'brand_small_text': False,
-    'navbar_small_text': False,
-    'footer_small_text': True,
-    'dark_mode_theme': None,
-    'related_modal_active': True,
-    'button_classes': {
-        'primary': 'btn-primary',
-        'secondary': 'btn-secondary',
-        'info': 'btn-info',
-        'warning': 'btn-warning',
-        'danger': 'btn-danger',
-        'success': 'btn-success'
-    }
+    "navbar_small_text": False,
+    "footer_small_text": True,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": False,
+    "accent": "accent-primary",
+    "navbar": "navbar-white navbar-light",
+    "no_navbar_border": True,
+    "navbar_fixed": True,
+    "layout_boxed": False,
+    "footer_fixed": True,
+    "sidebar_fixed": True,
+    "sidebar": "sidebar-dark-primary",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": False,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": True,
+    "theme": "lumen",
+    "dark_mode_theme": None,
+    "button_classes": {
+        "primary": "btn-primary",
+        "secondary": "btn-dark",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
+    },
+    "related_modal_active": True
 }
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
+
+os.makedirs(os.path.join(BASE_DIR, 'logs'), exist_ok=True)
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+
+    'formatters': {
+        'verbose': {
+            'format': '{asctime} [{levelname}] {name}: {message}',
+            'style': '{',
+        },
+    },
+
+    'handlers': {
+        'rotating_file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'django.log'),
+            'maxBytes': 1024 * 1024 * 5,  # 5 MB
+            'backupCount': 5,             # mantém até 5 arquivos antigos
+            'formatter': 'verbose',
+        },
+    },
+
+    'loggers': {
+        'django': {
+            'handlers': ['rotating_file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}

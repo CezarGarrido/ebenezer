@@ -1,4 +1,7 @@
-class ESCPBuilder:
+import re
+from html import escape
+
+class ESCBuilder:
     # Caractere de controle ESC (Escape)
     # Usado como prefixo para iniciar comandos ESC/P
     ESC = b'\x1B'  # ASCII 27
@@ -79,3 +82,39 @@ class ESCPBuilder:
 
     def build(self):
         return bytes(self.commands)
+    
+    def to_html(self, data: bytes) -> str:
+        # Converte os bytes para string usando latin1 (compatível com ESC/P)
+        texto = data.decode('latin1')
+
+        # Substituições de controle
+        texto = (
+            texto
+            .replace('\x1BE', '<b>')   # ESC E → Negrito ON
+            .replace('\x1BF', '</b>')  # ESC F → Negrito OFF
+            .replace('\x0D', '')       # CR (carriage return)
+            .replace('\x0C', '\f')     # FF → marca página (vamos dividir depois)
+        )
+
+        # Remove outros comandos ESC/P (menos os que mapeamos acima)
+        texto = re.sub(r'\x1B[@-Z\\^_]', '', texto)            # ESC comandos simples
+        texto = re.sub(r'\x1B\([^\x1B]{0,6}', '', texto)       # ESC (x comandos
+        texto = re.sub(r'\x1B\(t[\s\S]{0,6}', '', texto)       # ESC (t com charset
+        texto = re.sub(r'\x1Bt.', '', texto)                   # ESC tX
+        texto = re.sub(r'\x1Bx.', '', texto)                   # ESC xX
+        texto = texto.replace('\x0F', '')                      # Condensed ON
+        texto = texto.replace('\x12', '')                      # Condensed OFF
+        texto = texto.replace('\x1B', '')                      # ESC perdido
+        # Divide por páginas (form feed)
+        blocos = texto.split('\f')
+        html_blocos = []
+
+        for bloco in blocos:
+            if bloco.strip():
+                # Protege conteúdo não interpretado (evita quebras por acentos)
+                bloco_escapado = escape(bloco)
+                # Mantém as tags HTML (negrito) interpretáveis
+                bloco_final = bloco_escapado.replace('&lt;b&gt;', '<b>').replace('&lt;/b&gt;', '</b>')
+                html_blocos.append(f"<pre>{bloco_final}</pre>")
+
+        return '\n'.join(html_blocos)

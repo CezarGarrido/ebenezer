@@ -1,18 +1,38 @@
-(function ($) {
-    $(document).ready(function () {
-        $('[data-mask-money]').mask('#.##0,00', { reverse: true });
-        // Intercepta a submissão do formulário
-        $('form').on('submit', function (event) {
-            var amountField = $('[data-mask-money]');
-            var amountValue = amountField.val();
-            if (amountValue) {
-                var cleanAmount = amountValue
-                    .replace('R$', '')  // Remove o símbolo de moeda, se presente
-                    .replace(/\./g, '') // Remove pontos
-                    .replace(',', '.')   // Troca vírgulas por pontos
-                    .trim();             // Remove espaços em branco
-                amountField.val(cleanAmount);
+(function () {
+    function initMoneyMask($) {
+        function applyMask() {
+            $('[data-mask-money]').mask('#.##0,00', { reverse: true });
+        }
+
+        $(function () {
+            applyMask();
+
+            $(document).on("focus", "[data-mask-money]", function () {
+                $(this).mask("#.##0,00", { reverse: true });
+            });
+
+            $('form').on('submit', function () {
+                $('[data-mask-money]').each(function () {
+                    const valor = $(this).val();
+                    if (valor) {
+                        const valorLimpo = valor.replace(/\./g, '').replace(',', '.').trim();
+                        $(this).val(valorLimpo);
+                    }
+                });
+            });
+        });
+    }
+
+    if (typeof django !== 'undefined' && django.jQuery) {
+        initMoneyMask(django.jQuery);
+    } else {
+        // Espera o DOM carregar e tenta de novo
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof django !== 'undefined' && django.jQuery) {
+                initMoneyMask(django.jQuery);
+            } else {
+                console.error("django.jQuery não foi carregado.");
             }
         });
-    });
-})(django.jQuery);
+    }
+})();

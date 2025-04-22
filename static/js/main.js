@@ -30,3 +30,18 @@ hotkeys('f6,f10,f11,f12,f9,esc', function (event, handler) {
             window.history.back();
     }
 });
+
+const links = document.querySelectorAll('a.dropdown-item.dropdown-footer');
+links.forEach(link => {
+  const href = link.getAttribute('href');
+  if (href.startsWith('/admin/auth/user/') && href.endsWith('/change/')) {
+    // Cria o ícone
+    const icon = document.createElement("i");
+    icon.className = "fas fa-user mr-3";
+    // Limpa o conteúdo atual
+    link.textContent = "";
+    // Adiciona ícone e novo texto
+    link.appendChild(icon);
+    link.appendChild(document.createTextNode("Ver Perfil"));
+  }
+});

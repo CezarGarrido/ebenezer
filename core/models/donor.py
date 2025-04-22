@@ -15,5 +15,5 @@ class Donor(Person):
     class Meta:
         verbose_name = "Doador"
         verbose_name_plural = "Doadores"
-        
+        ordering = ['id','name']
         

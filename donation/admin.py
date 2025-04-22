@@ -1,19 +1,47 @@
-
+import locale
 from django.contrib import messages
 from django.contrib import admin
 from django import forms
-from django.contrib.auth.models import User
-from django.db import models
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from core.models.donor import Donor
+from core.models.employee import Employee
+from donation.views import Report, ReportsAdminView
 from .models import Donation
 from django.utils.html import format_html
-from django.utils.translation import gettext_lazy as _
-from django.utils.safestring import mark_safe
-from django.urls import reverse
 from django.http import HttpResponseRedirect
-from django.template.response import TemplateResponse
 from django import forms
+from .models import ThankYouMessage, ThankYouMessageLine
+import platform
 
+# Só importa win32print se for Windows
+if platform.system() == "Windows":
+    import win32print
+            
+class ThankYouMessageLineInline(admin.TabularInline):
+    model = ThankYouMessageLine
+    extra = 0
+
+@admin.register(ThankYouMessage)
+class ThankYouMessageAdmin(admin.ModelAdmin):
+    inlines = [ThankYouMessageLineInline]
+    list_display = ['name','get_lines', 'created_by', 'created_at', 'updated_at']
+    readonly_fields = ("created_by", "created_at",)
+    exclude = ("owner", "created_by")
+    search_fields = ("get_lines",)
+    def save_model(self, request, obj, form, change):
+        if not obj.created_by:  # Define apenas se for um novo objeto
+            obj.created_by = request.user
+            obj.owner = request.user.profile.company
+        super().save_model(request, obj, form, change)
+    
+    def get_lines(self, obj):
+        return obj.get_lines_text()
+    
+    get_lines.short_description ="Mensagem"
+    
+    def get_model_perms(self, request):
+        # Retorna permissões vazias para esconder da sidebar
+        return {}
+    
 class GenderedMessageMixin:
     """
     Corrige automaticamente mensagens do Django Admin de acordo com o gênero e número da entidade.
@@ -94,16 +122,18 @@ class DonationForm(forms.ModelForm):
         
         widgets = {
             'amount': forms.TextInput(attrs={'data-mask-money': ""}),
+            'paid_amount': forms.TextInput(attrs={'data-mask-money': ""}),
+            'expected_at': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date'}),
+            'paid_at': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date'}),
         }
 
-        
     class Media:
         js = ("js/vendor/jquery.mask.min.js", "js/mask/money.js",)  # Adicionamos um script personalizado
 
 class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
-    form=DonationForm
+    form = DonationForm
     exclude = ('created_by', 'company')  # Esconde o campo no formulário
-    list_display = ("id", "donor", "amount", "paid", "paid_at", "created_by", "created_at", "updated_at")  # Campos visíveis na listagem
+    list_display = ("id", "donor", "format_amount", "paid", "format_paid_amount", "paid_at", "created_by", "created_at", "updated_at")  # Campos visíveis na listagem
     exclude = ("owner", "created_by")
     verbose_name = "Doação"
     verbose_name_plural = "Doações"
@@ -125,127 +155,125 @@ class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
         "donor__name",     # Nome do doador
         "notes",           # Notas da doação
     )
-    #autocomplete_fields = ['donor']
+    
+    autocomplete_fields = ['donor']
+
     def save_model(self, request, obj, form, change):
         if not obj.created_by:  # Define apenas se for um novo objeto
             obj.created_by = request.user
             obj.owner = request.user.profile.company
         super().save_model(request, obj, form, change)
+        
     fieldsets = (
         ("Informações da Doação", {
-            "fields": ("donor", "amount", "expected_at", "notes")
+            "fields": ("donor", "amount", "expected_at", "notes", "created_by", "created_at", "updated_at")
         }),
         ("Informações de Pagamento", {
-            "fields": ("paid", "paid_at", "method"),
+            "fields": ("paid", "paid_at", "paid_amount", "method", "received_by"),
+            "classes": ("collapse",)  # ou remova isso para deixar sempre visível
+        }),
+
+        ("Recibo", {
+            "fields": ("thank_you_message", "get_receipt", ),
             "classes": ("collapse",)  # ou remova isso para deixar sempre visível
         }),
     )
-    readonly_fields = ("created_at", "updated_at")
+    
+    readonly_fields = ("created_by", "created_at", "updated_at", "get_receipt")
+
+        
+    def get_receipt(self, obj):
+        from django.utils.safestring import mark_safe
+        return mark_safe(f'''
+            <hr/>
+            <div class="receipt">
+                {obj.receipt_html()}
+            </div>
+            <hr/>
+            <div class="form-group">
+                <input type="button" class="btn btn-outline-success form-control" value="Imprimir no Navegador" onclick="window.print()" name="_print_browser" />
+            </div>
+            
+            <div class="form-group">
+                <input type="submit" class="btn btn-outline-warning form-control" value="Imprimir na Impressora" name="_print_receipt" />
+            </div>
+            
+            <div class="help-block">
+                * Recibo gerado com os dados da última edição salva.
+            </div>
+        ''')
+    
+    get_receipt.short_description = ""
+    
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        user_company = request.user.profile.company
+        if db_field.name == "donor":
+            kwargs["queryset"] = Donor.objects.filter(owner=user_company)
+        elif db_field.name == "received_by":
+            kwargs["queryset"] = Employee.objects.filter(owner=user_company)
+        elif db_field.name == "thank_you_message":
+            kwargs["queryset"] = ThankYouMessage.objects.filter(owner=user_company)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    def format_amount(self, obj):
+        return locale.currency(obj.amount, grouping=True)
+    
+    def format_paid_amount(self, obj):
+        if obj.paid_amount:
+            return locale.currency(obj.paid_amount, grouping=True)
+        return "-"
+    
+    format_amount.short_description = "Valor Esperado"
+    format_paid_amount.short_description = "Valor Recebido"
 
     def response_change(self, request, obj):
         if '_print_receipt' in request.POST:
             # Lógica personalizada aqui
             print("gerando....")
-            
-            messages.success(request, "Recibo gerado com sucesso.")
-            
-            # Redireciona de volta para a mesma página (edição do objeto)
-            url = reverse('admin:%s_%s_change' % (obj._meta.app_label, obj._meta.model_name), args=[obj.pk])
-            return HttpResponseRedirect(url)
+            if platform.system() == "Windows":
+                self.print_with_win32(obj.receipt())
+                messages.success(request, "Recibo gerado com sucesso.")
+            else:
+                messages.warning(request, "Disponível apenas para Windows")
+
+            return HttpResponseRedirect(request.get_full_path())
 
         return super().response_change(request, obj)
     
-# Register your models here.
-admin.site.register(Donation, DonationAdmin)
+        
+    def get_printers(self):
+        if platform.system() == "Windows":
+            return [p[2] for p in win32print.EnumPrinters(win32print.PRINTER_ENUM_LOCAL | win32print.PRINTER_ENUM_CONNECTIONS)]
+        else:
+            return []
+        
+    def print_with_win32(self, text, printer="EPSON LX-350"):
+        printers = self.get_printers()
+        
+        bytes_text = text.encode("latin1", errors="replace")
 
+        if printer in printers:
+            printer_name = printer
+            print(f"Usando impressora preferida: {printer_name}")
+        else:
+            printer_name = win32print.GetDefaultPrinter()
+            print(f"A impressora '{printer}' não foi encontrada. Usando padrão: {printer_name}")
 
-class DonationReportForm(forms.Form):
-    start_date = forms.DateField(label="Data inicial", required=False, widget=forms.DateInput(attrs={'type': 'date'}))
-    end_date = forms.DateField(label="Data final", required=False, widget=forms.DateInput(attrs={'type': 'date'}))
-    created_by = forms.ModelChoiceField(
-        label="Usuário",
-        required=False,
-        queryset=User.objects.none(),  # Inicialmente vazio
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
-        super().__init__(*args, **kwargs)
-
-        if self.request:
-            user = self.request.user
-            if user.is_superuser:
-                self.fields['created_by'].queryset = User.objects.all()
-            else:
-                self.fields['created_by'].queryset = User.objects.filter(profile__company=user.profile.company)
-
-
-class ReportsAdminView(admin.ModelAdmin):
-    def has_view_permission(self, request, obj=None):
-        return request.user.is_superuser or request.user.has_perm('donation.view_report')
-
-    def has_add_permission(self, request):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-    def changelist_view(self, request, extra_context=None):
-                # Verifica a permissão antes de continuar
-        if not self.has_view_permission(request):
-            from django.core.exceptions import PermissionDenied
-            raise PermissionDenied
-
-        form = DonationReportForm(request.GET or None, request=request)
-        donations = Donation.objects.all()
-
-        user = request.user
-        if not user.is_superuser:
-            donations = donations.filter(owner=user.profile.company)
-
-        if form.is_valid():
-            start = form.cleaned_data.get('start_date')
-            end = form.cleaned_data.get('end_date')
-            created_by = form.cleaned_data.get('created_by')
-
-            if start:
-                donations = donations.filter(paid_at__date__gte=start)
-            if end:
-                donations = donations.filter(paid_at__date__lte=end)
-            if created_by:
-                donations = donations.filter(created_by=created_by)
-
-        # PAGINAÇÃO
-        paginator = Paginator(donations, 20)  # 20 por página
-        page_number = request.GET.get('page')
         try:
-            page_obj = paginator.page(page_number)
-        except PageNotAnInteger:
-            page_obj = paginator.page(1)
-        except EmptyPage:
-            page_obj = paginator.page(paginator.num_pages)
-
-        context = dict(
-            self.admin_site.each_context(request),
-            title="Relatórios de Doações",
-            donations=page_obj,
-            form=form,
-            paginator=paginator,
-            page_obj=page_obj,
-            is_paginated=page_obj.has_other_pages(),
-        )
-        return TemplateResponse(request, "admin/donation/reports.html", context)
-
-
-class Report(models.Model):
-    class Meta:
-        verbose_name = "Relatório"
-        verbose_name_plural = "Relatórios"
-        app_label = "donation"  # para agrupar no mesmo menu se quiser
-        managed = False  # não cria tabela no banco
-
+            hPrinter = win32print.OpenPrinter(printer_name)
+            hJob = win32print.StartDocPrinter(hPrinter, 1, ("Recibo de Doação", None, "RAW"))
+            win32print.StartPagePrinter(hPrinter)
+            win32print.WritePrinter(hPrinter, bytes_text)
+            win32print.EndPagePrinter(hPrinter)
+            win32print.EndDocPrinter(hPrinter)
+            print(f"Recibo impresso com sucesso na '{printer_name}'.")
+        except Exception as e:
+            print("Erro ao imprimir:", e)
+        finally:
+            try:
+                win32print.ClosePrinter(hPrinter)
+            except:
+                print("Erro ao fechar impressora:", e)
+            
+admin.site.register(Donation, DonationAdmin)
 admin.site.register(Report, ReportsAdminView)

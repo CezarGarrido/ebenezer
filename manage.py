@@ -2,9 +2,10 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
-
+import locale
 
 def main():
+    locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ebenezer.settings')
     try:

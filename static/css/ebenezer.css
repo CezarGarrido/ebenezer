@@ -1,0 +1,130 @@
+.field-get_receipt {
+    grid-column: 1 / -1;
+    /* para layouts baseados em CSS Grid */
+}
+
+.field-get_receipt .readonly {
+    width: 100% !important;
+    max-width: none !important;
+}
+
+.field-get_receipt label {
+    display: none;
+    /* Esconde o label vazio */
+}
+
+.field-get_receipt .col-sm-7 {
+    flex: none !important;
+    max-width: 100% !important;
+    width: 100% !important;
+}
+
+.filter-column {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+
+@page {
+    margin: 0;
+}
+
+@media print {
+
+    html,
+    body {
+        margin: 0 !important;
+        padding: 0 !important;
+        background: white !important;
+        width: 100% !important;
+    }
+
+    /* Esconde tudo */
+    body * {
+        visibility: hidden !important;
+        box-shadow: none !important;
+    }
+
+    /* Mostra só o output */
+    .receipt,
+    .receipt * {
+        visibility: visible !important;
+    }
+
+    /* Cola o output no topo da página impressa */
+    .receipt {
+        position: fixed !important;
+        top: -50px !important;
+        width: 100% !important;
+        bottom: 0 !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        transform-origin: top center;
+        max-height: none !important;
+        overflow: visible !important;
+        margin: 0 !important;
+        margin-left: 16px !important;
+        padding: 0 !important;
+        background: white !important;
+        font-size: 19px;
+    }
+
+    .receipt * {
+        border: none !important;
+    }
+
+    .nav-tabs {
+        display: none !important;
+    }
+}
+
+/* Modal interno */
+.modal-header {
+    font-size: 0.95rem;
+    padding: 15px;
+}
+
+.modal-body {
+    padding: 0px !important;
+}
+
+body.iframe-mode .wrapper {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+body.iframe-mode .content-wrapper {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+body.iframe-mode .content {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+body.iframe-mode .container-fluid {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+}
+
+body.iframe-mode .card {
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 !important;
+}
+
+body.iframe-mode .card-body {
+    padding: 0.5rem !important;
+}
+
+body.iframe-mode #jazzy-tabs {
+    margin-bottom: 0 !important;
+}
+
+body.iframe-mode #jazzy-actions {
+    margin: 15px !important;
+}

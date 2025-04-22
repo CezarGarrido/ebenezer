@@ -11,26 +11,19 @@ def logo_directory_path(instance, filename):
 
 class Company(Person):
     logo_file = models.ImageField(
-        upload_to=logo_directory_path, default='images/logo.png', blank=True, null=True, verbose_name="Logo")
+        upload_to=logo_directory_path, default='images/company/logo.jpg', blank=True, null=True, verbose_name="Logo")
     cnae = models.CharField(max_length=10, blank=True, null=True, verbose_name="CNAE")
     iest = models.CharField(max_length=32, null=True, blank=True, verbose_name="Inscrição Estadual")
 
     class Meta:
-        verbose_name = "Empresa"
-        verbose_name_plural = "Empresa"
-
-
-    def get_complete_path(self):
-        if self.logo_file.name != 'images/logo.png':
-            return os.path.join("MEDIA_ROOT", self.logo_file)
-        else:
-            return ''
+        verbose_name = "Instituição"
+        verbose_name_plural = "Instituição"
 
     def save(self, *args, **kwargs):
         # Deletar logo se ja existir um
         try:
             obj = Company.objects.get(id=self.id)
-            if obj.logo_file != self.logo_file and obj.logo_file != 'imagens/logo.png':
+            if obj.logo_file != self.logo_file and obj.logo_file != 'images/company/logo.jpg':
                 obj.logo_file.delete(save=False)
         except:
             pass
@@ -46,7 +39,7 @@ class Company(Person):
 @receiver(post_delete, sender=Company)
 def logo_post_delete_handler(sender, instance, **kwargs):
     # Nao deletar a imagem default 'logo.png'
-    if instance.logo_file != 'imagens/logo.png':
+    if instance.logo_file != 'images/company/logo.jpg':
         instance.logo_file.delete(False)
 
 class UserProfile(models.Model):

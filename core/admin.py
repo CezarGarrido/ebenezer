@@ -1,7 +1,5 @@
-import os
 from django import forms
 from django.contrib import admin
-from django.db import IntegrityError
 from .models.company import Company, UserProfile, GroupCompany
 from .models.employee import Employee, EmployeeUser
 from .models.donor import Donor
@@ -50,7 +48,7 @@ class AddressForm(forms.ModelForm):
 
 class IndividualForm(forms.ModelForm):
     class Meta:
-        model = Address
+        model = Individual
         fields = "__all__"
         
         widgets = {
@@ -62,7 +60,7 @@ class IndividualForm(forms.ModelForm):
 
 class LegalEntityForm(forms.ModelForm):
     class Meta:
-        model = Address
+        model = LegalEntity
         fields = "__all__"
         
         widgets = {
@@ -82,6 +80,7 @@ class IndividualInline(admin.StackedInline):
     verbose_name_plural = "Dados de Pessoa Física"
     classes = ["individual-inline-tab"]
     ordering_field = ("cpf",)
+    
 class LegalEntityInline(admin.StackedInline):
     model = LegalEntity
     form = LegalEntityForm
@@ -140,13 +139,23 @@ class BasePersonAdmin(admin.ModelAdmin):
     list_filter = ("created_at",)
     readonly_fields = ('created_at', 'updated_at')
 
+class EmployeeForm(forms.ModelForm):
+    class Meta:
+        model = Employee
+        fields = "__all__"
+        
+        widgets = {
+            'salary': forms.TextInput(attrs={'data-mask-money': ""}),
+        }
+        
+    class Media:
+        js = ("js/vendor/jquery.mask.min.js", "js/mask/money.js",)  # Adicionamos um script personalizado
 
 @admin.register(Employee)
 class EmployeeAdmin(BasePersonAdmin):
+    form = EmployeeForm
     list_display = ("id", "name", "position", "created_by", "created_at", "updated_at")
     search_fields = ("name", "position")
-    verbose_name = "Funcionário"
-    verbose_name_plural = "Funcionários"
     exclude = ("owner", "person_type", "created_by")
     inlines = [IndividualInline, AddressInline, EmailInline, PhoneInline, EmployeeUserInline]
 
@@ -165,14 +174,12 @@ class EmployeeAdmin(BasePersonAdmin):
 @admin.register(Donor)
 class DonorAdmin(BasePersonAdmin):
     search_fields = ("name",)
-    verbose_name = "Doador"
-    verbose_name_plural = "Doadores"
     exclude = ("owner", "created_by")
     list_filter = ("created_at", "person_type")
 
     class Media:
         js = ('js/inline.js',)  # Carrega o script no Django Admin
-        
+
     def save_model(self, request, obj, form, change):
         if not obj.created_by:  # Define apenas se for um novo objeto
             obj.created_by = request.user
@@ -188,12 +195,14 @@ class DonorAdmin(BasePersonAdmin):
 @admin.register(Company)
 class CompanyAdmin(BasePersonAdmin):
     inlines = [LegalEntityInline, AddressInline, EmailInline, PhoneInline]
-
     list_display = ('image_tag', "name", "created_at", "updated_at")
-    search_fields = ("name", )
-    verbose_name = "Empresa"
-    verbose_name_plural = "Empresas"
+    search_fields = []
+    list_filter = []
     exclude = ("person_type", "created_by")
+    
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_superuser
+
     def save_model(self, request, obj, form, change):
         if not obj.created_by:  # Define apenas se for um novo objeto
             obj.created_by = request.user
@@ -209,11 +218,12 @@ class CompanyAdmin(BasePersonAdmin):
 
     def image_tag(self, obj):
         if obj.logo_file:
-            return format_html('<img src="{}" width="40" height="40"/>', obj.logo_file.url)
+            return format_html('<img class="img-circle" src="{}" width="40" height="40"/>', obj.logo_file.url)
         return "-"
 
     image_tag.short_description = 'Logo'
     image_tag.allow_tags = True
+    
 class UserProfileInline(admin.StackedInline):
     model = UserProfile
     can_delete = False
@@ -277,6 +287,8 @@ class CustomGroupAdmin(admin.ModelAdmin):
     
     # Adicionando ao list_display a função capitalized_name
     list_display = ('capitalized_name',)
-
+    
+    capitalized_name.short_description = "Nome"
+    
 admin.site.unregister(Group)
 admin.site.register(Group, CustomGroupAdmin)

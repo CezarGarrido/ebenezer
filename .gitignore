@@ -176,3 +176,5 @@ cython_debug/
 # Use collect
 staticfiles
 media
+logs
+data

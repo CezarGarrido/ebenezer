@@ -4,6 +4,8 @@ import platform
 import subprocess
 import re
 from django.core.management import execute_from_command_line
+import locale
+import platform
 
 def get_first_ipv4():
     system = platform.system()
@@ -32,6 +34,15 @@ def start_django_server():
 
 def main():
     print("Iniciando servidor Django...")
+
+    try:
+        if platform.system() == 'Windows':
+            locale.setlocale(locale.LC_ALL, 'Portuguese_Brazil.1252')
+        else:
+            locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
+    except locale.Error:
+        print("Aviso: Locale não pôde ser definido.")
+        
     try:
         start_django_server()
     except KeyboardInterrupt:

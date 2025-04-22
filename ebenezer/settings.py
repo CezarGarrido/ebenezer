@@ -243,6 +243,11 @@ LOGGING = {
     },
 
     'loggers': {
+        '': {  # Logger raiz pega tudo
+            'handlers': ['rotating_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
         'django': {
             'handlers': ['rotating_file'],
             'level': 'INFO',

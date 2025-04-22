@@ -273,7 +273,6 @@ class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
     def print_with_win32(self, text, printer="EPSON LX-350"):
         try:
             printers = self.get_printers()
-            bytes_text = text.encode("latin1", errors="replace")
 
             if printer in printers:
                 printer_name = printer
@@ -285,7 +284,7 @@ class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
             hPrinter = win32print.OpenPrinter(printer_name)
             hJob = win32print.StartDocPrinter(hPrinter, 1, ("Recibo de Doação", None, "RAW"))
             win32print.StartPagePrinter(hPrinter)
-            win32print.WritePrinter(hPrinter, bytes_text)
+            win32print.WritePrinter(hPrinter, text)
             win32print.EndPagePrinter(hPrinter)
             win32print.EndDocPrinter(hPrinter)
 

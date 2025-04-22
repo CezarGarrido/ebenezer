@@ -23,7 +23,7 @@ jobs:
             arch: x64
             artifact_name: ebenezer-windows-64
           - os: linux
-            runner: ubuntu-20.04
+            runner: ubuntu-22.04
             arch: x64
             artifact_name: ebenezer-linux-64
 

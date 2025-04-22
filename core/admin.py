@@ -270,5 +270,13 @@ class CustomGroupAdmin(admin.ModelAdmin):
         else:
             obj.save()
 
+    #--------------------------------------------------------------------------------------------
+     # Exibir o nome com apenas a primeira letra maiúscula
+    def capitalized_name(self, obj):
+        return obj.name.capitalize()
+    
+    # Adicionando ao list_display a função capitalized_name
+    list_display = ('capitalized_name',)
+
 admin.site.unregister(Group)
 admin.site.register(Group, CustomGroupAdmin)

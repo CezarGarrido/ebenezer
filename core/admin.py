@@ -44,7 +44,7 @@ class AddressForm(forms.ModelForm):
         }
         
     class Media:
-        js = ("js/vendor/jquery.mask.min.js", "js/mask/cep.js", "js/cep.js")  # Adicionamos um script personalizado
+        js = ("js/vendor/jquery.mask.min.js", "js/mask/cep.js")  # Adicionamos um script personalizado
 
 class IndividualForm(forms.ModelForm):
     class Meta:

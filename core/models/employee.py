@@ -9,7 +9,7 @@ class Employee(Person):
     """Funcionário vinculado a uma empresa"""
     owner = models.ForeignKey(
         "Company",
-        verbose_name="Empresa",
+        verbose_name="Instituição",
         on_delete=models.CASCADE,
         related_name="employees"
     )

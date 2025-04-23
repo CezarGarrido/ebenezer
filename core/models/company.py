@@ -44,14 +44,14 @@ def logo_post_delete_handler(sender, instance, **kwargs):
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
-    company = models.ForeignKey(Company, on_delete=models.CASCADE, limit_choices_to={'person_type': 'J'}, verbose_name="Empresa")
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, limit_choices_to={'person_type': 'J'}, verbose_name="Instituição")
 
     def __str__(self):
         return f"{self.user.username} ({self.company.name})"
 
 class GroupCompany(models.Model):
     group = models.OneToOneField(Group, on_delete=models.CASCADE, related_name="group_company")
-    company = models.ForeignKey(Company, on_delete=models.CASCADE, limit_choices_to={'person_type': 'J'}, verbose_name="Empresa")
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, limit_choices_to={'person_type': 'J'}, verbose_name="Instituição")
 
     def __str__(self):
         return f"{self.group.name} ({self.company.name})"

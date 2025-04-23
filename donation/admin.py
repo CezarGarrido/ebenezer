@@ -127,8 +127,8 @@ class DonationForm(forms.ModelForm):
         widgets = {
             'amount': forms.TextInput(attrs={'data-mask-money': ""}),
             'paid_amount': forms.TextInput(attrs={'data-mask-money': ""}),
-            'expected_at': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date'}),
-            'paid_at': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date'}),
+            'expected_at': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date', 'class': 'form-control'}),
+            'paid_at': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date', 'class': 'form-control'}),
         }
 
     class Media:

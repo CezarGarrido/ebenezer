@@ -21,12 +21,12 @@ class BaseReportForm(forms.Form):
     start_date = forms.DateField(
         label="Data inicial", 
         required=True, 
-        widget=forms.DateInput(attrs={'type': 'date', 'value': datetime.now().date()})
+        widget=forms.DateInput(attrs={'type': 'date', 'value': datetime.now().date(), 'class': 'form-control'})
     )
     end_date = forms.DateField(
         label="Data final", 
         required=True, 
-        widget=forms.DateInput(attrs={'type': 'date', 'value': datetime.now().date()})
+        widget=forms.DateInput(attrs={'type': 'date', 'value': datetime.now().date(), 'class': 'form-control'})
     )
 
     def clean(self):

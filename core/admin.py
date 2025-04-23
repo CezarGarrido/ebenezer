@@ -234,8 +234,8 @@ class CompanyAdmin(BasePersonAdmin):
 class UserProfileInline(admin.StackedInline):
     model = UserProfile
     can_delete = False
-    verbose_name = "Empresa"
-    verbose_name_plural = "Empresa"
+    verbose_name = "Instituição"
+    verbose_name_plural = "Instituição"
 
 class CustomUserAdmin(UserAdmin):
     inlines = (UserProfileInline,)
@@ -261,8 +261,8 @@ admin.site.register(User, CustomUserAdmin)
 class GroupCompanyInline(admin.StackedInline):
     model = GroupCompany
     can_delete = False
-    verbose_name = "Empresa"
-    verbose_name_plural = "Empresa"
+    verbose_name = "Instituição"
+    verbose_name_plural = "Instituição"
     
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if db_field.name == "company" and not request.user.is_superuser:

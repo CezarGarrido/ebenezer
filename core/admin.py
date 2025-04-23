@@ -271,7 +271,8 @@ class GroupCompanyInline(admin.StackedInline):
     
 class CustomGroupAdmin(admin.ModelAdmin):
     inlines = (GroupCompanyInline,)
-
+    filter_horizontal = ('permissions',)
+    
     def get_queryset(self, request):
         """ Filtra grupos da mesma empresa do admin logado. """
         qs = super().get_queryset(request)

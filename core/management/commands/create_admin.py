@@ -1,6 +1,7 @@
+from tokenize import group
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
-from core.models.company import Company, UserProfile
+from core.models.company import Company, UserProfile, GroupCompany
 #----------------------------------------------------
 from django.contrib.auth.models import Group, Permission    # permissões e grupos
 from core.models.donor import Donor     # modelos que vão ter permissões específicas
@@ -43,9 +44,11 @@ class Command(BaseCommand):
         #-------------------------------------------------------------------------------
         # cria (se não existir) o grupo ADMINISTRATIVO
         admin_group, admin_created = Group.objects.get_or_create(name='ADMINISTRATIVO') 
+        GroupCompany.objects.get_or_create(group=admin_group, company=company)
 
         # cria (se não existir) o grupo TELEMARKETING
         tele_group, tele_created = Group.objects.get_or_create(name='TELEMARKETING')
+        GroupCompany.objects.get_or_create(group=tele_group, company=company)
 
         if admin_created:
             # Só define todas as permissões se o grupo foi criado agora

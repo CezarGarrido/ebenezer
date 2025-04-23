@@ -44,7 +44,7 @@ class AddressForm(forms.ModelForm):
         }
         
     class Media:
-        js = ("js/vendor/jquery.mask.min.js", "js/mask/cep.js",)  # Adicionamos um script personalizado
+        js = ("js/vendor/jquery.mask.min.js", "js/mask/cep.js")  # Adicionamos um script personalizado
 
 class IndividualForm(forms.ModelForm):
     class Meta:
@@ -98,8 +98,15 @@ class AddressInline(admin.StackedInline):
     extra = 1
     verbose_name = "Endereço"
     verbose_name_plural = "Endereços"
-    ordering_field = ("cep",)
-
+    ordering_field = ("postal_code",)
+    
+    
+    def get_fields(self, request, obj=None):
+        fields = super().get_fields(request, obj)
+        # Ordernar para que o cep apareça no topo do formulario
+        fields = ['postal_code'] + [field for field in fields if field != 'postal_code']
+        return fields
+    
 class EmailInline(admin.TabularInline):
     model = Email
     form = EmailForm

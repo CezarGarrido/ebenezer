@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from core.escbuilder.escprinter import ESCPrinter
 from core.models.company import Company
 from core.models.donor import Donor
 from django.core.exceptions import ObjectDoesNotExist
@@ -91,10 +92,14 @@ class Donation(models.Model):
         return f"Doação {self.id}"
     
     def receipt(self):
+        
+        CENTER_WIDTH = 66
+        PAGE_WIDTH = CENTER_WIDTH + 40
+    
         company = self.owner
-        center = 66
 
-        def linha_lado_lado(esquerda, direita, largura=center):
+
+        def linha_lado_lado(esquerda, direita, largura=CENTER_WIDTH):
             return f"{esquerda}{' ' * (largura - len(esquerda) - len(direita))}{direita}"
 
         def valor_por_extenso(valor):
@@ -105,23 +110,23 @@ class Donation(models.Model):
 
         # Cabeçalho
         b.bold(True)
-        b.text(company.name.center(center + 40))
+        b.text(company.name.center(PAGE_WIDTH))
         b.bold(False).linefeed()
+        
         b.condensed(True)
-
         a = "Utilidade Pública Municipal Lei Nº 1527 de 09/11/88"
         c = "Utilidade Pública Estadual Lei Nº 1493 de 13/05/94"
-        b.text(linha_lado_lado(a, c, largura=center + 40)).linefeed()
-        b.text("Utilidade Pública Federal Portaria Nº 735 de 13/08/01 DOU 14/08/01".center(center + 40)).linefeed()
-    
-        b.text("CEBAS: CEBAS 0030 Resolução Nº 05 de 12/04/2021".center(center + 40)).linefeed()
+        b.text(linha_lado_lado(a, c, largura=PAGE_WIDTH)).linefeed()
+        b.text("Utilidade Pública Federal Portaria Nº 735 de 13/08/01 DOU 14/08/01".center(PAGE_WIDTH)).linefeed()
+        b.text("CEBAS: CEBAS 0030 Resolução Nº 05 de 12/04/2021".center(PAGE_WIDTH)).linefeed()
         b.linefeed()
+        b.condensed(False)
 
         # Endereço
         endereco = company.addresses.filter(address_type='UNI').first() or company.addresses.first()
         if endereco:
-            b.text(f"{endereco.street}, {endereco.number} - {endereco.neighborhood}".center(center + 40)).linefeed()
-            b.text(f"{endereco.city} - {endereco.state} - CEP: {endereco.postal_code}".center(center + 40)).linefeed()
+            b.text(f"{endereco.street}, {endereco.number} - {endereco.neighborhood}".center(PAGE_WIDTH)).linefeed()
+            b.text(f"{endereco.city} - {endereco.state} - CEP: {endereco.postal_code}".center(PAGE_WIDTH)).linefeed()
 
         # Contatos
         telefones = company.phones.all()
@@ -142,18 +147,18 @@ class Donation(models.Model):
             b.text(f"E-mails: {email_str}").linefeed()
 
         b.linefeed()
-        b.text("-" * (center + 40)).linefeed()
+        b.text("-" * (PAGE_WIDTH)).linefeed()
         b.bold(True)
-        b.text("RECIBO DE DOAÇÃO".center(center + 40)).linefeed()
+        b.text("RECIBO DE DOAÇÃO".center(PAGE_WIDTH)).linefeed()
         b.bold(False)
 
-        b.text("-" * (center + 40)).linefeed()
+        b.text("-" * (PAGE_WIDTH)).linefeed()
         b.linefeed()
         
         # Número do recibo e data de emissão
         recibo_num = f"Recibo Nº...: {self.id}"
         data_emissao = f"Emitido em: {self.expected_at.strftime('%d/%m/%Y')}"
-        b.text(linha_lado_lado(recibo_num, data_emissao, largura=center+40)).linefeed()
+        b.text(linha_lado_lado(recibo_num, data_emissao, largura=PAGE_WIDTH)).linefeed()
         
         # Dados do doador
         b.text(f"Recebemos de: {self.donor.name}").linefeed()
@@ -207,13 +212,13 @@ class Donation(models.Model):
         
         if self.thank_you_message:
             for line in self.thank_you_message.lines.all():
-                b.text(line.text.center(center + 40)).linefeed()
+                b.text(line.text.center(PAGE_WIDTH)).linefeed()
             b.linefeed(2)  # espaço extra após a mensagem
         else:
-            b.text("Agradecemos sua doação.".center(center + 40)).linefeed(2)
+            b.text("Agradecemos sua doação.".center(PAGE_WIDTH)).linefeed(2)
             
-        b.text("______________________________".center(center + 40)).linefeed()
-        b.text("Assinatura do Responsável".center(center + 40)).linefeed()
+        b.text("______________________________".center(PAGE_WIDTH)).linefeed()
+        b.text("Assinatura do Responsável".center(PAGE_WIDTH)).linefeed()
 
         b.form_feed()
 
@@ -222,3 +227,159 @@ class Donation(models.Model):
     def receipt_html(self):
         b = ESCBuilder()
         return b.to_html(self.receipt())
+    
+
+    def test_receipt(self):
+        printer = "LPT1"
+        company = self.owner
+        center = 66
+
+        def linha_lado_lado(esquerda, direita, largura=center):
+            return f"{esquerda}{' ' * (largura - len(esquerda) - len(direita))}{direita}"
+
+        def valor_por_extenso(valor):
+            return num2words(valor, lang='pt_BR', to='currency')
+
+        # Initialize printer
+        escp = ESCPrinter(printer, escp24pin=False)
+        if not escp.initialize():
+            raise Exception("Failed to initialize printer")
+
+        # Header
+        escp.bold(True)
+        escp.print(company.name.center(center + 40))
+        escp.lineFeed()
+        escp.bold(False)
+
+        a = "Utilidade Pública Municipal Lei Nº 1527 de 09/11/88"
+        c = "Utilidade Pública Estadual Lei Nº 1493 de 13/05/94"
+        escp.print(linha_lado_lado(a, c, largura=center + 40))
+        escp.lineFeed()
+        escp.print("Utilidade Pública Federal Portaria Nº 735 de 13/08/01 DOU 14/08/01".center(center + 40))
+        escp.lineFeed()
+        escp.print("CEBAS: CEBAS 0030 Resolução Nº 05 de 12/04/2021".center(center + 40))
+        escp.lineFeed()
+        escp.lineFeed()
+
+        # Address
+        endereco = company.addresses.filter(address_type='UNI').first() or company.addresses.first()
+        if endereco:
+            escp.print(f"{endereco.street}, {endereco.number} - {endereco.neighborhood}".center(center + 40))
+            escp.lineFeed()
+            escp.print(f"{endereco.city} - {endereco.state} - CEP: {endereco.postal_code}".center(center + 40))
+            escp.lineFeed()
+
+        # Contacts
+        telefones = company.phones.all()
+        emails = company.emails.all()
+        try:
+            legal = company.legalentity
+            cnpj = legal.cnpj or "-"
+            escp.print(f"CNPJ: {cnpj}")
+            escp.lineFeed()
+        except ObjectDoesNotExist:
+            pass
+        
+        if telefones.exists():
+            tel_str = ', '.join([t.phone for t in telefones])
+            escp.print(f"Telefones: {tel_str}")
+            escp.lineFeed()
+
+        if emails.exists():
+            email_str = ', '.join([e.email for e in emails])
+            escp.print(f"E-mails: {email_str}")
+            escp.lineFeed()
+
+        escp.lineFeed()
+        escp.print("-" * (center + 40))
+        escp.lineFeed()
+        escp.bold(True)
+        escp.print("RECIBO DE DOAÇÃO".center(center + 40))
+        escp.lineFeed()
+        escp.bold(False)
+
+        escp.print("-" * (center + 40))
+        escp.lineFeed()
+        escp.lineFeed()
+        
+        # Receipt number and issue date
+        recibo_num = f"Recibo Nº...: {self.id}"
+        data_emissao = f"Emitido em: {self.expected_at.strftime('%d/%m/%Y')}"
+        escp.print(linha_lado_lado(recibo_num, data_emissao, largura=center+40))
+        escp.lineFeed()
+        
+        # Donor data
+        escp.print(f"Recebemos de: {self.donor.name}")
+        escp.lineFeed()
+        
+        # Donor address
+        if hasattr(self.donor, 'addresses'):
+            endereco_doador = self.donor.addresses.first()
+            if endereco_doador:
+                endereco_parts = []
+                if endereco_doador.street:
+                    endereco_parts.append(endereco_doador.street)
+                if endereco_doador.number:
+                    endereco_parts.append(endereco_doador.number)
+                endereco_str = " ".join(endereco_parts) if endereco_parts else "-"
+                escp.print(f"Endereço....: {endereco_str}")
+                escp.lineFeed()
+                
+                bairro_str = endereco_doador.neighborhood if endereco_doador.neighborhood else "-"
+                escp.print(f"Bairro......: {bairro_str}")
+                escp.lineFeed()
+                
+                cidade_estado_parts = []
+                if endereco_doador.city:
+                    cidade_estado_parts.append(endereco_doador.city)
+                if endereco_doador.state:
+                    cidade_estado_parts.append(endereco_doador.state)
+                cidade_estado_str = " - ".join(cidade_estado_parts) if cidade_estado_parts else "-"
+                escp.print(f"Cidade......: {cidade_estado_str}")
+                escp.lineFeed()
+
+        # Donor contact
+        if hasattr(self.donor, 'phones') and self.donor.phones.exists():
+            telefone = self.donor.phones.first().phone
+            escp.print(f"Contato.....: {telefone}")
+            escp.lineFeed()
+        
+        # Donation value
+        valor_formatado = f"{self.amount:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+        escp.print(f"Valor.......: R$ {valor_formatado}")
+        escp.lineFeed()
+        escp.print(f"Por Extenso.: {valor_por_extenso(float(self.amount))}")
+        escp.lineFeed()
+        
+        # Payment method
+        if self.method and self.paid:
+            escp.print(f"Pago em.....: {dict(PAYMENT_METHOD_CHOICES).get(self.method, 'Outro')}")
+            escp.lineFeed()
+            if self.paid_at:
+                escp.print(f"Data Pagto..: {self.paid_at.strftime('%d/%m/%Y')}")
+                escp.lineFeed()
+            if self.received_by:
+                escp.print(f"Recebido por.: {self.received_by.name}")
+                escp.lineFeed()
+
+        # Final message
+        escp.lineFeed()
+        
+        if self.thank_you_message:
+            for line in self.thank_you_message.lines.all():
+                escp.print(line.text.center(center + 40))
+                escp.lineFeed()
+            escp.lineFeed()
+            escp.lineFeed()
+        else:
+            escp.print("Agradecemos sua doação.".center(center + 40))
+            escp.lineFeed()
+            escp.lineFeed()
+            
+        escp.print("______________________________".center(center + 40))
+        escp.lineFeed()
+        escp.print("Assinatura do Responsável".center(center + 40))
+        escp.lineFeed()
+
+        escp.formFeed()
+        escp.close()

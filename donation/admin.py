@@ -198,9 +198,15 @@ class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
                 <input type="button" class="btn btn-outline-success form-control" value="Imprimir no Navegador" onclick="window.print()" name="_print_browser" />
             </div>
             
+            
+            <div class="form-group">
+                <input type="submit" class="btn btn-outline-info form-control" value="Imprimir na LPT1" name="_print_receipt_test" />
+            </div>
+            
             <div class="form-group">
                 <input type="submit" class="btn btn-outline-warning form-control" value="Imprimir na Impressora" name="_print_receipt" />
             </div>
+            
             
             <div class="help-block">
                 * Recibo gerado com os dados da última edição salva.
@@ -231,6 +237,25 @@ class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
     format_paid_amount.short_description = "Valor Recebido"
 
     def response_change(self, request, obj):
+        if '_print_receipt_test' in request.POST:
+            try:
+                logger.info("Solicitação para imprimir recibo recebida.")
+                obj.test_receipt()
+                if platform.system() == "Windows":
+                    if hasattr(obj, "test_receipt") and callable(obj.test_receipt):
+                        obj.test_receipt()
+                        messages.success(request, "Recibo gerado com sucesso.")
+                    else:
+                        messages.error(request, "O objeto não possui o método 'receipt'.")
+                        logger.info("Recibo gerado com sucesso.")
+                else:
+                    messages.warning(request, "Disponível apenas para Windows")
+                    logger.warning("Tentativa de impressão em SO não suportado: %s", platform.system())
+
+            except Exception as e:
+                logger.error("Erro ao gerar recibo", exc_info=True)
+                messages.error(request, "Erro ao gerar recibo.")
+        
         if '_print_receipt' in request.POST:
             try:
                 logger.info("Solicitação para imprimir recibo recebida.")

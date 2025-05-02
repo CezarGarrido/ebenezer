@@ -6,6 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from core.escbuilder.escbuilder import ESCBuilder
 from num2words import num2words
 from core.models.employee import Employee
+import subprocess
 
 PAYMENT_METHOD_CHOICES = [
     ('cash', 'Dinheiro'),
@@ -217,7 +218,12 @@ class Donation(models.Model):
 
         b.form_feed()
 
-        return b.build()
+        content = b.build()
+        
+        proc = subprocess.Popen(['lpr', '-P', 'LX-300', '-o', 'raw'], stdin=subprocess.PIPE)
+        proc.communicate(input=content)
+
+        return content
     
     def receipt_html(self):
         b = ESCBuilder()

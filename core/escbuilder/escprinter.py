@@ -137,7 +137,19 @@ class ESCPrinter:
     def bold(self, bold):
         """Ativa/desativa negrito"""
         self._write(self.ESC + (self.E if bold else self.F))
-    
+        
+    def condensed(self, enable=True):
+        """Ativa ou desativa modo condensado"""
+        if enable:
+            self._write(self.ESC + chr(15))
+            self._write(self.CR)
+        else:
+            self._write(self.ESC + self.AT)    # ESC @: reset total
+            self.select10CPI()
+            self.selectDraftPrinting()
+            self.setCharacterSet(self.BRAZIL)
+        return self
+
     def proportionalMode(self, proportional):
         """Ativa/desativa modo proporcional"""
         self._write(self.ESC + self.p + (chr(49) if proportional else chr(48)))

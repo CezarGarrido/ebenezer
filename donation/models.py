@@ -1,3 +1,5 @@
+from encodings.punycode import T
+import subprocess
 from django.db import models
 from django.contrib.auth.models import User
 from core.escbuilder.escprinter import ESCPrinter
@@ -7,6 +9,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from core.escbuilder.escbuilder import ESCBuilder
 from num2words import num2words
 from core.models.employee import Employee
+import platform
 
 PAYMENT_METHOD_CHOICES = [
     ('cash', 'Dinheiro'),
@@ -230,9 +233,9 @@ class Donation(models.Model):
     
 
     def test_receipt(self):
-        printer = "LPT1"
+        printer = "recibo.bin"
         company = self.owner
-        center = 66
+        center = 40
 
         def linha_lado_lado(esquerda, direita, largura=center):
             return f"{esquerda}{' ' * (largura - len(esquerda) - len(direita))}{direita}"
@@ -244,30 +247,34 @@ class Donation(models.Model):
         escp = ESCPrinter(printer, escp24pin=False)
         if not escp.initialize():
             raise Exception("Failed to initialize printer")
-
+        escp.setMargins(5, 75)  # Deixa uma margem à esquerda e direita
+        
         # Header
         escp.bold(True)
-        escp.print(company.name.center(center + 40))
+        escp.print(company.name.upper().center(center + 35))
         escp.lineFeed()
         escp.bold(False)
 
+        escp.condensed(True)
+
         a = "Utilidade Pública Municipal Lei Nº 1527 de 09/11/88"
         c = "Utilidade Pública Estadual Lei Nº 1493 de 13/05/94"
-        escp.print(linha_lado_lado(a, c, largura=center + 40))
+        escp.print(linha_lado_lado(a, c, largura=center + 80))
         escp.lineFeed()
-        escp.print("Utilidade Pública Federal Portaria Nº 735 de 13/08/01 DOU 14/08/01".center(center + 40))
-        escp.lineFeed()
-        escp.print("CEBAS: CEBAS 0030 Resolução Nº 05 de 12/04/2021".center(center + 40))
-        escp.lineFeed()
+        escp.print(linha_lado_lado("Utilidade Pública Federal Portaria Nº 735 de 13/08/01 DOU 14/08/01", "CEBAS: CEBAS 0030 Resolução Nº 05 de 12/04/2021", largura=center + 80))
+        escp.print("Atest. de Reg. no Cons. Nac. de Assist. Soc. R n.º 0018 Res n.º 05 de 02/02/04 DOU 05/02/04".center(center+80))
         escp.lineFeed()
 
         # Address
         endereco = company.addresses.filter(address_type='UNI').first() or company.addresses.first()
         if endereco:
-            escp.print(f"{endereco.street}, {endereco.number} - {endereco.neighborhood}".center(center + 40))
+            escp.print(f"{endereco.street}, {endereco.number}, {endereco.neighborhood} - CEP: {endereco.postal_code}".upper().center(center + 94))
             escp.lineFeed()
-            escp.print(f"{endereco.city} - {endereco.state} - CEP: {endereco.postal_code}".center(center + 40))
+            escp.print(f"{endereco.city} - {endereco.state}".upper().center(center + 80))
             escp.lineFeed()
+
+        escp.condensed(False)
+        escp.lineFeed()
 
         # Contacts
         telefones = company.phones.all()
@@ -322,11 +329,11 @@ class Donation(models.Model):
                 if endereco_doador.number:
                     endereco_parts.append(endereco_doador.number)
                 endereco_str = " ".join(endereco_parts) if endereco_parts else "-"
-                escp.print(f"Endereço....: {endereco_str}")
+                escp.print(f"Endereço....: {endereco_str.upper()}")
                 escp.lineFeed()
                 
                 bairro_str = endereco_doador.neighborhood if endereco_doador.neighborhood else "-"
-                escp.print(f"Bairro......: {bairro_str}")
+                escp.print(f"Bairro......: {bairro_str.upper()}")
                 escp.lineFeed()
                 
                 cidade_estado_parts = []
@@ -335,25 +342,25 @@ class Donation(models.Model):
                 if endereco_doador.state:
                     cidade_estado_parts.append(endereco_doador.state)
                 cidade_estado_str = " - ".join(cidade_estado_parts) if cidade_estado_parts else "-"
-                escp.print(f"Cidade......: {cidade_estado_str}")
+                escp.print(f"Cidade......: {cidade_estado_str.upper()}")
                 escp.lineFeed()
 
         # Donor contact
         if hasattr(self.donor, 'phones') and self.donor.phones.exists():
             telefone = self.donor.phones.first().phone
-            escp.print(f"Contato.....: {telefone}")
+            escp.print(f"Contato.....: {telefone.upper()}")
             escp.lineFeed()
         
         # Donation value
         valor_formatado = f"{self.amount:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
         escp.print(f"Valor.......: R$ {valor_formatado}")
         escp.lineFeed()
-        escp.print(f"Por Extenso.: {valor_por_extenso(float(self.amount))}")
+        escp.print(f"Por Extenso.: {valor_por_extenso(float(self.amount)).upper()}")
         escp.lineFeed()
         
         # Payment method
         if self.method and self.paid:
-            escp.print(f"Pago em.....: {dict(PAYMENT_METHOD_CHOICES).get(self.method, 'Outro')}")
+            escp.print(f"Pago em.....: {dict(PAYMENT_METHOD_CHOICES).get(self.method, 'Outro').upper()}")
             escp.lineFeed()
             if self.paid_at:
                 escp.print(f"Data Pagto..: {self.paid_at.strftime('%d/%m/%Y')}")
@@ -367,7 +374,7 @@ class Donation(models.Model):
         
         if self.thank_you_message:
             for line in self.thank_you_message.lines.all():
-                escp.print(line.text.center(center + 40))
+                escp.print(line.text.upper().center(center + 40))
                 escp.lineFeed()
             escp.lineFeed()
             escp.lineFeed()
@@ -378,8 +385,29 @@ class Donation(models.Model):
             
         escp.print("______________________________".center(center + 40))
         escp.lineFeed()
-        escp.print("Assinatura do Responsável".center(center + 40))
+        escp.print("Assinatura".center(center + 40))
         escp.lineFeed()
 
         escp.formFeed()
         escp.close()
+        
+        if platform.system() == "Windows":
+            import win32print
+
+            printer_name = "LX-300"  # ou o nome correto da impressora no Windows
+            with open(printer, "rb") as f:
+                content = f.read()
+
+            # Abre a impressora e envia o conteúdo RAW
+            hPrinter = win32print.OpenPrinter(printer_name)
+            try:
+                hJob = win32print.StartDocPrinter(hPrinter, 1, ("Recibo de Doação", None, "RAW"))
+                win32print.StartPagePrinter(hPrinter)
+                win32print.WritePrinter(hPrinter, content)
+                win32print.EndPagePrinter(hPrinter)
+                win32print.EndDocPrinter(hPrinter)
+            finally:
+                win32print.ClosePrinter(hPrinter)
+        else:
+            # Se não for Windows, usa lpr normalmente
+            subprocess.run(["lpr", "-P", "LX-300", "-o", "raw", printer])

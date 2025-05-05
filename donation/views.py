@@ -315,7 +315,7 @@ class ReportsAdminView(admin.ModelAdmin, ReportBuilderMixin):
         itens_na_pagina = 0
         pagina = 1
         
-        for donation in list(donations) * 100:
+        for donation in list(donations) * 30:
             valor_previsto = donation.amount or 0
             total_previsto += valor_previsto
             total_recebido += donation.paid_amount or 0
@@ -381,7 +381,7 @@ class ReportsAdminView(admin.ModelAdmin, ReportBuilderMixin):
         itens_na_pagina = 0
         pagina = 1
         
-        for donation in list(donations) * 100:
+        for donation in list(donations) * 30:
             valor_previsto = donation.amount or 0
             total_previsto += valor_previsto
             total_recebido += donation.paid_amount or 0

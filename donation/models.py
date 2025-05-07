@@ -154,10 +154,11 @@ class Donation(models.Model):
         CHARS_PER_LINE = 80  # Adjusted for typical condensed font on receipt printers
         CHARS_PER_LINE_CONDENSED = 136  # Adjusted for typical condensed font on receipt printers
 
-        LEFT_MARGIN = 1  # Minimum left margin in characters
+        LEFT_MARGIN = 5  # Minimum left margin in characters
         RIGHT_MARGIN = 1  # Minimum right margin in characters
+        RIGHT_MARGIN_CONDENSED  = 5  # Minimum right margin in characters
         MAX_LINE_WIDTH = CHARS_PER_LINE - LEFT_MARGIN - RIGHT_MARGIN
-        MAX_LINE_WIDT_CONDENSED = CHARS_PER_LINE_CONDENSED - LEFT_MARGIN - RIGHT_MARGIN
+        MAX_LINE_WIDT_CONDENSED = CHARS_PER_LINE_CONDENSED - LEFT_MARGIN - RIGHT_MARGIN_CONDENSED
 
         def print_centered(printer, text):
             """Print text centered within the paper width"""
@@ -328,7 +329,7 @@ class Donation(models.Model):
             
             # Donation value
             formatted_value = format_currency_value(receipt.amount)
-            printer.print(f"Valor.......: R$ {formatted_value}")
+            printer.print(f"Valor.......: {formatted_value}")
             printer.lineFeed()
             printer.print(f"Por Extenso.: {format_currency_extenso(float(receipt.amount))}")
             printer.lineFeed()
@@ -338,14 +339,6 @@ class Donation(models.Model):
                 method = dict(PAYMENT_METHOD_CHOICES).get(receipt.method, 'Outro').upper()
                 printer.print(f"Pago em.....: {method}")
                 printer.lineFeed()
-                
-                if receipt.paid_at:
-                    printer.print(f"Data Pagto..: {receipt.paid_at.strftime('%d/%m/%Y')}")
-                    printer.lineFeed()
-                    
-                if receipt.received_by:
-                    printer.print(f"Recebido por.: {receipt.received_by.name}")
-                    printer.lineFeed()
 
         def print_footer(printer, settings):
             """Print receipt footer section"""
@@ -366,7 +359,6 @@ class Donation(models.Model):
             print_centered(printer, "Assinatura")
 
 
-
         # Main execution
         company = self.owner
 
@@ -374,7 +366,7 @@ class Donation(models.Model):
         escp = ESCPrinter(escp24pin=False)
         if not escp.initialize():
             raise Exception("Failed to initialize printer")
-
+        escp.setMargins(5, 80)
         print_company_info(escp, company)
         print_receipt_header(escp)
         print_donation_details(escp, self)

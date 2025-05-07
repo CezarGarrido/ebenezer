@@ -54,6 +54,8 @@ class ESCPrinter:
         self.USA = self.ARGUMENT_1
         self.BRAZIL = self.ARGUMENT_25
     
+        self.columnsRight = -1
+        self.columnsLeft = -1
     def close(self):
         """Simula o fechamento do stream"""
         pass  # Nada a fechar porque está tudo na memória
@@ -118,6 +120,10 @@ class ESCPrinter:
             self.select10CPI()
             self.selectDraftPrinting()
             self.setCharacterSet(self.BRAZIL)
+            
+            if self.columnsLeft > 0 and self.columnsRight > 0:
+                self.setMargins(self.columnsLeft, self.columnsRight)
+
         return self
 
 
@@ -153,6 +159,8 @@ class ESCPrinter:
         self._write(self.TAB * tabs)
     
     def setMargins(self, columnsLeft, columnsRight):
+        self.columnsLeft = columnsLeft
+        self.columnsRight = columnsRight
         self._write(self.ESC + self.l + chr(columnsLeft))
         self._write(self.ESC + self.Q + chr(columnsRight))
         return self

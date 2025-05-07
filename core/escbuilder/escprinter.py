@@ -1,25 +1,25 @@
+from html import escape
+import re
 import sys
 
 class ESCPrinter:
-    def __init__(self, printer, escp24pin):
+    def __init__(self, escp24pin=False):
         """
         Construtor da classe ESCPrinter
-        :param printer: string indicando o caminho da impressora na rede
+        :param printer: string indicando o caminho da impressora (não usado agora)
         :param escp24pin: booleano indicando se a impressora é 24 pinos ESC/P2
         """
-        
-        self.printer = printer
         self.escp24pin = escp24pin
-        self.ostream = None
+        self.commands = bytearray()
         self.streamOpenSuccess = False
         
         # Constantes
-        self.MAX_ADVANCE_9PIN = 216  # Para impressoras 24/48 pinos ESC/P2 deve ser 180
+        self.MAX_ADVANCE_9PIN = 216
         self.MAX_ADVANCE_24PIN = 180
-        self.MAX_UNITS = 127  # Para posicionamento vertical, 127 como máximo parece funcionar melhor
+        self.MAX_UNITS = 127
         self.CM_PER_INCH = 2.54
         
-        # Comandos ESC/P em ASCII
+        # ESC/P comandos
         self.ESC = chr(27)
         self.AT = chr(64)
         self.LINE_FEED = chr(10)
@@ -38,7 +38,7 @@ class ESCPrinter:
         self.J = chr(74)
         self.P = chr(80)
         self.Q = chr(81)
-        self.dollar = chr(36)  # $ é palavra reservada em Python
+        self.dollar = chr(36)
         
         # Argumentos
         self.ARGUMENT_0 = chr(0)
@@ -51,111 +51,80 @@ class ESCPrinter:
         self.ARGUMENT_7 = chr(7)
         self.ARGUMENT_25 = chr(25)
         
-        # Conjuntos de caracteres
         self.USA = self.ARGUMENT_1
         self.BRAZIL = self.ARGUMENT_25
     
     def close(self):
-        """Fecha o stream, usado quando o trabalho de impressão termina"""
-        if self.ostream:
-            try:
-                self.ostream.close()
-            except IOError as e:
-                print(f"Erro ao fechar o stream: {e}", file=sys.stderr)
+        """Simula o fechamento do stream"""
+        pass  # Nada a fechar porque está tudo na memória
     
     def initialize(self):
-        """Inicializa a impressora e retorna True se bem-sucedido"""
-        self.streamOpenSuccess = False
+        """Inicializa o buffer de comandos"""
+        self.commands.clear()
+        self.streamOpenSuccess = True
         
-        try:
-            self.ostream = open(self.printer, 'wb')
-            
-            # Reset configurações padrão
-            self._write(self.ESC + self.AT)
-            
-            # Seleciona pitch de 10 caracteres por polegada
-            self.select10CPI()
-            
-            # Seleciona qualidade de rascunho
-            self.selectDraftPrinting()
-            
-            # Define conjunto de caracteres
-            self.setCharacterSet(self.BRAZIL)
-            
-            self.streamOpenSuccess = True
-        except IOError as e:
-            print(f"Erro ao inicializar impressora: {e}", file=sys.stderr)
+        self._write(self.ESC + self.AT)
+        self.select10CPI()
+        self.selectDraftPrinting()
+        self.setCharacterSet(self.BRAZIL)
         
         return self.streamOpenSuccess
     
     def _write(self, data):
-        """Método auxiliar para escrever dados na impressora"""
-        if self.ostream:
-            try:
-                if isinstance(data, str):
-                    self.ostream.write(data.encode('latin-1'))
-                else:
-                    self.ostream.write(data)
-                self.ostream.flush()
-            except IOError as e:
-                print(f"Erro ao escrever na impressora: {e}", file=sys.stderr)
-    
+        """Acumula dados em memória"""
+        if isinstance(data, str):
+            self.commands += data.encode('latin-1')
+        else:
+            self.commands += data
+
     def select10CPI(self):
-        """10 caracteres por polegada (condensado disponível)"""
         self._write(self.ESC + self.P)
     
     def select15CPI(self):
-        """15 caracteres por polegada (condensado não disponível)"""
         self._write(self.ESC + self.g)
     
     def selectDraftPrinting(self):
-        """Define qualidade de impressão como rascunho"""
         self._write(self.ESC + self.x + chr(48))
     
     def selectLQPrinting(self):
-        """Define qualidade de impressão como letter quality"""
         self._write(self.ESC + self.x + chr(49))
     
     def setCharacterSet(self, charset):
-        """Define o conjunto de caracteres"""
-        # Atribui tabela de caracteres
         self._write(self.ESC + self.PARENTHESIS_LEFT + self.t + 
-                   self.ARGUMENT_3 + self.ARGUMENT_0 + 
-                   self.ARGUMENT_1 + charset + self.ARGUMENT_0)
-        
-        # Seleciona tabela de caracteres
+                    self.ARGUMENT_3 + self.ARGUMENT_0 + 
+                    self.ARGUMENT_1 + charset + self.ARGUMENT_0)
         self._write(self.ESC + self.t + self.ARGUMENT_1)
     
-    def lineFeed(self):
-        """Executa nova linha"""
-        self._write(self.CR + self.LINE_FEED)
+    def lineFeed(self, lines=1):
+        for _ in range(lines):
+            self._write(self.CR + self.LINE_FEED)
+        return self
     
     def formFeed(self):
-        """Ejeita uma única folha"""
         self._write(self.CR + self.FF)
     
     def bold(self, bold):
-        """Ativa/desativa negrito"""
         self._write(self.ESC + (self.E if bold else self.F))
+        return self
         
     def condensed(self, enable=True):
         """Ativa ou desativa modo condensado"""
         if enable:
-            self._write(self.ESC + chr(15))
+            self._write(self.ESC + chr(15))  # Condensed ON
             self._write(self.CR)
         else:
-            self._write(self.ESC + self.AT)    # ESC @: reset total
+            # Reset completo
+            self._write(self.ESC + self.AT)  # ESC @ = Reset
             self.select10CPI()
             self.selectDraftPrinting()
             self.setCharacterSet(self.BRAZIL)
         return self
 
+
     def proportionalMode(self, proportional):
-        """Ativa/desativa modo proporcional"""
         self._write(self.ESC + self.p + (chr(49) if proportional else chr(48)))
     
     def advanceVertical(self, centimeters):
-        """Avança a posição vertical de impressão aproximadamente em centímetros"""
         inches = centimeters / self.CM_PER_INCH
         units = int(inches * (self.MAX_ADVANCE_24PIN if self.escp24pin else self.MAX_ADVANCE_9PIN))
         
@@ -165,7 +134,6 @@ class ESCPrinter:
             units -= self.MAX_UNITS
     
     def advanceHorizontal(self, centimeters):
-        """Avança a posição horizontal de impressão aproximadamente em centímetros"""
         inches = centimeters / self.CM_PER_INCH
         units = int(inches * 120)
         units_low = units % 256
@@ -174,7 +142,6 @@ class ESCPrinter:
         self._write(self.ESC + self.BACKSLASH + chr(units_low) + chr(units_high))
     
     def setAbsoluteHorizontalPosition(self, centimeters):
-        """Define a posição horizontal absoluta em centímetros da margem esquerda"""
         inches = centimeters / self.CM_PER_INCH
         units = int(inches * 60)
         units_low = units % 256
@@ -183,31 +150,85 @@ class ESCPrinter:
         self._write(self.ESC + self.dollar + chr(units_low) + chr(units_high))
     
     def horizontalTab(self, tabs):
-        """Executa tabulação horizontal o número especificado de vezes"""
         self._write(self.TAB * tabs)
     
     def setMargins(self, columnsLeft, columnsRight):
-        """Define margens esquerda e direita em colunas"""
-        # Margem esquerda
         self._write(self.ESC + self.l + chr(columnsLeft))
-        
-        # Margem direita
         self._write(self.ESC + self.Q + chr(columnsRight))
+        return self
     
     def print(self, text):
-        """Imprime texto"""
         self._write(text)
+        return self
     
     def isInitialized(self):
-        """Retorna True se a impressora foi inicializada com sucesso"""
         return self.streamOpenSuccess
     
-    def getShare(self):
-        """Retorna o nome do compartilhamento da impressora (rede Windows)"""
-        return self.printer
+    def build(self):
+        """Retorna os comandos acumulados como bytes"""
+        return bytes(self.commands)
     
     def __str__(self):
-        """Retorna representação em string do ESCPrinter"""
+        return f"<ESCPrinter[24pin={self.escp24pin}]>"
+
+    def to_html(self, data: bytes) -> str:
+        # Converte os bytes para string usando latin1 (compatível com ESC/P)
+        texto = data.decode('latin1')
+
+        # Substituições de controle
+        texto = (
+            texto
+            .replace('\x1BE', '<b>')   # ESC E → Negrito ON
+            .replace('\x1BF', '</b>')  # ESC F → Negrito OFF
+            .replace('\x0D', '')       # CR (carriage return)
+            .replace('\x0C', '\f')     # FF → marca página (vamos dividir depois)
+        )
+
+        # Remove outros comandos ESC/P (menos os que mapeamos acima)
+        texto = re.sub(r'\x1B[@-Z\\^_]', '', texto)            # ESC comandos simples
+        texto = re.sub(r'\x1B\([^\x1B]{0,6}', '', texto)       # ESC (x comandos
+        texto = re.sub(r'\x1B\(t[\s\S]{0,6}', '', texto)       # ESC (t com charset
+        texto = re.sub(r'\x1Bt.', '', texto)                   # ESC tX
+        texto = re.sub(r'\x1Bx.', '', texto)                   # ESC xX
         
-        return f"<ESCPrinter[share={self.printer}, 24pin={self.escp24pin}]>"
+        # Processa texto condensado (alternando entre normal e condensado)
+        partes = []
+        condensado = False
+        for char in texto:
+            if char == '\x0F':  # Condensed ON
+                condensado = True
+                partes.append('<span style="font-size: 8px;font-stretch:condensed;">')
+            elif char == '\x12':  # Condensed OFF
+                condensado = False
+                partes.append('</span>')
+            elif char == '\x1B':  # ESC perdido
+                continue
+            else:
+                partes.append(char)
         
+        texto_processado = ''.join(partes)
+        
+        # Fecha qualquer tag de condensed não fechada
+        if condensado:
+            texto_processado += '</span>'
+
+        # Divide por páginas (form feed)
+        blocos = texto_processado.split('\f')
+        html_blocos = []
+
+        for bloco in blocos:
+            if bloco.strip():
+                # Protege conteúdo não interpretado (evita quebras por acentos)
+                bloco_escapado = escape(bloco)
+                # Mantém as tags HTML (negrito e condensed) interpretáveis
+                bloco_final = (
+                    bloco_escapado
+                    .replace('&lt;b&gt;', '<b>')
+                    .replace('&lt;/b&gt;', '</b>')
+                    .replace('&lt;span style=&quot;font-size: 8px;font-stretch:condensed;&quot;&gt;', 
+                            '<span style="font-size: 8px;font-stretch:condensed;">')
+                    .replace('&lt;/span&gt;', '</span>')
+                )
+                html_blocos.append(f"<pre>{bloco_final}</pre>")
+
+        return '\n'.join(html_blocos)

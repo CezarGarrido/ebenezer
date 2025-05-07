@@ -1,24 +1,21 @@
 import locale
+import subprocess
 from django.contrib import messages
 from django.contrib import admin
 from django import forms
 from core.models.donor import Donor
 from core.models.employee import Employee
 from donation.views import Report, ReportsAdminView
-from .models import Donation
+from .models import Donation, DonationSettings
 from django.utils.html import format_html
 from django.http import HttpResponseRedirect
 from django import forms
 from .models import ThankYouMessage, ThankYouMessageLine
 import platform
+from django.utils.safestring import mark_safe
 
 import logging
 logger = logging.getLogger(__name__)
-
-
-# Só importa win32print se for Windows
-if platform.system() == "Windows":
-    import win32print
             
 class ThankYouMessageLineInline(admin.TabularInline):
     model = ThankYouMessageLine
@@ -45,7 +42,75 @@ class ThankYouMessageAdmin(admin.ModelAdmin):
     def get_model_perms(self, request):
         # Retorna permissões vazias para esconder da sidebar
         return {}
+
+
+class DonationSettingsForm(forms.ModelForm):
+    class Meta:
+        model = DonationSettings
+        fields = '__all__'
     
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Obter lista de impressoras disponíveis
+        printers = self.get_printers()
+        
+        # Criar choices para o campo default_printer
+        printer_choices = [('', '---------')]  # Opção vazia
+        printer_choices += [(printer, printer) for printer in printers]
+        
+        # Atualizar o campo no formulário
+        self.fields['default_printer'].widget = forms.Select(choices=printer_choices)
+    
+    def get_printers(self):
+        """Retorna a lista de impressoras disponíveis no sistema"""
+        printers = []
+        
+        if platform.system() == "Windows":
+            try:
+                flags = win32print.PRINTER_ENUM_LOCAL | win32print.PRINTER_ENUM_CONNECTIONS
+                printers_info = win32print.EnumPrinters(flags)
+                printers = [printer[2] for printer in printers_info]
+            except Exception:
+                printers = ["Erro ao obter impressoras - verifique permissões"]
+        else:
+            # Para Linux/Mac
+            try:
+                output = subprocess.check_output(["lpstat", "-e"]).decode().splitlines()
+                printers = output
+            except Exception:
+                printers = ["Erro ao obter impressoras - verifique se o CUPS está instalado"]
+        
+        return printers
+    def clean(self):
+        cleaned_data = super().clean()
+        # Verifica se já existe um registro e se este não é o registro existente
+        if DonationSettings.objects.exists() and not self.instance.pk:
+            raise forms.ValidationError("Já existe um registro de configuração. Você pode apenas editá-lo.")
+        return cleaned_data
+    
+@admin.register(DonationSettings)
+class DonationSettingsAdmin(admin.ModelAdmin):
+    form = DonationSettingsForm
+    list_display = ('thank_you_message', 'default_printer', 'updated_at')
+    readonly_fields = ('created_at', 'updated_at')
+    exclude = ('owner', 'created_by')
+    
+    def has_add_permission(self, request):
+        # Impede a criação de novos registros se já existir um
+        return not DonationSettings.objects.exists()
+    
+    def save_model(self, request, obj, form, change):
+        # Garante que o owner seja definido automaticamente
+        if not obj.created_by:  # Define apenas se for um novo objeto
+            obj.created_by = request.user
+            obj.owner = request.user.profile.company
+        super().save_model(request, obj, form, change)
+
+    def get_model_perms(self, request):
+        # Retorna permissões vazias para esconder da sidebar
+        return {}
+
 class GenderedMessageMixin:
     """
     Corrige automaticamente mensagens do Django Admin de acordo com o gênero e número da entidade.
@@ -123,7 +188,7 @@ class DonationForm(forms.ModelForm):
     class Meta:
         model = Donation
         fields = "__all__"
-        
+
         widgets = {
             'amount': forms.TextInput(attrs={'data-mask-money': ""}),
             'paid_amount': forms.TextInput(attrs={'data-mask-money': ""}),
@@ -131,9 +196,42 @@ class DonationForm(forms.ModelForm):
             'paid_at': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date', 'class': 'form-control'}),
         }
 
+
     class Media:
         js = ("js/vendor/jquery.mask.min.js", "js/mask/money.js",)  # Adicionamos um script personalizado
+        
+    def clean(self):
+        cleaned_data = super().clean()
+        paid = cleaned_data.get("paid")
+        paid_amount = cleaned_data.get("paid_amount")
+        paid_at = cleaned_data.get("paid_at")
+        method = cleaned_data.get("method")
+        received_by = cleaned_data.get("received_by")
+        amount = cleaned_data.get("amount")
 
+        if paid:
+            # 1. Valor recebido é obrigatório e maior que zero
+            if paid_amount is None:
+                self.add_error("paid_amount", "Informe o valor recebido.")
+            elif paid_amount <= 0:
+                self.add_error("paid_amount", "O valor recebido deve ser maior que zero.")
+
+            # 2. Data de pagamento é obrigatória
+            if paid_at is None:
+                self.add_error("paid_at", "Informe a data de pagamento.")
+
+            # 3. Meio de pagamento obrigatório
+            if not method:
+                self.add_error("method", "Informe o meio de pagamento.")
+
+        else:
+            # Se não foi pago, limpa os campos de pagamento
+            cleaned_data["paid_amount"] = None
+            cleaned_data["paid_at"] = None
+            cleaned_data["method"] = None
+
+        return cleaned_data
+    
 class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
     form = DonationForm
     exclude = ('created_by', 'company')  # Esconde o campo no formulário
@@ -176,45 +274,10 @@ class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
             "fields": ("paid", "paid_at", "paid_amount", "method", "received_by"),
             "classes": ("collapse",)  # ou remova isso para deixar sempre visível
         }),
-
-        ("Recibo", {
-            "fields": ("thank_you_message", "get_receipt", ),
-            "classes": ("collapse",)  # ou remova isso para deixar sempre visível
-        }),
     )
     
     readonly_fields = ("created_by", "created_at", "updated_at", "get_receipt")
 
-        
-    def get_receipt(self, obj):
-        from django.utils.safestring import mark_safe
-        return mark_safe(f'''
-            <hr/>
-            <div class="receipt">
-                {obj.receipt_html()}
-            </div>
-            <hr/>
-            <div class="form-group">
-                <input type="button" class="btn btn-outline-success form-control" value="Imprimir no Navegador" onclick="window.print()" name="_print_browser" />
-            </div>
-            
-            
-            <div class="form-group">
-                <input type="submit" class="btn btn-outline-info form-control" value="Imprimir na LPT1" name="_print_receipt_test" />
-            </div>
-            
-            <div class="form-group">
-                <input type="submit" class="btn btn-outline-warning form-control" value="Imprimir na Impressora" name="_print_receipt" />
-            </div>
-            
-            
-            <div class="help-block">
-                * Recibo gerado com os dados da última edição salva.
-            </div>
-        ''')
-    
-    get_receipt.short_description = ""
-    
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         user_company = request.user.profile.company
         if db_field.name == "donor":
@@ -237,92 +300,53 @@ class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
     format_paid_amount.short_description = "Valor Recebido"
 
     def response_change(self, request, obj):
-        if '_print_receipt_test' in request.POST:
-            try:
-                logger.info("Solicitação para imprimir recibo recebida.")
-                obj.test_receipt()
-                if platform.system() == "Windows":
-                    if hasattr(obj, "test_receipt") and callable(obj.test_receipt):
-                        obj.test_receipt()
-                        messages.success(request, "Recibo gerado com sucesso.")
-                    else:
-                        messages.error(request, "O objeto não possui o método 'receipt'.")
-                        logger.info("Recibo gerado com sucesso.")
-                else:
-                    messages.warning(request, "Disponível apenas para Windows")
-                    logger.warning("Tentativa de impressão em SO não suportado: %s", platform.system())
-
-            except Exception as e:
-                logger.error("Erro ao gerar recibo", exc_info=True)
-                messages.error(request, "Erro ao gerar recibo.")
-        
         if '_print_receipt' in request.POST:
             try:
-                logger.info("Solicitação para imprimir recibo recebida.")
-
-                if platform.system() == "Windows":
-                    if hasattr(obj, "receipt") and callable(obj.receipt):
-                        self.print_with_win32(obj.receipt())
-                        messages.success(request, "Recibo gerado com sucesso.")
-                    else:
-                        messages.error(request, "O objeto não possui o método 'receipt'.")
-                        logger.info("Recibo gerado com sucesso.")
-                else:
-                    messages.warning(request, "Disponível apenas para Windows")
-                    logger.warning("Tentativa de impressão em SO não suportado: %s", platform.system())
-
+                logger.info(f"Iniciando processo de impressão de recibo para doação ID: {obj.id}")
+                
+                # Validação básica do objeto
+                if not obj or not obj.pk:
+                    messages.error(request, "Doação inválida ou não encontrada.")
+                    logger.error(f"Objeto de doação inválido: {obj}")
+                    return HttpResponseRedirect(request.get_full_path())
+                
+                # Obter configurações com validação
+                try:
+                    settings = DonationSettings.get_solo()
+                    if not settings:
+                        messages.error(request, "Configurações do sistema não encontradas.")
+                        logger.error("Configurações de doação não encontradas no banco de dados")
+                        return HttpResponseRedirect(request.get_full_path())
+                except Exception as e:
+                    messages.error(request, "Erro ao acessar configurações do sistema.")
+                    logger.error(f"Erro ao acessar DonationSettings: {str(e)}", exc_info=True)
+                    return HttpResponseRedirect(request.get_full_path())
+                
+                # Validação da impressora
+                printer_name = settings.default_printer
+                if not printer_name or not printer_name.strip():
+                    messages.error(request, "Nenhuma impressora padrão configurada.")
+                    logger.error("Nenhuma impressora configurada nas settings")
+                    return HttpResponseRedirect(request.get_full_path())
+                
+                # Tentativa de impressão
+                try:
+                    logger.info(f"Enviando recibo para impressora: {printer_name}")
+                    obj.print_receipt(settings)
+                    messages.success(request, f"Recibo enviado com sucesso para a impressora: {printer_name}")
+                    logger.info(f"Recibo impresso com sucesso para doação ID: {obj.id}")
+                except Exception as e:
+                    messages.error(request, "Erro inesperado ao imprimir recibo.")
+                    logger.error(f"Erro inesperado ao imprimir recibo: {str(e)}", exc_info=True)
+                
             except Exception as e:
-                logger.error("Erro ao gerar recibo", exc_info=True)
-                messages.error(request, "Erro ao gerar recibo.")
-
+                messages.error(request, "Ocorreu um erro durante o processo de impressão.")
+                logger.critical(f"Erro crítico no processamento de recibo: {str(e)}", exc_info=True)
+            
             return HttpResponseRedirect(request.get_full_path())
 
         return super().response_change(request, obj)
 
 
-    def get_printers(self):
-        try:
-            if platform.system() == "Windows":
-                printers = [p[2] for p in win32print.EnumPrinters(
-                    win32print.PRINTER_ENUM_LOCAL | win32print.PRINTER_ENUM_CONNECTIONS)]
-                logger.info("Impressoras detectadas: %s", printers)
-                return printers
-            else:
-                logger.info("Listagem de impressoras ignorada (SO não suportado: %s)", platform.system())
-                return []
-        except Exception:
-            logger.error("Erro ao obter lista de impressoras", exc_info=True)
-            return []
-
-
-    def print_with_win32(self, text, printer="EPSON LX-350"):
-        try:
-            printers = self.get_printers()
-
-            if printer in printers:
-                printer_name = printer
-                logger.info("Usando impressora preferida: %s", printer_name)
-            else:
-                printer_name = win32print.GetDefaultPrinter()
-                logger.warning("Impressora '%s' não encontrada. Usando padrão: %s", printer, printer_name)
-
-            hPrinter = win32print.OpenPrinter(printer_name)
-            hJob = win32print.StartDocPrinter(hPrinter, 1, ("Recibo de Doação", None, "RAW"))
-            win32print.StartPagePrinter(hPrinter)
-            win32print.WritePrinter(hPrinter, text)
-            win32print.EndPagePrinter(hPrinter)
-            win32print.EndDocPrinter(hPrinter)
-
-            logger.info("Recibo impresso com sucesso na '%s'.", printer_name)
-
-        except Exception:
-            logger.error("Erro ao imprimir recibo", exc_info=True)
-
-        finally:
-            try:
-                win32print.ClosePrinter(hPrinter)
-            except Exception:
-                logger.error("Erro ao fechar impressora", exc_info=True)
-            
 admin.site.register(Donation, DonationAdmin)
 admin.site.register(Report, ReportsAdminView)

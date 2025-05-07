@@ -67,6 +67,7 @@ class DonationSettingsForm(forms.ModelForm):
         printers = []
         
         if platform.system() == "Windows":
+            import win32print
             try:
                 flags = win32print.PRINTER_ENUM_LOCAL | win32print.PRINTER_ENUM_CONNECTIONS
                 printers_info = win32print.EnumPrinters(flags)

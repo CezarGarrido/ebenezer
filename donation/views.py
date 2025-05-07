@@ -24,10 +24,13 @@ class ReportBuilderMixin:
     """Mixin containing common report building functionality"""
     CHARS_PER_LINE = 80  # Adjusted for typical condensed font on receipt printers
     CHARS_PER_LINE_CONDENSED = 136  # Adjusted for typical condensed font on receipt printers
-    LEFT_MARGIN = 1  # Minimum left margin in characters
+    
+    LEFT_MARGIN = 5  # Minimum left margin in characters
     RIGHT_MARGIN = 1  # Minimum right margin in characters
+    RIGHT_MARGIN_CONDENSED  = 5  # Minimum right margin in characters
     MAX_LINE_WIDTH = CHARS_PER_LINE - LEFT_MARGIN - RIGHT_MARGIN
-    MAX_LINE_WIDTH_CONDENSED = CHARS_PER_LINE_CONDENSED - LEFT_MARGIN - RIGHT_MARGIN
+    MAX_LINE_WIDTH_CONDENSED = CHARS_PER_LINE_CONDENSED - LEFT_MARGIN - RIGHT_MARGIN_CONDENSED
+
 
     def print_centered(self, printer, text):
         """Print text centered within the paper width"""
@@ -107,9 +110,9 @@ class ReportBuilderMixin:
             "CÓDIGO".ljust(10) +
             "DATA".ljust(12) +
             "DOADOR".ljust(38) + 
-            "VALOR PREVISTO".rjust(25) + 
-            "VALOR RECEBIDO".rjust(28) + 
-            "DIFERENÇA".rjust(21)
+            "VALOR PREVISTO".rjust(22) + 
+            "VALOR RECEBIDO".rjust(25) + 
+            "DIFERENÇA".rjust(20)
         )
         printer.print(header_line)
         printer.lineFeed()
@@ -124,15 +127,15 @@ class ReportBuilderMixin:
             f"{donation.id}".ljust(10) +
             (donation.expected_at.strftime('%d/%m/%Y') if donation.expected_at else "-").ljust(12) +
             f"{donation.donor.id} - {donation.donor.name}".ljust(38) +
-            locale.currency(donation.amount or 0, grouping=True).rjust(25) +
-            locale.currency(donation.paid_amount or 0, grouping=True).rjust(28)
+            locale.currency(donation.amount or 0, grouping=True).rjust(22) +
+            locale.currency(donation.paid_amount or 0, grouping=True).rjust(25)
         )
         
         valor_previsto = donation.amount or 0
         valor_pago = donation.paid_amount or 0
         dif_percentual = ((valor_pago - valor_previsto) / valor_previsto * 100) if valor_previsto > 0 else 0.0
         
-        row_line += f"{dif_percentual:.2f}%".rjust(21)
+        row_line += f"{dif_percentual:.2f}%".rjust(20)
         printer.print(row_line)
         printer.lineFeed()
 
@@ -432,7 +435,7 @@ class ReportsAdminView(admin.ModelAdmin, ReportBuilderMixin):
         """Generate employee report using mixin methods"""
         printer = ESCPrinter()
         printer.initialize()
-        
+        printer.setMargins(5, 80)
         self._generate_report_header(
             printer,
             employee.owner,
@@ -482,7 +485,8 @@ class ReportsAdminView(admin.ModelAdmin, ReportBuilderMixin):
         """Generate donor report using mixin methods"""
         printer = ESCPrinter()
         printer.initialize()
-        
+        printer.setMargins(5, 80)
+
         self._generate_report_header(
             printer,
             donor.owner,
@@ -531,7 +535,8 @@ class ReportsAdminView(admin.ModelAdmin, ReportBuilderMixin):
         """Generate general report using mixin methods"""
         printer = ESCPrinter()
         printer.initialize()
-        
+        printer.setMargins(5, 80)
+
         self._generate_report_header(
             printer,
             user.profile.company,

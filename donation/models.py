@@ -158,7 +158,7 @@ class Donation(models.Model):
         RIGHT_MARGIN = 1  # Minimum right margin in characters
         RIGHT_MARGIN_CONDENSED  = 5  # Minimum right margin in characters
         MAX_LINE_WIDTH = CHARS_PER_LINE - LEFT_MARGIN - RIGHT_MARGIN
-        MAX_LINE_WIDT_CONDENSED = CHARS_PER_LINE_CONDENSED - LEFT_MARGIN - RIGHT_MARGIN_CONDENSED
+        MAX_LINE_WIDTH_CONDENSED = CHARS_PER_LINE_CONDENSED - LEFT_MARGIN - RIGHT_MARGIN_CONDENSED
 
         def print_centered(printer, text):
             """Print text centered within the paper width"""
@@ -167,7 +167,7 @@ class Donation(models.Model):
 
         def print_centered_condensed(printer, text):
             """Print text centered within the paper width"""
-            printer.print(text.center(MAX_LINE_WIDT_CONDENSED))
+            printer.print(text.center(MAX_LINE_WIDTH_CONDENSED))
             printer.lineFeed()
 
 
@@ -190,10 +190,10 @@ class Donation(models.Model):
             min_margin = 2  # minimum spaces between sides
             total_len = len(left) + len(right) + min_margin
             
-            if total_len >= MAX_LINE_WIDT_CONDENSED:
+            if total_len >= MAX_LINE_WIDTH_CONDENSED:
                 result = left + ' ' * min_margin + right
             else:
-                space_between = MAX_LINE_WIDT_CONDENSED - len(left) - len(right)
+                space_between = MAX_LINE_WIDTH_CONDENSED - len(left) - len(right)
                 result = left + (' ' * space_between) + right
             
             printer.print(result)

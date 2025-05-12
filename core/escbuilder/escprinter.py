@@ -1,9 +1,5 @@
 from html import escape
-import io
 import re
-import sys
-import qrcode
-from PIL import Image
 
 class ESCPrinter:
     def __init__(self, escp24pin=False):

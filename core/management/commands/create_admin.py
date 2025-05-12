@@ -36,11 +36,52 @@ class Command(BaseCommand):
         # Criação da empresa
         try:
             company, created = Company.objects.get_or_create(
-                name='Ebenezer',
+                name='Lar Ebenezer - ADAS',
                 defaults={'person_type': 'J'}
             )
+            
+            legal_entity, _ = LegalEntity.objects.get_or_create(
+                person=company,
+                defaults={
+                    'trade_name': "Lar Ebenezer",
+                    'cnpj': "03471216000123"
+                }
+            )
+            
+            Address.objects.get_or_create(
+                person=company,
+                address_type='UNI',
+                street='Rua 20 de Dezembro',
+                number='3170',
+                neighborhood='Chácaras Trevo',
+                postal_code='79815-335',
+                city='Dourados',
+                state='MS',
+                is_primary=True
+            )
+            
+            Phone.objects.get_or_create(
+                person=company,
+                phone='(67) 9 9201-7277',
+                type='C',
+                is_primary=True
+            )
+            
+            Phone.objects.get_or_create(
+                person=company,
+                phone='(67) 9 8402-0020',
+                type='C',
+                is_primary=False
+            )
+            
+            Email.objects.get_or_create(
+                person=company,
+                email='larebenezerdouradosm@gmail.com',
+                is_primary=True
+            )
+            
         except IntegrityError:
-            company = Company.objects.get(name='Ebenezer')
+            company = Company.objects.get(name='Lar Ebenezer - ADAS')
             created = False
 
         if created:

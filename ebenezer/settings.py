@@ -176,7 +176,7 @@ JAZZMIN_SETTINGS = {
     ],
     "use_google_fonts_cdn": True,
     "order_with_respect_to": ["auth", "core", "donation.Donation", "donation.Report"],
-    'show_ui_builder': True,  # Desativa o personalizador (menos “web-like”)
+    'show_ui_builder': False,  # Desativa o personalizador (menos “web-like”)
     'custom_js': 'js/main.js',
     'custom_css': 'css/ebenezer.css',
     'related_modal_active': True,

@@ -199,7 +199,7 @@ class DonationForm(forms.ModelForm):
 
 
     class Media:
-        js = ("js/vendor/jquery.mask.min.js", "js/mask/money.js",)  # Adicionamos um script personalizado
+        js = ("js/vendor/jquery.mask.min.js", "js/mask/money.js", "js/payment.js")  # Adicionamos um script personalizado
         
     def clean(self):
         cleaned_data = super().clean()

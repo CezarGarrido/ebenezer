@@ -343,6 +343,11 @@ class Donation(models.Model):
         def print_footer(printer, settings):
             """Print receipt footer section"""
             printer.lineFeed()
+
+            print_centered(printer, "ACESSO RÁPIDO:")
+            printer.lineFeed()
+            printer.qrcode("chave pix")
+            printer.lineFeed()
             
             if settings.thank_you_message:
                 for line in settings.thank_you_message.lines.all():
@@ -373,6 +378,7 @@ class Donation(models.Model):
         print_footer(escp, settings)
 
         escp.formFeed()
+        escp.reset()
         return escp.build()
 
 

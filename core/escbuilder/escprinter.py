@@ -1,6 +1,9 @@
 from html import escape
+import io
 import re
 import sys
+import qrcode
+from PIL import Image
 
 class ESCPrinter:
     def __init__(self, escp24pin=False):
@@ -56,6 +59,7 @@ class ESCPrinter:
     
         self.columnsRight = -1
         self.columnsLeft = -1
+        
     def close(self):
         """Simula o fechamento do stream"""
         pass  # Nada a fechar porque está tudo na memória
@@ -116,7 +120,7 @@ class ESCPrinter:
             self._write(self.CR)
         else:
             # Reset completo
-            self._write(self.ESC + self.AT)  # ESC @ = Reset
+            self.reset()
             self.select10CPI()
             self.selectDraftPrinting()
             self.setCharacterSet(self.BRAZIL)
@@ -126,6 +130,8 @@ class ESCPrinter:
 
         return self
 
+    def reset(self):
+        self._write(self.ESC + self.AT)  # ESC @
 
     def proportionalMode(self, proportional):
         self._write(self.ESC + self.p + (chr(49) if proportional else chr(48)))

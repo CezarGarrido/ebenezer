@@ -25,9 +25,9 @@ class ReportBuilderMixin:
     CHARS_PER_LINE = 80  # Adjusted for typical condensed font on receipt printers
     CHARS_PER_LINE_CONDENSED = 136  # Adjusted for typical condensed font on receipt printers
     
-    LEFT_MARGIN = 5  # Minimum left margin in characters
+    LEFT_MARGIN = 2  # Minimum left margin in characters
     RIGHT_MARGIN = 1  # Minimum right margin in characters
-    RIGHT_MARGIN_CONDENSED  = 5  # Minimum right margin in characters
+    RIGHT_MARGIN_CONDENSED  = 2  # Minimum right margin in characters
     MAX_LINE_WIDTH = CHARS_PER_LINE - LEFT_MARGIN - RIGHT_MARGIN
     MAX_LINE_WIDTH_CONDENSED = CHARS_PER_LINE_CONDENSED - LEFT_MARGIN - RIGHT_MARGIN_CONDENSED
 
@@ -144,6 +144,7 @@ class ReportBuilderMixin:
         self.print_centered(printer, "-" * self.MAX_LINE_WIDTH)
         printer.lineFeed()
         
+        printer.bold(True)
         diferenca_total = ((total_recebido - total_previsto) / total_previsto * 100) if total_previsto > 0 else 0.0
         
         printer.print(self._linha_pontilhada(
@@ -162,11 +163,13 @@ class ReportBuilderMixin:
             "Diferença", 
             f":{diferenca_total:.2f}%"
         ))
-        
+        printer.bold(False)
         printer.lineFeed(2)
         
         self.print_centered(printer, f"--- Página {page} ---")
+        
         printer.formFeed()
+        printer.reset()
 
     def _generate_page_footer(self, printer, total_previsto, total_recebido, page):
         """Generate page footer with subtotals"""
@@ -188,7 +191,7 @@ class ReportBuilderMixin:
         printer.lineFeed()
         
         self.print_centered_condensed(printer, f"--- Página {page} ---")
-        printer.lineFeed(3).formFeed()
+        printer.lineFeed()
         
 class BaseReportForm(forms.Form):
     """Base form for all report types with common date fields"""
@@ -435,7 +438,7 @@ class ReportsAdminView(admin.ModelAdmin, ReportBuilderMixin):
         """Generate employee report using mixin methods"""
         printer = ESCPrinter()
         printer.initialize()
-        printer.setMargins(5, 80)
+        printer.setMargins(2, 80)
         self._generate_report_header(
             printer,
             employee.owner,
@@ -485,7 +488,7 @@ class ReportsAdminView(admin.ModelAdmin, ReportBuilderMixin):
         """Generate donor report using mixin methods"""
         printer = ESCPrinter()
         printer.initialize()
-        printer.setMargins(5, 80)
+        printer.setMargins(2, 80)
 
         self._generate_report_header(
             printer,
@@ -535,7 +538,7 @@ class ReportsAdminView(admin.ModelAdmin, ReportBuilderMixin):
         """Generate general report using mixin methods"""
         printer = ESCPrinter()
         printer.initialize()
-        printer.setMargins(5, 80)
+        printer.setMargins(2, 80)
 
         self._generate_report_header(
             printer,
@@ -578,6 +581,7 @@ class ReportsAdminView(admin.ModelAdmin, ReportBuilderMixin):
 
         # Rodapé final da última página
         self._generate_report_footer(printer, total_previsto, total_recebido, page)
+
         return printer.build()
 
     def _build_report_summary_context(self, request, report_type):

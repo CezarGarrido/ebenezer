@@ -1,11 +1,14 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
+from core.models.base import Address, Email, Individual, LegalEntity, Person, Phone
 from core.models.company import Company, UserProfile, GroupCompany
 from django.contrib.auth.models import Group, Permission
 from core.models.donor import Donor
-from donation.models import Donation
+from donation.models import Donation, DonationSettings, ThankYouMessage, ThankYouMessageLine
 from django.contrib.contenttypes.models import ContentType
 from django.db import IntegrityError
+
+from donation.views import Report
 
 class Command(BaseCommand):
     help = 'Criar empresa e usuário iniciais'
@@ -85,13 +88,22 @@ class Command(BaseCommand):
 
         # Atribuição de permissões ao grupo TELEMARKETING
         if tele_created:
-            donor_ct = ContentType.objects.get_for_model(Donor)
-            donor_permissions = Permission.objects.filter(content_type=donor_ct)
-            donation_ct = ContentType.objects.get_for_model(Donation)
-            donation_permissions = Permission.objects.filter(content_type=donation_ct)
+            # Modelos cujas permissões devem ser atribuídas
+            all_models = [
+                Individual, LegalEntity, Address, Email, Phone,
+                Donor, Donation, Report, ThankYouMessage, ThankYouMessageLine, DonationSettings
+            ]
 
-            tele_permissions = list(donor_permissions) + list(donation_permissions)
-            tele_group.permissions.set(tele_permissions)
+            # Coleta todas as permissões padrão dos modelos
+            all_permissions = []
+            for model in all_models:
+                ct = ContentType.objects.get_for_model(model)
+                perms = Permission.objects.filter(content_type=ct)
+                all_permissions.extend(perms)
+
+            # Atribui ao grupo
+            tele_group.permissions.set(all_permissions)
+            
             self.stdout.write(self.style.SUCCESS(f'Permissões atribuídas ao grupo {tele_group.name}.'))
         else:
             self.stdout.write(f'Grupo {tele_group.name} já existia, permissões não foram alteradas.')

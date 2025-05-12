@@ -44,17 +44,8 @@ def parse_record(record: bytes, fields: List[Field], separator='|') -> str:
         raw = record[field.offset:field.offset + field.size]
         if field.ftype == 0:  # String
             row.append(convert_to_utf8(raw))
-        elif field.ftype == 1:  # Numérico
-            print(raw)
-            
-            print("Bytes (hex):", [hex(b) for b in raw])
-            print("Bytes (int):", list(raw))
-            print("Como string ISO:", raw.decode('iso-8859-1', errors='ignore'))
-            print("Como string ASCII:", raw.decode('ascii', errors='ignore'))
-            raw = record[field.offset + 1:field.offset + field.size]
-            val = int.from_bytes(raw, byteorder='little')
-            #val = int.from_bytes(raw[1:], byteorder='little') if len(raw) > 1 else 0
-            print(val)
+        elif field.ftype == 1:  # Numérico            
+            val = int.from_bytes(raw[1:], byteorder='little') if len(raw) > 1 else 0
             row.append(str(val))
         elif field.ftype == 2:  # Data
             jd = int.from_bytes(raw, byteorder='little')
@@ -106,7 +97,7 @@ def dat_to_csv(dat_path: str, csv_path: str, tag_path: str = None, separator='|'
             row = parse_record(record, fields, separator)
             writer.writerow([cell for cell in row.split(separator)])
 
-def process_directory(directory: str, separator='|'):
+def process_directory(directory: str, output: str, separator='|'):
     # List all .DAT files in the directory
     for filename in os.listdir(directory):
         if filename.upper().endswith('.DAT'):
@@ -121,7 +112,7 @@ def process_directory(directory: str, separator='|'):
                     tag_path = None
             
             # Generate output CSV path
-            csv_path = os.path.join(directory, f"{base_name}.csv")
+            csv_path = os.path.join(output, f"{base_name}.csv")
             
             print(f"Processing {filename}...")
             try:
@@ -129,16 +120,3 @@ def process_directory(directory: str, separator='|'):
                 print(f"Successfully created {csv_path}")
             except Exception as e:
                 print(f"Error processing {filename}: {str(e)}")
-
-if __name__ == "__main__":
-    import sys
-    if len(sys.argv) != 2:
-        print("Usage: python script.py <directory_path>")
-        sys.exit(1)
-    
-    directory = sys.argv[1]
-    if not os.path.isdir(directory):
-        print(f"Error: {directory} is not a valid directory")
-        sys.exit(1)
-    
-    process_directory(directory)

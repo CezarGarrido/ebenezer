@@ -5,6 +5,9 @@ from pathlib import Path
 import unicodedata
 import re
 from django.contrib.auth.models import Group
+from django.db import IntegrityError
+
+from core.models.company import UserProfile
 
 def normalize_text(text: str) -> str:
     # Remove acentos

@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib import admin
+
 from .models.company import Company, UserProfile, GroupCompany
 from .models.employee import Employee, EmployeeUser
 from .models.donor import Donor
@@ -7,7 +8,7 @@ from .models.base import Individual, LegalEntity, Address, Email, Phone
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.admin import UserAdmin
 from django.utils.html import format_html
-      
+
 class PhoneForm(forms.ModelForm):
     class Meta:
         model = Phone
@@ -305,6 +306,8 @@ class CustomGroupAdmin(admin.ModelAdmin):
     list_display = ('capitalized_name',)
     
     capitalized_name.short_description = "Nome"
-    
+
+
+
 admin.site.unregister(Group)
 admin.site.register(Group, CustomGroupAdmin)

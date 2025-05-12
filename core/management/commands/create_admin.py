@@ -1,12 +1,14 @@
-from tokenize import group
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
+from core.models.base import Address, Email, Individual, LegalEntity, Person, Phone
 from core.models.company import Company, UserProfile, GroupCompany
-#----------------------------------------------------
-from django.contrib.auth.models import Group, Permission    # permissões e grupos
-from core.models.donor import Donor     # modelos que vão ter permissões específicas
-from donation.models import Donation
-from django.contrib.contenttypes.models import ContentType  # filtrar permissões por modelo
+from django.contrib.auth.models import Group, Permission
+from core.models.donor import Donor
+from donation.models import Donation, DonationSettings, ThankYouMessage, ThankYouMessageLine
+from django.contrib.contenttypes.models import ContentType
+from django.db import IntegrityError
+
+from donation.views import Report
 
 class Command(BaseCommand):
     help = 'Criar empresa e usuário iniciais'
@@ -14,11 +16,16 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         User = get_user_model()
 
-        # Verifica se o usuário já existe
-        user, created = User.objects.get_or_create(
-            email='admin@admin.com',
-            defaults={'username': 'admin@admin.com', 'is_superuser': True, 'is_staff': True}
-        )
+        # Criação do usuário admin
+        try:
+            user, created = User.objects.get_or_create(
+                email='admin@admin.com',
+                defaults={'username': 'admin@admin.com', 'is_superuser': True, 'is_staff': True}
+            )
+        except IntegrityError:
+            user = User.objects.get(email='admin@admin.com')
+            created = False
+
         if created:
             user.set_password('admin')
             user.save()
@@ -26,52 +33,77 @@ class Command(BaseCommand):
         else:
             self.stdout.write('Usuário admin já existe.')
 
-        # Cria empresa, se não existir
-        company, created = Company.objects.get_or_create(
-            name='Ebenezer',
-            defaults={
-                'person_type': 'J',
-            }
-        )
+        # Criação da empresa
+        try:
+            company, created = Company.objects.get_or_create(
+                name='Ebenezer',
+                defaults={'person_type': 'J'}
+            )
+        except IntegrityError:
+            company = Company.objects.get(name='Ebenezer')
+            created = False
+
         if created:
             self.stdout.write(self.style.SUCCESS('Empresa criada.'))
         else:
             self.stdout.write('Empresa já existe.')
 
-        # Cria perfil do usuário com a empresa
-        UserProfile.objects.get_or_create(user=user, company=company)
+        # Criação do perfil do usuário
+        try:
+            UserProfile.objects.get_or_create(user=user, company=company)
+        except IntegrityError:
+            pass  # Já existe
 
-        #-------------------------------------------------------------------------------
-        # cria (se não existir) o grupo ADMINISTRATIVO
-        admin_group, admin_created = Group.objects.get_or_create(name='ADMINISTRATIVO') 
-        GroupCompany.objects.get_or_create(group=admin_group, company=company)
+        # Criação do grupo ADMINISTRATIVO
+        try:
+            admin_group, admin_created = Group.objects.get_or_create(name='ADMINISTRATIVO')
+        except IntegrityError:
+            admin_group = Group.objects.get(name='ADMINISTRATIVO')
+            admin_created = False
 
-        # cria (se não existir) o grupo TELEMARKETING
-        tele_group, tele_created = Group.objects.get_or_create(name='TELEMARKETING')
-        GroupCompany.objects.get_or_create(group=tele_group, company=company)
+        try:
+            GroupCompany.objects.get_or_create(group=admin_group, company=company)
+        except IntegrityError:
+            pass
 
+        # Criação do grupo TELEMARKETING
+        try:
+            tele_group, tele_created = Group.objects.get_or_create(name='TELEMARKETING')
+        except IntegrityError:
+            tele_group = Group.objects.get(name='TELEMARKETING')
+            tele_created = False
+
+        try:
+            GroupCompany.objects.get_or_create(group=tele_group, company=company)
+        except IntegrityError:
+            pass
+
+        # Atribuição de permissões ao grupo ADMINISTRATIVO
         if admin_created:
-            # Só define todas as permissões se o grupo foi criado agora
             admin_permissions = Permission.objects.all()
             admin_group.permissions.set(admin_permissions)
             self.stdout.write(self.style.SUCCESS(f'Permissões atribuídas ao grupo {admin_group.name}.'))
         else:
             self.stdout.write(f'Grupo {admin_group.name} já existia, permissões não foram alteradas.')
 
+        # Atribuição de permissões ao grupo TELEMARKETING
         if tele_created:
-            # Pega todas as permissões de Donor
-            donor_ct = ContentType.objects.get_for_model(Donor)
-            donor_permissions = Permission.objects.filter(content_type=donor_ct)
+            # Modelos cujas permissões devem ser atribuídas
+            all_models = [
+                Individual, LegalEntity, Address, Email, Phone,
+                Donor, Donation, Report, ThankYouMessage, ThankYouMessageLine, DonationSettings
+            ]
 
-            # Pega todas as permissões de Donation
-            donation_ct = ContentType.objects.get_for_model(Donation)
-            donation_permissions = Permission.objects.filter(content_type=donation_ct)
+            # Coleta todas as permissões padrão dos modelos
+            all_permissions = []
+            for model in all_models:
+                ct = ContentType.objects.get_for_model(model)
+                perms = Permission.objects.filter(content_type=ct)
+                all_permissions.extend(perms)
 
-            # Junta as permissões
-            tele_permissions = list(donor_permissions) + list(donation_permissions)
-
-            # Aplica ao grupo TELEMARKETING
-            tele_group.permissions.set(tele_permissions)
+            # Atribui ao grupo
+            tele_group.permissions.set(all_permissions)
+            
             self.stdout.write(self.style.SUCCESS(f'Permissões atribuídas ao grupo {tele_group.name}.'))
         else:
             self.stdout.write(f'Grupo {tele_group.name} já existia, permissões não foram alteradas.')

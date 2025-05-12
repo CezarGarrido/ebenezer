@@ -16,14 +16,22 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         Donor.objects.all().delete()
         file_path = kwargs['file_path']
-        with open(file_path, newline='', encoding='utf-8') as f:
-            reader = csv.DictReader(f, delimiter=',')
+        with open(file_path, newline='', encoding='utf-8', errors='replace') as raw_file:
+            cleaned_file = (line.replace('\x00', '') for line in raw_file)
+            reader = csv.DictReader(cleaned_file, delimiter=',')
             created_count = 0
 
             for row in reader:
+                
+                if not row:  # pula registros inválidos
+                    continue
+
                 if not row['COD_DOA']:  # pula registros inválidos
                     continue
 
+                if not row['NOM_A']:
+                    continue
+                
                 # Parse dates
                 id = int(row.get("COD_DOA"))
                 # Verifica se o ID já existe

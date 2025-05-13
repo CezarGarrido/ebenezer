@@ -1,0 +1,57 @@
+{% extends 'admin/index.html' %}
+
+{% block content %}
+  <div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-3 col-md-6 col-12 col-sm-12">
+          <div class="small-box bg-info">
+            <div class="inner">
+              <h3>{{ total_donations }}</h3>
+              <p>Total Arrecadado</p>
+            </div>
+            <div class="icon">
+              <i class="fas fa-donate"></i>
+            </div>
+          </div>
+        </div>
+      
+        <div class="col-lg-3 col-md-6 col-12 col-sm-12">
+          <div class="small-box bg-success">
+            <div class="inner">
+              <h3>{{ monthly_donations }}</h3>
+              <p>Este mês</p>
+            </div>
+            <div class="icon">
+              <i class="fas fa-calendar-alt"></i>
+            </div>
+          </div>
+        </div>
+      
+        <div class="col-lg-3 col-md-6 col-12 col-sm-12">
+          <div class="small-box bg-warning">
+            <div class="inner">
+              <h3>{{ donor_count }}</h3>
+              <p>Total de Doadores</p>
+            </div>
+            <div class="icon">
+              <i class="fas fa-users"></i>
+            </div>
+          </div>
+        </div>
+      
+        <div class="col-lg-3 col-md-6 col-12 col-sm-12">
+          <div class="small-box bg-danger">
+            <div class="inner">
+              <h3>{{ donation_count }}</h3>
+              <p>Doações Realizadas</p>
+            </div>
+            <div class="icon">
+              <i class="fas fa-hand-holding-heart"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+  </div>
+
+  {{ block.super }}
+{% endblock %}

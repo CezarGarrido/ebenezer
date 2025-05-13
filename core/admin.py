@@ -1,6 +1,7 @@
+from datetime import datetime
 from django import forms
 from django.contrib import admin
-
+from donation.models import Donation
 from .models.company import Company, UserProfile, GroupCompany
 from .models.employee import Employee, EmployeeUser
 from .models.donor import Donor
@@ -8,6 +9,32 @@ from .models.base import Individual, LegalEntity, Address, Email, Phone
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.admin import UserAdmin
 from django.utils.html import format_html
+from django.db.models import Sum, Count
+import locale
+
+class CustomAdminSite(admin.AdminSite):
+    def index(self, request, extra_context=None):
+        extra_context = extra_context or {}
+        
+        now = datetime.now()
+        current_month = now.month
+        current_year = now.year
+        total_donations = Donation.objects.filter(paid=True).aggregate(Sum('paid_amount'))['paid_amount__sum'] or 0
+        monthly_donations = Donation.objects.filter(paid=True, created_at__month=current_month, created_at__year=current_year).aggregate(Sum('paid_amount'))['paid_amount__sum'] or 0
+        
+        stats = {
+            'total_donations': locale.currency(total_donations, grouping=True),
+            'donation_count': Donation.objects.count(),
+            'donor_count': Donor.objects.count(),
+            'monthly_donations': locale.currency(monthly_donations, grouping=True),
+        }
+        
+        extra_context.update(stats)
+
+        return super().index(request, extra_context)
+
+# Substitui o site padrão
+admin.site.__class__ = CustomAdminSite
 
 class PhoneForm(forms.ModelForm):
     class Meta:

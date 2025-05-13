@@ -9,7 +9,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from core.escbuilder.escbuilder import ESCBuilder
 from num2words import num2words
 from core.models.employee import Employee
-        # Enviar para impressora
+
+# Enviar para impressora
 import platform, tempfile, os
 
 PAYMENT_METHOD_CHOICES = [
@@ -374,5 +375,4 @@ class Donation(models.Model):
     
         escp.reset()
         return escp.build()
-
 

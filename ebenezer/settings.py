@@ -172,7 +172,7 @@ JAZZMIN_SETTINGS = {
     },
     'search_model': ['core.Donor'],
     "usermenu_links": [
-        {"name": "Config. Recibo", "url": "/admin/donation/thankyoumessage/", "icon": "fas fa-gear"},
+        {"name": "Config. Doações", "url": "/admin/donation/donationsettings/", "icon": "fas fa-gear", "permissions": ["donation.add_thankyoumessage"]},
     ],
     "use_google_fonts_cdn": True,
     "order_with_respect_to": ["auth", "core", "donation.Donation", "donation.Report"],
@@ -184,6 +184,7 @@ JAZZMIN_SETTINGS = {
     'navigation_expanded': True,
     "changeform_format_overrides": {"donation.Donation": ""},
 }
+
 
 JAZZMIN_UI_TWEAKS = {
     "navbar_small_text": False,
@@ -237,7 +238,7 @@ LOGGING = {
         'rotating_file': {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(EXEC_DIR, 'logs', 'django.log'),
+            'filename': os.path.join(EXEC_DIR, 'logs', 'app.log'),
             'maxBytes': 1024 * 1024 * 5,
             'backupCount': 5,
             'formatter': 'json',  # use o formatter JSON aqui

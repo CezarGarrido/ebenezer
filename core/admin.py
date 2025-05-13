@@ -1,7 +1,6 @@
 from datetime import datetime
 from django import forms
 from django.contrib import admin
-
 from donation.models import Donation
 from .models.company import Company, UserProfile, GroupCompany
 from .models.employee import Employee, EmployeeUser
@@ -267,7 +266,7 @@ class UserProfileInline(admin.StackedInline):
 
 class CustomUserAdmin(UserAdmin):
     inlines = (UserProfileInline,)
-
+    
     def get_queryset(self, request):
         """ Filtra usuários da mesma empresa do admin logado. """
         qs = super().get_queryset(request)
@@ -282,6 +281,15 @@ class CustomUserAdmin(UserAdmin):
             UserProfile.objects.create(user=obj, company=request.user.profile.company)
         else:
             obj.save()
+    
+    #-------------------------------------------------------------------------------------
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        """ Personaliza a exibição dos nomes dos grupos """
+        field = super().formfield_for_manytomany(db_field, request, **kwargs)
+        if db_field.name == 'groups':
+            # Exibe o nome do grupo somente com a primeira letra maiúscula
+            field.label_from_instance = lambda obj: obj.name.capitalize()
+        return field
 
 admin.site.unregister(User)
 admin.site.register(User, CustomUserAdmin)
@@ -317,7 +325,7 @@ class CustomGroupAdmin(admin.ModelAdmin):
             obj.save()
 
     #--------------------------------------------------------------------------------------------
-     # Exibir o nome com apenas a primeira letra maiúscula
+    # Exibir o nome com apenas a primeira letra maiúscula
     def capitalized_name(self, obj):
         return obj.name.capitalize()
     
@@ -325,6 +333,8 @@ class CustomGroupAdmin(admin.ModelAdmin):
     list_display = ('capitalized_name',)
     
     capitalized_name.short_description = "Nome"
-    
+
+
+
 admin.site.unregister(Group)
 admin.site.register(Group, CustomGroupAdmin)

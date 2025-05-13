@@ -1,0 +1,13 @@
+{% extends "admin/change_form.html" %}
+
+{% block object-tools-items %}
+{{ block.super }}
+<form method="post">
+    <button type="submit" 
+            class="btn btn-primary form-control mt-3"
+            name="_print_receipt"
+            title="Imprimir Recibo">
+        <i class="fas fa-print"></i> Imprimir Recibo
+    </button>
+</form>
+{% endblock %}

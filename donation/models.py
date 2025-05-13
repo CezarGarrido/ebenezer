@@ -267,7 +267,7 @@ class Donation(models.Model):
             # Print address
             address = company.addresses.filter(address_type='UNI').first() or company.addresses.first()
             if address:
-                address_line = f"{address.street}, {address.number}, {address.neighborhood}"
+                address_line = f"{address.street}, {address.number}, {address.neighborhood} - CEP {address.postal_code}"
                 print_centered_condensed(printer, address_line.upper())
                 city_state = f"{address.city} - {address.state}"
                 print_centered_condensed(printer, city_state.upper())
@@ -279,33 +279,27 @@ class Donation(models.Model):
             try:
                 legal = company.legalentity
                 cnpj = legal.cnpj or "-"
-                printer.print(f"CNPJ: {cnpj}")
-                printer.lineFeed()
             except ObjectDoesNotExist:
-                pass
-            
+                cnpj = "-"
+
+            emails = company.emails.all()
+            email_str = ', '.join([e.email for e in emails]) if emails.exists() else "-"
+
+            print_line_side_by_side(printer, f"E-mail(s): {email_str}", f"CNPJ: {cnpj}")
+
             phones = company.phones.all()
             if phones.exists():
                 phone_str = ', '.join([p.phone for p in phones])
-                printer.print(f"Telefones: {phone_str}")
-                printer.lineFeed()
-
-            emails = company.emails.all()
-            if emails.exists():
-                email_str = ', '.join([e.email for e in emails])
-                printer.print(f"E-mails: {email_str}")
+                printer.print(f"Telefone(s): {phone_str}")
                 printer.lineFeed()
 
         def print_receipt_header(printer):
             """Print receipt header section"""
             printer.lineFeed()
-            printer.print("-" * MAX_LINE_WIDTH)
-            printer.lineFeed()
             printer.bold(True)
             print_centered(printer, "RECIBO DE DOAÇÃO")
+            printer.print("=" * MAX_LINE_WIDTH)
             printer.bold(False)
-            printer.print("-" * MAX_LINE_WIDTH)
-            printer.lineFeed()
             printer.lineFeed()
 
         def print_donation_details(printer, receipt):
@@ -343,12 +337,6 @@ class Donation(models.Model):
         def print_footer(printer, settings):
             """Print receipt footer section"""
             printer.lineFeed()
-
-            print_centered(printer, "ACESSO RÁPIDO:")
-            printer.lineFeed()
-            printer.qrcode("chave pix")
-            printer.lineFeed()
-            
             if settings.thank_you_message:
                 for line in settings.thank_you_message.lines.all():
                     print_centered(printer, line.text.upper())
@@ -377,7 +365,13 @@ class Donation(models.Model):
         print_donation_details(escp, self)
         print_footer(escp, settings)
 
-        escp.formFeed()
+        ALTURA_FOLHA = 14.0  # 140mm
+        conteudo_usado = 12.0  # conteúdo impresso ocupa 12cm
+        espaco_restante = ALTURA_FOLHA - conteudo_usado
+
+        if espaco_restante > 0:
+            escp.advanceVertical(espaco_restante)
+    
         escp.reset()
         return escp.build()
 

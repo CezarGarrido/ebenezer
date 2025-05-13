@@ -1,18 +1,11 @@
 {% extends 'admin/base_site.html' %}
 {% load static %}
-{% block extrahead %}
-  {{ block.super }}
-  <meta charset="ISO-8859-1" />
-  <style scoped>
-
-  </style>
-{% endblock %}
 
 {% block content %}
   <!-- Custom Tabs -->
   <div class="card w-100">
     <div class="card-header d-flex p-0">
-      <h3 class="card-title p-3"><i class="fas fa-file"></i> Relatórios</h3>
+      <h3 class="card-title p-3"><i class="fas fa-file-alt"></i> Relatórios</h3>
       <ul class="nav nav-pills ml-auto p-2">
         <li class="nav-item">
           <a class="nav-link active" href="#tab_1" data-toggle="tab">Relatório Individual</a>
@@ -58,7 +51,7 @@
             </div>
 
             <div class="col-md-9">
-              <div class="receipt card border-0 shadow-sm" id="receipt_individual" style="max-height: 60vh; overflow-y: auto;">
+              <div class="receipt card border-0 shadow-sm" id="receipt_individual">
                 {% if summary_data.individual %}
                   <div class="report-summary p-4">
                     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -180,7 +173,7 @@
             </div>
 
             <div class="col-md-9">
-              <div class="receipt card border-0 shadow-sm" id="receipt_general" style="max-height: 60vh; overflow-y: auto;">
+              <div class="receipt card border-0 shadow-sm" id="receipt_general">
                 {% if summary_data.general %}
                   <div class="report-summary p-4">
                     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -302,7 +295,7 @@
             </div>
 
             <div class="col-md-9">
-              <div class="receipt card border-0 shadow-sm" id="receipt_donor" style="max-height: 60vh; overflow-y: auto;">
+              <div class="receipt card border-0 shadow-sm" id="receipt_donor">
                 {% if summary_data.donor %}
                   <div class="report-summary p-4">
                     <div class="d-flex justify-content-between align-items-center mb-4">

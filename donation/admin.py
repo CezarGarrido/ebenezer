@@ -1,14 +1,16 @@
+import datetime
 import locale
 import subprocess
 from django.contrib import messages
 from django.contrib import admin
 from django import forms
+import urllib.parse
 from core.models.donor import Donor
 from core.models.employee import Employee
 from donation.views import Report, ReportsAdminView
 from .models import Donation, DonationSettings
 from django.utils.html import format_html
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django import forms
 from .models import ThankYouMessage, ThankYouMessageLine
 import platform
@@ -236,7 +238,7 @@ class DonationForm(forms.ModelForm):
 class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
     form = DonationForm
     exclude = ('created_by', 'company')  # Esconde o campo no formulário
-    list_display = ("id", "donor", "format_amount", "paid", "format_paid_amount", "paid_at", "created_by", "created_at", "updated_at")  # Campos visíveis na listagem
+    list_display = ("id", "paid_status", "expected_at", "donor", "format_amount", "format_paid_amount", "paid_at", "created_by", "created_at", "updated_at")  # Campos visíveis na listagem
     exclude = ("owner", "created_by")
     verbose_name = "Doação"
     verbose_name_plural = "Doações"
@@ -297,10 +299,41 @@ class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
             return locale.currency(obj.paid_amount, grouping=True)
         return "-"
     
+    def paid_status(self, obj):
+        if obj.paid:
+            return format_html('<span class="badge badge-success" title="Doação paga">Pago</span>')
+
+        # Verifica se está vencida (expected_at no passado)
+        if obj.expected_at and obj.expected_at < datetime.datetime.now().date():
+            return format_html('<span class="badge badge-warning" title="Doação vencida e não paga">Atrasado</span>')
+
+        # Ainda dentro do prazo
+        return format_html('<span class="badge badge-danger" title="Ainda no prazo de pagamento">Pendente</span>')
+
+    paid_status.short_description = "Situação"
     format_amount.short_description = "Valor Esperado"
     format_paid_amount.short_description = "Valor Recebido"
 
     def response_change(self, request, obj):
+        if '_download_receipt_pdf' in request.POST:
+            # Obter configurações com validação
+            try:
+                settings = DonationSettings.get_solo()
+                if not settings:
+                    messages.error(request, "Configurações do sistema não encontradas.")
+                    logger.error("Configurações de doação não encontradas no banco de dados")
+                    return HttpResponseRedirect(request.get_full_path())
+            except Exception as e:
+                messages.error(request, "Erro ao acessar configurações do sistema.")
+                logger.error(f"Erro ao acessar DonationSettings: {str(e)}", exc_info=True)
+                return HttpResponseRedirect(request.get_full_path())
+                
+            content_pdf = obj.get_receipt_pdf(settings)  # deve retornar o conteúdo binário do PDF
+
+            response = HttpResponse(content_pdf, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename=recibo_de_doacao_{obj.pk}.pdf'
+            return response
+
         if '_print_receipt' in request.POST:
             try:
                 logger.info(f"Iniciando processo de impressão de recibo para doação ID: {obj.id}")
@@ -348,6 +381,24 @@ class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
 
         return super().response_change(request, obj)
 
+
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        obj = self.get_object(request, object_id)
+        if obj:
+            # Obtém o primeiro telefone do tipo 'C' (celular)
+            phone_obj = obj.donor.phones.filter(type='C').first() or obj.donor.phones.first()
+            phone = "55" + phone_obj.phone if phone_obj else ""
+
+            # Gera o texto da mensagem com URL encoding
+            raw_text = obj.get_whats_msg()
+            encoded_text = urllib.parse.quote(raw_text)
+
+            whatsapp_url = f"https://web.whatsapp.com/send?phone={phone}&text={encoded_text}"
+
+            extra_context = extra_context or {}
+            extra_context['whatsapp_url'] = whatsapp_url
+
+        return super().change_view(request, object_id, form_url, extra_context=extra_context)
 
 admin.site.register(Donation, DonationAdmin)
 admin.site.register(Report, ReportsAdminView)

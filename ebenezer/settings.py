@@ -124,12 +124,14 @@ USE_I18N = True
 
 USE_TZ = True
 
-USE_L10N = True
+USE_L10N = False
 
 LOCALE_PATHS = [
     BASE_DIR / "locale",
 ]
 
+DATE_FORMAT = "d/m/Y"
+DATETIME_FORMAT = "d/m/Y H:i"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
@@ -176,7 +178,7 @@ JAZZMIN_SETTINGS = {
     ],
     "use_google_fonts_cdn": True,
     "order_with_respect_to": ["auth", "core", "donation.Donation", "donation.Report"],
-    'show_ui_builder': True,  # Desativa o personalizador (menos “web-like”)
+    'show_ui_builder': False,  # Desativa o personalizador (menos “web-like”)
     'custom_js': 'js/main.js',
     'custom_css': 'css/ebenezer.css',
     'related_modal_active': True,
@@ -203,15 +205,15 @@ JAZZMIN_UI_TWEAKS = {
     "sidebar_nav_small_text": False,
     "sidebar_disable_expand": False,
     "sidebar_nav_child_indent": False,
-    "sidebar_nav_compact_style": False,
+    "sidebar_nav_compact_style": True,
     "sidebar_nav_legacy_style": False,
-    "sidebar_nav_flat_style": True,
+    "sidebar_nav_flat_style": False,
     "theme": "lumen",
     "dark_mode_theme": None,
     "button_classes": {
         "primary": "btn-primary",
-        "secondary": "btn-dark",
-        "info": "btn-info",
+        "secondary": "btn-outline-dark",
+        "info": "btn-outline-info",
         "warning": "btn-warning",
         "danger": "btn-danger",
         "success": "btn-success"

@@ -8,13 +8,19 @@
       <h3 class="card-title p-3"><i class="fas fa-file-alt"></i> Relatórios</h3>
       <ul class="nav nav-pills ml-auto p-2">
         <li class="nav-item">
-          <a class="nav-link active" href="#tab_1" data-toggle="tab">Relatório Individual</a>
+          <a class="nav-link active" href="#tab_1" data-toggle="tab">
+            <i class="fas fa-user mr-1"></i> Relatório Individual
+          </a>  
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#tab_2" data-toggle="tab">Relatório Geral</a>
+          <a class="nav-link" href="#tab_2" data-toggle="tab">
+            <i class="fas fa-chart-bar mr-1"></i> Relatório Geral
+          </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#tab_3" data-toggle="tab">Relatório Por Doador</a>
+          <a class="nav-link" href="#tab_3" data-toggle="tab">
+            <i class="fas fa-hand-holding-heart mr-1"></i> Relatório por Doador
+          </a>
         </li>
       </ul>
     </div>
@@ -65,7 +71,7 @@
                         <div class="card h-100 border-0 bg-light">
                           <div class="card-body text-center">
                             <h6 class="card-subtitle mb-2 text-muted">Total de Doações</h6>
-                            <h3 class="card-title text-primary">{{ summary_data.individual.total_donations }}</h3>
+                            <h3 class="card-title text-dark">{{ summary_data.individual.total_donations }}</h3>
                             <small class="text-muted">no período</small>
                           </div>
                         </div>
@@ -76,7 +82,7 @@
                         <div class="card h-100 border-0 bg-light">
                           <div class="card-body text-center">
                             <h6 class="card-subtitle mb-2 text-muted">Total Previsto</h6>
-                            <h3 class="card-title text-info">{{ summary_data.individual.total_previsto }}</h3>
+                            <h3 class="card-title text-primary">{{ summary_data.individual.total_previsto }}</h3>
                             <small class="text-muted">valor estimado</small>
                           </div>
                         </div>
@@ -187,7 +193,7 @@
                         <div class="card h-100 border-0 bg-light">
                           <div class="card-body text-center">
                             <h6 class="card-subtitle mb-2 text-muted">Total de Doações</h6>
-                            <h3 class="card-title text-primary">{{ summary_data.general.total_donations }}</h3>
+                            <h3 class="card-title text-dark">{{ summary_data.general.total_donations }}</h3>
                             <small class="text-muted">no período</small>
                           </div>
                         </div>
@@ -198,7 +204,7 @@
                         <div class="card h-100 border-0 bg-light">
                           <div class="card-body text-center">
                             <h6 class="card-subtitle mb-2 text-muted">Total Previsto</h6>
-                            <h3 class="card-title text-info">{{ summary_data.general.total_previsto }}</h3>
+                            <h3 class="card-title text-primary">{{ summary_data.general.total_previsto }}</h3>
                             <small class="text-muted">valor estimado</small>
                           </div>
                         </div>
@@ -309,7 +315,7 @@
                         <div class="card h-100 border-0 bg-light">
                           <div class="card-body text-center">
                             <h6 class="card-subtitle mb-2 text-muted">Total de Doações</h6>
-                            <h3 class="card-title text-primary">{{ summary_data.donor.total_donations }}</h3>
+                            <h3 class="card-title text-dark">{{ summary_data.donor.total_donations }}</h3>
                             <small class="text-muted">no período</small>
                           </div>
                         </div>
@@ -320,7 +326,7 @@
                         <div class="card h-100 border-0 bg-light">
                           <div class="card-body text-center">
                             <h6 class="card-subtitle mb-2 text-muted">Total Previsto</h6>
-                            <h3 class="card-title text-info">{{ summary_data.donor.total_previsto }}</h3>
+                            <h3 class="card-title text-primary">{{ summary_data.donor.total_previsto }}</h3>
                             <small class="text-muted">valor estimado</small>
                           </div>
                         </div>
@@ -410,10 +416,6 @@
       })
     })
     
-    function abrirParaImprimir(id) {
-      window.print()
-    }
-    
     function printReport(formVisualId, formDataId) {
       const formVisual = $('#' + formVisualId) // Formulário onde está o botão, spinner, status
       const formDataForm = $('#' + formDataId) // Formulário que vai ser enviado
@@ -459,11 +461,7 @@
       })
     }
   </script>
-
-  <script>
-    // Espera o DOM carregar e tenta de novo
-  </script>
-
+  
   <style scoped>
     .form-label {
       display: block;

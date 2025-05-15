@@ -1,5 +1,7 @@
 from html import escape
 import re
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
 
 class ESCPrinter:
     def __init__(self, escp24pin=False):
@@ -242,3 +244,115 @@ class ESCPrinter:
                 html_blocos.append(f"<pre>{bloco_final}</pre>")
 
         return '\n'.join(html_blocos)
+    
+
+    def to_pdf(self, data: bytes, pdf_path: str):
+        from reportlab.pdfgen import canvas
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib.units import mm
+
+        PAGE_WIDTH, PAGE_HEIGHT = A4
+        MARGIN_LEFT = 15 * mm
+        MARGIN_TOP = 20 * mm
+        LINE_HEIGHT = 5 * mm
+        FONT_NAME = "Courier"
+        FONT_SIZE = 9
+        FONT_SIZE_CONDENSED = 6.5
+        CHAR_WIDTH = 3 * mm
+        CHAR_WIDTH_CONDENSED = 2 * mm
+
+        c = canvas.Canvas(pdf_path, pagesize=A4)
+        x = MARGIN_LEFT
+        y = PAGE_HEIGHT - MARGIN_TOP
+        condensed = False
+        bold = False
+
+        current_font = FONT_NAME
+        current_font_size = FONT_SIZE
+        current_char_width = CHAR_WIDTH
+        c.setFont(current_font, current_font_size)
+
+        text_buffer = ""
+        
+        def flush_buffer():
+            nonlocal x, y
+            if text_buffer:
+                if bold:
+                    c.setFont(f"{current_font}-Bold", current_font_size)
+                else:
+                    c.setFont(current_font, current_font_size)
+                c.drawString(x, y, text_buffer)
+                return len(text_buffer) * current_char_width
+            return 0
+
+        for char in data.decode('latin-1', errors='ignore'):
+            if char == '\f':  # Form feed - nova página
+                flush_buffer()
+                c.showPage()
+                y = PAGE_HEIGHT - MARGIN_TOP
+                x = MARGIN_LEFT
+                text_buffer = ""
+                continue
+            elif char == '\n':  # Nova linha
+                x += flush_buffer()
+                y -= LINE_HEIGHT
+                x = MARGIN_LEFT
+                text_buffer = ""
+                
+                # Verifica se precisa de nova página
+                if y < MARGIN_TOP:
+                    c.showPage()
+                    y = PAGE_HEIGHT - MARGIN_TOP
+                    x = MARGIN_LEFT
+                continue
+            elif char == '\r':  # Carriage return - volta ao início da linha
+                x += flush_buffer()
+                x = MARGIN_LEFT
+                text_buffer = ""
+                continue
+            elif char == '\x0F':  # Condensed ON
+                x += flush_buffer()
+                condensed = True
+                current_font_size = FONT_SIZE_CONDENSED
+                current_char_width = CHAR_WIDTH_CONDENSED
+                text_buffer = ""
+                continue
+            elif char == '\x12':  # Condensed OFF
+                x += flush_buffer()
+                condensed = False
+                current_font_size = FONT_SIZE
+                current_char_width = CHAR_WIDTH
+                text_buffer = ""
+                continue
+            elif char == '\x1B':  # ESC - início de comando (vamos ignorar)
+                continue
+            elif char == '\x1BE':  # Bold ON
+                x += flush_buffer()
+                bold = True
+                text_buffer = ""
+                continue
+            elif char == '\x1BF':  # Bold OFF
+                x += flush_buffer()
+                bold = False
+                text_buffer = ""
+                continue
+            elif ord(char) < 32:  # Ignora outros caracteres de controle
+                continue
+            else:
+                text_buffer += char
+                # Se o próximo caractere ultrapassar a margem direita, faz flush
+                if x + (len(text_buffer) * current_char_width) > PAGE_WIDTH - MARGIN_LEFT:
+                    x += flush_buffer()
+                    y -= LINE_HEIGHT
+                    x = MARGIN_LEFT
+                    text_buffer = ""
+                    
+                    # Verifica se precisa de nova página
+                    if y < MARGIN_TOP:
+                        c.showPage()
+                        y = PAGE_HEIGHT - MARGIN_TOP
+                        x = MARGIN_LEFT
+
+        # Flush do buffer final
+        flush_buffer()
+        c.save()

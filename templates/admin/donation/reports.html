@@ -130,6 +130,8 @@
                       {% csrf_token %}
                       <div class="d-flex justify-content-end">
                         <button class="btn btn-outline-primary" type="button" onclick="printReport('form_print_individual','form_report_individual')"><i class="fas fa-print me-2"></i> Imprimir Relatório</button>
+                        <button class="btn btn-outline-danger ml-2" type="button" onclick="downloadPDF('form_report_individual')"><i class="fas fa-print me-2"></i> Baixar PDF</button>
+
                         <div id="printSpinner" class="spinner-border text-primary ms-2 d-none" role="status">
                           <span class="visually-hidden">Loading...</span>
                         </div>
@@ -252,6 +254,9 @@
                       {% csrf_token %}
                       <div class="d-flex justify-content-end">
                         <button class="btn btn-outline-primary" type="button" onclick="printReport('form_print_general', 'form_report_general')"><i class="fas fa-print me-2"></i> Imprimir Relatório</button>
+                        <button class="btn btn-outline-danger ml-2" type="button" onclick="downloadPDF('form_report_general')"><i class="fas fa-print me-2"></i> Baixar PDF</button>
+
+                        
                         <div id="printSpinner" class="spinner-border text-primary ms-2 d-none" role="status">
                           <span class="visually-hidden">Loading...</span>
                         </div>
@@ -374,6 +379,8 @@
                       {% csrf_token %}
                       <div class="d-flex justify-content-end">
                         <button class="btn btn-outline-primary" type="button" onclick="printReport('form_print_donor','form_report_donor')"><i class="fas fa-print me-2"></i> Imprimir Relatório</button>
+                        <button class="btn btn-outline-danger ml-2" type="button" onclick="downloadPDF('form_report_donor')"><i class="fas fa-print me-2"></i> Baixar PDF</button>
+
                         <div id="printSpinner" class="spinner-border text-primary ms-2 d-none" role="status">
                           <span class="visually-hidden">Loading...</span>
                         </div>
@@ -460,6 +467,39 @@
         }
       })
     }
+    function downloadPDF(formDataId) {
+      const formDataForm = $('#' + formDataId);
+      const formData = new FormData(formDataForm[0]);
+      formData.append('action', 'download')
+      fetch("{% url 'admin:donation_print_receipt' %}", {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': '{{ csrf_token }}'
+        }
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Erro ao gerar PDF');
+        }
+        return response.blob();
+      })
+      .then(blob => {
+        const blobUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = 'relatorio_doacoes.pdf';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(blobUrl);
+      })
+      .catch(error => {
+        alert('Erro ao baixar o PDF: ' + error.message);
+      });
+    }
+    
   </script>
   
   <style scoped>

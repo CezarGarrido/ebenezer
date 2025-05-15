@@ -389,10 +389,10 @@ class Donation(models.Model):
         buffer = BytesIO()
         # Configuração inicial
         locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
-        PAGE_WIDTH, PAGE_HEIGHT = landscape(A4)  # Modo paisagem
+        PAGE_WIDTH, PAGE_HEIGHT = A4  # Modo paisagem
         MARGIN_LEFT = 15 * mm
         MARGIN_RIGHT = 15 * mm
-        MARGIN_TOP = 20 * mm
+        MARGIN_TOP = 5 * mm
         LINE_HEIGHT = 5 * mm
         FONT_NAME = "Courier"
         FONT_SIZE = 10  # Aumentado para melhor legibilidade
@@ -400,7 +400,7 @@ class Donation(models.Model):
         CHAR_WIDTH_CONDENSED = 2 * mm
         
         # Criar canvas PDF em modo paisagem
-        c = canvas.Canvas(buffer, pagesize=landscape(A4))
+        c = canvas.Canvas(buffer, pagesize=A4)
         
         # Posição inicial
         x = MARGIN_LEFT
@@ -576,7 +576,7 @@ class Donation(models.Model):
             method = dict(PAYMENT_METHOD_CHOICES).get(self.method, 'Outro').upper()
             draw_text(f"Pago em.....: {method}")
         
-        y -= LINE_HEIGHT
+        y -= LINE_HEIGHT - 20
         
         # 4. Rodapé
         draw_line()
@@ -586,7 +586,7 @@ class Donation(models.Model):
 
         draw_text(thank_msg, align="center")
         
-        y -= LINE_HEIGHT * 3
+        y -= LINE_HEIGHT * 2
         
         # Assinatura
         signature_line = "_" * 30

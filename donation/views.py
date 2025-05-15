@@ -1,4 +1,4 @@
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.urls import path
 import locale
 import logging
@@ -12,6 +12,8 @@ from django import forms
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.template.response import TemplateResponse
 from django.utils.translation import gettext_lazy as _
+
+from donation import report_pdf
 from .models import Donation, DonationSettings
 from core.models.donor import Donor
 from core.models.employee import Employee, EmployeeUser
@@ -306,10 +308,19 @@ class ReportsAdminView(admin.ModelAdmin, ReportBuilderMixin):
         report_type = request.POST.get("report_type")
         if not report_type:
             return JsonResponse({"error": "Tipo de relatório não informado."}, status=400)
-
+        action = request.POST.get("action")
+            
         context = self._build_report_context(request, report_type)
 
         receipt_bytes = context["receipts"].get(report_type) or b''
+        
+        if action == "download":
+            return HttpResponse(
+                receipt_bytes,
+                content_type="application/pdf",
+                headers={"Content-Disposition": 'attachment; filename="relatorio_doacoes.pdf"'}
+            )
+
 
         if not receipt_bytes:
             return JsonResponse({"error": "Nenhum relatório gerado para imprimir."}, status=400)
@@ -392,8 +403,9 @@ class ReportsAdminView(admin.ModelAdmin, ReportBuilderMixin):
             'general': b'',
             'donor': b''
         }
-
-        if report_type in forms and forms[report_type].is_valid():
+        action = request.POST.get("action")
+    
+        if report_type in forms and forms[report_type].is_valid():            
             data = forms[report_type].cleaned_data
             donations = self._get_filtered_donations(
                 request, 
@@ -404,31 +416,56 @@ class ReportsAdminView(admin.ModelAdmin, ReportBuilderMixin):
             if report_type == "individual" and data.get("created_by"):
                 try:
                     employee_user = EmployeeUser.objects.get(employee=data["created_by"])
-                    receipts['individual'] = self._generate_employee_report(
-                        data["start_date"],
-                        data["end_date"],
-                        employee_user.employee,
-                        donations.filter(created_by=employee_user.user)
-                    )
+                    
+                    if action == "download":
+                        receipts['individual'] = report_pdf.generate_employee_report_pdf(
+                            employee_user.employee,
+                            donations.filter(created_by=employee_user.user),
+                            data["start_date"],
+                            data["end_date"],
+                        )
+                    else:
+                        receipts['individual'] = self._generate_employee_report(
+                            data["start_date"],
+                            data["end_date"],
+                            employee_user.employee,
+                            donations.filter(created_by=employee_user.user)
+                        )
                 except EmployeeUser.DoesNotExist:
                     logger.error(f"EmployeeUser not found for employee: {data['created_by']}")
 
             elif report_type == "donor" and data.get("donor"):
-                receipts['donor'] = self._generate_donor_report(
-                    data["start_date"],
-                    data["end_date"],
-                    data["donor"],
-                    donations.filter(donor=data["donor"])
-                )
+                if action == "download":
+                    receipts['donor'] = report_pdf.generate_donor_report_pdf(
+                        data["donor"],
+                        donations.filter(donor=data["donor"]),
+                        data["start_date"],
+                        data["end_date"],
+                    )
+                else:
+                    receipts['donor'] = self._generate_donor_report(
+                        data["start_date"],
+                        data["end_date"],
+                        data["donor"],
+                        donations.filter(donor=data["donor"])
+                    )
 
             elif report_type == "general":
-                receipts['general'] = self._generate_general_report(
-                    request.user,
-                    data["start_date"],
-                    data["end_date"],
-                    donations
-                )
-        
+                if action == "download":
+                    receipts['general'] = report_pdf.generate_general_report(
+                        request.user,
+                        data["start_date"],
+                        data["end_date"],
+                        donations
+                    )
+                else:
+                    receipts['general'] = self._generate_general_report(
+                        request.user,
+                        data["start_date"],
+                        data["end_date"],
+                        donations
+                    )
+            
         return {
             "report_type": report_type,
             "receipts": receipts,

@@ -174,7 +174,7 @@ JAZZMIN_SETTINGS = {
     },
     'search_model': ['core.Donor'],
     "usermenu_links": [
-        {"name": "Config. Doações", "url": "/admin/donation/donationsettings/", "icon": "fas fa-gear", "permissions": ["donation.add_thankyoumessage"]},
+        {"name": "Parâmetros", "url": "/admin/donation/donationsettings/", "icon": "fas fa-gear", "permissions": ["donation.add_thankyoumessage"]},
     ],
     "use_google_fonts_cdn": True,
     "order_with_respect_to": ["auth", "core", "donation.Donation", "donation.Report"],

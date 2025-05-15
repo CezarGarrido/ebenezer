@@ -72,6 +72,7 @@ jobs:
             --hidden-import=jazzmin.templatetags.jazzmin_tags ^
             --hidden-import=jazzmin.compat ^
             --hidden-import=ebenezer.wsgi ^
+            --hidden-import=reportlab ^
             --add-data "staticfiles;staticfiles" ^
             --add-data "templates;templates" ^
             --add-data "core\\management;core\\management"
@@ -89,6 +90,7 @@ jobs:
             --hidden-import=jazzmin.templatetags.jazzmin_tags \
             --hidden-import=jazzmin.compat \
             --hidden-import=ebenezer.wsgi \
+            --hidden-import=reportlab \
             --add-data "staticfiles:staticfiles" \
             --add-data "templates:templates" \
             --add-data "core/management:core/management"

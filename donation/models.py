@@ -9,9 +9,13 @@ from django.core.exceptions import ObjectDoesNotExist
 from core.escbuilder.escbuilder import ESCBuilder
 from num2words import num2words
 from core.models.employee import Employee
-
 # Enviar para impressora
 import platform, tempfile, os
+# Gerar PDF
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import landscape, A4
+from reportlab.lib.units import mm
+from io import BytesIO
 
 PAYMENT_METHOD_CHOICES = [
     ('cash', 'Dinheiro'),
@@ -382,12 +386,6 @@ class Donation(models.Model):
         return escp.build()
     
     def get_receipt_pdf(self, settings):
-        from reportlab.pdfgen import canvas
-        from reportlab.lib.pagesizes import landscape, A4
-        from reportlab.lib.units import mm
-        from num2words import num2words
-        import locale
-        from io import BytesIO
         buffer = BytesIO()
         # Configuração inicial
         locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')

@@ -1,7 +1,5 @@
 from html import escape
 import re
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import A4
 
 class ESCPrinter:
     def __init__(self, escp24pin=False):
@@ -246,7 +244,6 @@ class ESCPrinter:
         return '\n'.join(html_blocos)
     
 
-    def to_pdf(self, data: bytes, pdf_path: str):
         from reportlab.pdfgen import canvas
         from reportlab.lib.pagesizes import A4
         from reportlab.lib.units import mm

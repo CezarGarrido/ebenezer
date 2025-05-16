@@ -6,7 +6,7 @@ from django.contrib import admin
 from django import forms
 import urllib.parse
 from core.models.donor import Donor
-from core.models.employee import Employee
+from core.models.employee import Employee, EmployeeUser
 from donation.views import Report, ReportsAdminView
 from .models import Donation, DonationSettings
 from django.utils.html import format_html
@@ -209,8 +209,6 @@ class DonationForm(forms.ModelForm):
         paid_amount = cleaned_data.get("paid_amount")
         paid_at = cleaned_data.get("paid_at")
         method = cleaned_data.get("method")
-        received_by = cleaned_data.get("received_by")
-        amount = cleaned_data.get("amount")
 
         if paid:
             # 1. Valor recebido é obrigatório e maior que zero
@@ -237,9 +235,7 @@ class DonationForm(forms.ModelForm):
     
 class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
     form = DonationForm
-    exclude = ('created_by', 'company')  # Esconde o campo no formulário
     list_display = ("id", "paid_status", "expected_at", "donor", "format_amount", "format_paid_amount", "paid_at", "created_by", "created_at", "updated_at")  # Campos visíveis na listagem
-    exclude = ("owner", "created_by")
     verbose_name = "Doação"
     verbose_name_plural = "Doações"
     entity_labels = {
@@ -261,9 +257,24 @@ class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
         "notes",           # Notas da doação
     )
     
+    
     autocomplete_fields = ['donor']
+    
+    exclude = ['owner', 'created_by']
+
+    def get_exclude(self, request, obj=None):
+        exclude = list(super().get_exclude(request, obj) or [])
+        if request.user.is_superuser and 'created_by' in exclude:
+            exclude.remove('created_by')
+        return exclude
 
     def save_model(self, request, obj, form, change):
+        if not obj.received_by: 
+            try:
+             obj.received_by = EmployeeUser.objects.get(user=request.user).employee
+            except:
+                pass  # Ou raise, ou log, conforme a lógica do seu sistema
+            
         if not obj.created_by:  # Define apenas se for um novo objeto
             obj.created_by = request.user
             obj.owner = request.user.profile.company
@@ -279,7 +290,13 @@ class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
         }),
     )
     
-    readonly_fields = ("created_by", "created_at", "updated_at", "get_receipt")
+    def get_readonly_fields(self, request, obj=None):
+        base_readonly = ["created_at", "updated_at", "get_receipt"]
+
+        if not request.user.is_superuser:
+            base_readonly.append("created_by")
+
+        return base_readonly
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         user_company = request.user.profile.company
@@ -380,25 +397,6 @@ class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
             return HttpResponseRedirect(request.get_full_path())
 
         return super().response_change(request, obj)
-
-
-    def change_view(self, request, object_id, form_url='', extra_context=None):
-        obj = self.get_object(request, object_id)
-        if obj:
-            # Obtém o primeiro telefone do tipo 'C' (celular)
-            phone_obj = obj.donor.phones.filter(type='C').first() or obj.donor.phones.first()
-            phone = "55" + phone_obj.phone if phone_obj else ""
-
-            # Gera o texto da mensagem com URL encoding
-            raw_text = obj.get_whats_msg()
-            encoded_text = urllib.parse.quote(raw_text)
-
-            whatsapp_url = f"https://web.whatsapp.com/send?phone={phone}&text={encoded_text}"
-
-            extra_context = extra_context or {}
-            extra_context['whatsapp_url'] = whatsapp_url
-
-        return super().change_view(request, object_id, form_url, extra_context=extra_context)
 
 admin.site.register(Donation, DonationAdmin)
 admin.site.register(Report, ReportsAdminView)

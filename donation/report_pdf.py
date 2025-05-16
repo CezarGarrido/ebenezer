@@ -19,11 +19,11 @@ def get_identification_lines(context):
     if context.get("employee"):
         emp = context["employee"]
         lines.append(f"Código............: {emp.id}")
-        lines.append(f"Funcionário.......: {emp.name}")
+        lines.append(f"Funcionário.......: {emp.name.upper()}")
     elif context.get("donor"):
         donor = context["donor"]
         lines.append(f"Código............: {donor.id}")
-        lines.append(f"Doador............: {donor.name}")
+        lines.append(f"Doador............: {donor.name.upper()}")
     return lines
 
 def generate_donation_report_pdf(context):
@@ -119,7 +119,7 @@ def generate_donation_report_pdf(context):
         rows.append([
             str(d.id),
             d.expected_at.strftime('%d/%m/%Y') if d.expected_at else "-",
-            f"{d.donor.id} - {d.donor.name}",
+            f"{d.donor.id} - {d.donor.name.upper()}",
             locale.currency(valor_previsto, grouping=True),
             locale.currency(valor_recebido, grouping=True),
             f"{diferenca:.2f}%"

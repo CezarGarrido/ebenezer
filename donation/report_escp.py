@@ -121,7 +121,13 @@ def generate_donor_or_employee_report(entity, start_date, end_date, donations, t
 
     generate_report_header(printer, entity.owner, title)
     print_line_side_by_side(printer, f"Código..............: {entity.id}", "")
-    print_line_side_by_side(printer, f"{title.split('POR ')[-1].capitalize()}..............: {entity.name.upper()}", "")
+    
+    entity_by = title.split('POR ')[-1].capitalize()
+    if entity_by == "Doador":
+        print_line_side_by_side(printer, f"{entity_by}..............: {entity.name.upper()}", "")
+    else:
+        print_line_side_by_side(printer, f"{entity_by}.........: {entity.name.upper()}", "")
+        
     print_line_side_by_side(printer, f"Período.............: {start_date.strftime('%d/%m/%Y')} até {end_date.strftime('%d/%m/%Y')}", "")
     printer.lineFeed()
 

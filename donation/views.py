@@ -278,7 +278,7 @@ class ReportsAdminView(admin.ModelAdmin):
 
                     fake_employee = SimpleNamespace(
                         id=user.id,
-                        name=user.get_full_name() or user.username,
+                        name=f"{user.get_full_name() or user.username} (Usuário)",
                         owner=user.profile.company
                     )
 

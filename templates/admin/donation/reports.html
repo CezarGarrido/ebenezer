@@ -2,397 +2,141 @@
 {% load static %}
 
 {% block content %}
-  <!-- Custom Tabs -->
+<h3>Relatórios</h3>
   <div class="card w-100">
     <div class="card-header d-flex p-0">
-      <h3 class="card-title p-3"><i class="fas fa-file-alt"></i> Relatórios</h3>
-      <ul class="nav nav-pills ml-auto p-2">
+      <ul class="nav nav-pills p-2">
         <li class="nav-item">
-          <a class="nav-link active" href="#tab_1" data-toggle="tab">Relatório Individual</a>
+          <a class="nav-link active" href="#tab_1" data-toggle="tab">Individual</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#tab_2" data-toggle="tab">Relatório Geral</a>
+          <a class="nav-link" href="#tab_2" data-toggle="tab">Geral</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#tab_3" data-toggle="tab">Relatório Por Doador</a>
+          <a class="nav-link" href="#tab_3" data-toggle="tab">Por Doador</a>
         </li>
       </ul>
     </div>
-    <!-- /.card-header -->
     <div class="card-body">
       <div class="tab-content">
-        <div class="tab-pane active" id="tab_1">
-          <div class="row">
-            <div class="col-md-3">
-              <form method="get" action="#tab_1" class="filter-column" id="form_report_individual">
-                <input type="hidden" name="report_type" value="individual" />
-                {% if individual_form.non_field_errors %}
-                  <div class="error help-block text-red">{{ individual_form.non_field_errors }}</div>
-                {% endif %}
+      <!-- Aba Individual -->
+      <div class="tab-pane active" id="tab_1">
+        <div class="row">
+          <div class="col-md-3">
+            <form method="get" class="filter-column"  action="#tab_1" id="form_report_individual">
+              <input type="hidden" name="report_type" value="individual" />
+              <input type="hidden" name="action" value="download" />
 
-                {% for field in individual_form %}
-                  <div class="mb-3">
-                    <label class="form-label">{{ field.label }}</label>
-                    {{ field }}
+              {% if individual_form.non_field_errors %}
+                <div class="text-danger small">{{ individual_form.non_field_errors }}</div>
+              {% endif %}
 
-                    <div class="help-block text-red">
-                      <ul class="errorlist">
-                        {% for error in field.errors %}
-                          <li>{{ error }}</li>
-                        {% endfor %}
-                      </ul>
-                    </div>
-                  </div>
-                {% endfor %}
+              {% for field in individual_form %}
                 <div class="mb-3">
-                  <button class="btn btn-primary w-100" type="submit">Gerar Relatório</button>
+                  <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                  {{ field }}
+                  {% if field.errors %}
+                    <div class="text-danger small">{{ field.errors|join:', ' }}</div>
+                  {% endif %}
+                  {% if field.help_text %}
+                    <div class="text-muted small">{{ field.help_text }}</div>
+                  {% endif %}
                 </div>
-              </form>
-            </div>
+              {% endfor %}
 
-            <div class="col-md-9">
-              <div class="receipt card border-0 shadow-sm" id="receipt_individual">
-                {% if summary_data.individual %}
-                  <div class="report-summary p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                      <h3 class="mb-0 text-primary"><i class="fas fa-file-alt mr-2"></i>{{ summary_data.individual.title }}</h3>
-                      <span class="badge bg-light text-dark"><i class="fas fa-calendar-alt mr-1"></i>{{ summary_data.individual.periodo }}</span>
-                    </div>
-
-                    <div class="row g-3 mb-4">
-                      <!-- Card de Total de Doações -->
-                      <div class="col-md-6 col-lg-3">
-                        <div class="card h-100 border-0 bg-light">
-                          <div class="card-body text-center">
-                            <h6 class="card-subtitle mb-2 text-muted">Total de Doações</h6>
-                            <h3 class="card-title text-primary">{{ summary_data.individual.total_donations }}</h3>
-                            <small class="text-muted">no período</small>
-                          </div>
-                        </div>
-                      </div>
-
-                      <!-- Card de Total Previsto -->
-                      <div class="col-md-6 col-lg-3">
-                        <div class="card h-100 border-0 bg-light">
-                          <div class="card-body text-center">
-                            <h6 class="card-subtitle mb-2 text-muted">Total Previsto</h6>
-                            <h3 class="card-title text-info">{{ summary_data.individual.total_previsto }}</h3>
-                            <small class="text-muted">valor estimado</small>
-                          </div>
-                        </div>
-                      </div>
-
-                      <!-- Card de Total Recebido -->
-                      <div class="col-md-6 col-lg-3">
-                        <div class="card h-100 border-0 bg-light">
-                          <div class="card-body text-center">
-                            <h6 class="card-subtitle mb-2 text-muted">Total Recebido</h6>
-                            <h3 class="card-title text-success">{{ summary_data.individual.total_recebido }}</h3>
-                            <small class="text-muted">valor confirmado</small>
-                          </div>
-                        </div>
-                      </div>
-
-                      <!-- Card de Diferença -->
-                      <div class="col-md-6 col-lg-3">
-                        <div class="card h-100 border-0 bg-light">
-                          <div class="card-body text-center">
-                            <h6 class="card-subtitle mb-2 text-muted">Diferença</h6>
-                            <h3 class="card-title 
-                              {% if summary_data.individual.dif_percentual|slice:'1:-1'|add:'0' >= 0 %}
-                                
-                                
-                                text-success
-
-
-                              {% else %}
-                                
-                                
-                                text-danger
-
-
-                              {% endif %}">
-                              {{ summary_data.individual.dif_percentual }}
-                            </h3>
-                            <small class="text-muted">em relação ao previsto</small>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <form method="post" id="form_print_individual" class="mt-4">
-                      {% csrf_token %}
-                      <div class="d-flex justify-content-end">
-                        <button class="btn btn-outline-primary" type="button" onclick="printReport('form_print_individual','form_report_individual')"><i class="fas fa-print me-2"></i> Imprimir Relatório</button>
-                        <div id="printSpinner" class="spinner-border text-primary ms-2 d-none" role="status">
-                          <span class="visually-hidden">Loading...</span>
-                        </div>
-                      </div>
-                      <div id="printStatus" class="text-end small mt-2"></div>
-                    </form>
-                  </div>
-                {% else %}
-                  <div class="text-center p-5 text-muted">
-                    <i class="fas fa-file-alt" style="font-size: 3rem;"></i>
-                    <p class="mt-3">Nenhum relatório gerado. Selecione os filtros e clique em "Gerar Relatório".</p>
-                  </div>
-                {% endif %}
+              <div class="d-flex gap-2">
+                <button class="btn btn-primary flex-grow-1" type="button" onclick="downloadPDF('form_report_individual', 'pdfFrameIndividual')">Gerar Relatório</button>
+                <button class="btn btn-outline-success ml-1" type="button" onclick="printReport('form_report_individual', 'form_report_individual')" title="Imprimir em Matricial"><i class="fas fa-print"></i></button>
               </div>
-            </div>
+              <div id="printStatus_individual" class="small mt-2 text-muted"></div>
+            </form>
+          </div>
+          <div class="col-md-9">
+            <iframe id="pdfFrameIndividual" style="width:100%; height:600px; border:none;"></iframe>
           </div>
         </div>
-        <!-- /.tab-pane -->
-        <div class="tab-pane" id="tab_2">
-          <div class="row">
-            <div class="col-md-3">
-              <form method="get" action="#tab_2" class="filter-column" id="form_report_general">
-                <input type="hidden" name="report_type" value="general" />
-
-                {% if general_form.non_field_errors %}
-                  <div class="error help-block text-red">{{ general_form.non_field_errors }}</div>
-                {% endif %}
-
-                {% for field in general_form %}
-                  <div class="mb-3">
-                    <label class="form-label">{{ field.label }}</label>
-                    {{ field }}
-
-                    <div class="help-block text-red">
-                      <ul class="errorlist">
-                        {% for error in field.errors %}
-                          <li>{{ error }}</li>
-                        {% endfor %}
-                      </ul>
-                    </div>
-                  </div>
-                {% endfor %}
-                <div class="mb-3">
-                  <button class="btn btn-primary w-100" type="submit">Gerar Relatório</button>
-                </div>
-              </form>
-            </div>
-
-            <div class="col-md-9">
-              <div class="receipt card border-0 shadow-sm" id="receipt_general">
-                {% if summary_data.general %}
-                  <div class="report-summary p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                      <h3 class="mb-0 text-primary"><i class="fas fa-file-alt mr-2"></i>{{ summary_data.general.title }}</h3>
-                      <span class="badge bg-light text-dark"><i class="fas fa-calendar-alt mr-1"></i>{{ summary_data.general.periodo }}</span>
-                    </div>
-
-                    <div class="row g-3 mb-4">
-                      <!-- Card de Total de Doações -->
-                      <div class="col-md-6 col-lg-3">
-                        <div class="card h-100 border-0 bg-light">
-                          <div class="card-body text-center">
-                            <h6 class="card-subtitle mb-2 text-muted">Total de Doações</h6>
-                            <h3 class="card-title text-primary">{{ summary_data.general.total_donations }}</h3>
-                            <small class="text-muted">no período</small>
-                          </div>
-                        </div>
-                      </div>
-
-                      <!-- Card de Total Previsto -->
-                      <div class="col-md-6 col-lg-3">
-                        <div class="card h-100 border-0 bg-light">
-                          <div class="card-body text-center">
-                            <h6 class="card-subtitle mb-2 text-muted">Total Previsto</h6>
-                            <h3 class="card-title text-info">{{ summary_data.general.total_previsto }}</h3>
-                            <small class="text-muted">valor estimado</small>
-                          </div>
-                        </div>
-                      </div>
-
-                      <!-- Card de Total Recebido -->
-                      <div class="col-md-6 col-lg-3">
-                        <div class="card h-100 border-0 bg-light">
-                          <div class="card-body text-center">
-                            <h6 class="card-subtitle mb-2 text-muted">Total Recebido</h6>
-                            <h3 class="card-title text-success">{{ summary_data.general.total_recebido }}</h3>
-                            <small class="text-muted">valor confirmado</small>
-                          </div>
-                        </div>
-                      </div>
-
-                      <!-- Card de Diferença -->
-                      <div class="col-md-6 col-lg-3">
-                        <div class="card h-100 border-0 bg-light">
-                          <div class="card-body text-center">
-                            <h6 class="card-subtitle mb-2 text-muted">Diferença</h6>
-                            <h3 class="card-title 
-                              {% if summary_data.general.dif_percentual|slice:'1:-1'|add:'0' >= 0 %}
-                                
-                                
-                                text-success
-
-
-                              {% else %}
-                                
-                                
-                                text-danger
-
-
-                              {% endif %}">
-                              {{ summary_data.general.dif_percentual }}
-                            </h3>
-                            <small class="text-muted">em relação ao previsto</small>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <form method="post" id="form_print_general" class="mt-4">
-                      {% csrf_token %}
-                      <div class="d-flex justify-content-end">
-                        <button class="btn btn-outline-primary" type="button" onclick="printReport('form_print_general', 'form_report_general')"><i class="fas fa-print me-2"></i> Imprimir Relatório</button>
-                        <div id="printSpinner" class="spinner-border text-primary ms-2 d-none" role="status">
-                          <span class="visually-hidden">Loading...</span>
-                        </div>
-                      </div>
-                      <div id="printStatus" class="text-end small mt-2"></div>
-                    </form>
-                  </div>
-                {% else %}
-                  <div class="text-center p-5 text-muted">
-                    <i class="fas fa-file-alt" style="font-size: 3rem;"></i>
-                    <p class="mt-3">Nenhum relatório gerado. Selecione os filtros e clique em "Gerar Relatório".</p>
-                  </div>
-                {% endif %}
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- /.tab-pane -->
-        <div class="tab-pane" id="tab_3">
-          <div class="row">
-            <div class="col-md-3">
-              <form method="get" action="#tab_3" class="filter-column" id="form_report_donor">
-                <input type="hidden" name="report_type" value="donor" />
-
-                {% if donor_form.non_field_errors %}
-                  <div class="error help-block text-red">{{ donor_form.non_field_errors }}</div>
-                {% endif %}
-
-                {% for field in donor_form %}
-                  <div class="mb-3">
-                    <label class="form-label">{{ field.label }}</label>
-                    {{ field }}
-
-                    <div class="help-block text-red">
-                      <ul class="errorlist">
-                        {% for error in field.errors %}
-                          <li>{{ error }}</li>
-                        {% endfor %}
-                      </ul>
-                    </div>
-                  </div>
-                {% endfor %}
-                <div class="mb-3">
-                  <button class="btn btn-primary w-100" type="submit">Gerar Relatório</button>
-                </div>
-              </form>
-            </div>
-
-            <div class="col-md-9">
-              <div class="receipt card border-0 shadow-sm" id="receipt_donor">
-                {% if summary_data.donor %}
-                  <div class="report-summary p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                      <h3 class="mb-0 text-primary"><i class="fas fa-file-alt mr-2"></i>{{ summary_data.donor.title }}</h3>
-                      <span class="badge bg-light text-dark"><i class="fas fa-calendar-alt mr-1"></i>{{ summary_data.donor.periodo }}</span>
-                    </div>
-
-                    <div class="row g-3 mb-4">
-                      <!-- Card de Total de Doações -->
-                      <div class="col-md-6 col-lg-3">
-                        <div class="card h-100 border-0 bg-light">
-                          <div class="card-body text-center">
-                            <h6 class="card-subtitle mb-2 text-muted">Total de Doações</h6>
-                            <h3 class="card-title text-primary">{{ summary_data.donor.total_donations }}</h3>
-                            <small class="text-muted">no período</small>
-                          </div>
-                        </div>
-                      </div>
-
-                      <!-- Card de Total Previsto -->
-                      <div class="col-md-6 col-lg-3">
-                        <div class="card h-100 border-0 bg-light">
-                          <div class="card-body text-center">
-                            <h6 class="card-subtitle mb-2 text-muted">Total Previsto</h6>
-                            <h3 class="card-title text-info">{{ summary_data.donor.total_previsto }}</h3>
-                            <small class="text-muted">valor estimado</small>
-                          </div>
-                        </div>
-                      </div>
-
-                      <!-- Card de Total Recebido -->
-                      <div class="col-md-6 col-lg-3">
-                        <div class="card h-100 border-0 bg-light">
-                          <div class="card-body text-center">
-                            <h6 class="card-subtitle mb-2 text-muted">Total Recebido</h6>
-                            <h3 class="card-title text-success">{{ summary_data.donor.total_recebido }}</h3>
-                            <small class="text-muted">valor confirmado</small>
-                          </div>
-                        </div>
-                      </div>
-
-                      <!-- Card de Diferença -->
-                      <div class="col-md-6 col-lg-3">
-                        <div class="card h-100 border-0 bg-light">
-                          <div class="card-body text-center">
-                            <h6 class="card-subtitle mb-2 text-muted">Diferença</h6>
-                            <h3 class="card-title 
-                              {% if summary_data.donor.dif_percentual|slice:'1:-1'|add:'0' >= 0 %}
-                                
-                                
-                                text-success
-
-
-                              {% else %}
-                                
-                                
-                                text-danger
-
-
-                              {% endif %}">
-                              {{ summary_data.donor.dif_percentual }}
-                            </h3>
-                            <small class="text-muted">em relação ao previsto</small>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <form method="post" id="form_print_donor" class="mt-4">
-                      {% csrf_token %}
-                      <div class="d-flex justify-content-end">
-                        <button class="btn btn-outline-primary" type="button" onclick="printReport('form_print_donor','form_report_donor')"><i class="fas fa-print me-2"></i> Imprimir Relatório</button>
-                        <div id="printSpinner" class="spinner-border text-primary ms-2 d-none" role="status">
-                          <span class="visually-hidden">Loading...</span>
-                        </div>
-                      </div>
-                      <div id="printStatus" class="text-end small mt-2"></div>
-                    </form>
-                  </div>
-                {% else %}
-                  <div class="text-center p-5 text-muted">
-                    <i class="fas fa-file-alt" style="font-size: 3rem;"></i>
-                    <p class="mt-3">Nenhum relatório gerado. Selecione os filtros e clique em "Gerar Relatório".</p>
-                  </div>
-                {% endif %}
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- /.tab-pane -->
       </div>
-      <!-- /.tab-content -->
+   
+
+      <!-- Aba Geral -->
+      <div class="tab-pane" id="tab_2">
+        <div class="row">
+          <div class="col-md-3">
+            <form method="get" class="filter-column" id="form_report_general">
+              <input type="hidden" name="report_type" value="general" />
+
+              {% if general_form.non_field_errors %}
+                <div class="text-danger small">{{ general_form.non_field_errors }}</div>
+              {% endif %}
+
+              {% for field in general_form %}
+                <div class="mb-3">
+                  <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                  {{ field }}
+                  {% if field.errors %}
+                    <div class="text-danger small">{{ field.errors|join:', ' }}</div>
+                  {% endif %}
+                  {% if field.help_text %}
+                    <div class="text-muted small">{{ field.help_text }}</div>
+                  {% endif %}
+                </div>
+              {% endfor %}
+
+              <div class="d-flex gap-2">
+                <button class="btn btn-primary flex-grow-1" type="button" onclick="downloadPDF('form_report_general', 'pdfFrameGeneral')">Gerar Relatório</button>
+                <button class="btn btn-outline-success ml-1" type="button" onclick="printReport('form_report_general', 'form_report_general')" title="Imprimir em Matricial"><i class="fas fa-print"></i></button>
+              </div>
+              <div id="printStatus_general" class="small mt-2 text-muted"></div>
+            </form>
+          </div>
+          <div class="col-md-9">
+            <iframe id="pdfFrameGeneral" style="width:100%; height:600px; border:none;"></iframe>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aba Por Doador -->
+      <div class="tab-pane" id="tab_3">
+        <div class="row">
+          <div class="col-md-3">
+            <form method="get" class="filter-column" id="form_report_donor">
+              <input type="hidden" name="report_type" value="donor" />
+              <input type="hidden" name="action" value="download" />
+
+              {% if donor_form.non_field_errors %}
+                <div class="text-danger small">{{ donor_form.non_field_errors }}</div>
+              {% endif %}
+
+              {% for field in donor_form %}
+                <div class="mb-3">
+                  <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                  {{ field }}
+                  {% if field.errors %}
+                    <div class="text-danger small">{{ field.errors|join:', ' }}</div>
+                  {% endif %}
+                  {% if field.help_text %}
+                    <div class="text-muted small">{{ field.help_text }}</div>
+                  {% endif %}
+                </div>
+              {% endfor %}
+
+              <div class="d-flex gap-2">
+                <button class="btn btn-primary flex-grow-1" type="button" onclick="downloadPDF('form_report_donor', 'pdfFrameDonor')">Gerar Relatório</button>
+                <button class="btn btn-outline-success ml-1" type="button" onclick="printReport('form_report_donor', 'form_report_donor')" title="Imprimir em Matricial"><i class="fas fa-print"></i></button>
+              </div>
+              <div id="printStatus_donor" class="small mt-2 text-muted"></div>
+            </form>
+          </div>
+          <div class="col-md-9">
+            <iframe id="pdfFrameDonor" style="width:100%; height:600px; border:none;"></iframe>
+          </div>
+        </div>
+      </div>
     </div>
-    <!-- /.card-body -->
+    </div>
   </div>
-  <!-- ./card -->
 {% endblock %}
+
 {% block extrajs %}
   <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -410,65 +154,115 @@
       })
     })
     
-    function abrirParaImprimir(id) {
-      window.print()
-    }
-    
     function printReport(formVisualId, formDataId) {
-      const formVisual = $('#' + formVisualId) // Formulário onde está o botão, spinner, status
-      const formDataForm = $('#' + formDataId) // Formulário que vai ser enviado
+      const formVisual = $('#' + formVisualId);
+      const form = $('#' + formDataId);
+      const status = formVisual.find('.text-muted, .text-success, .text-danger');
     
-      const button = formVisual.find('button[type="button"]')
-      const spinner = formVisual.find('.spinner-border')
-      const status = formVisual.find('.text-end.small')
     
-      // Mostra o spinner e desabilita o botão
-      spinner.removeClass('d-none')
-      button.prop('disabled', true)
-      status.text('Enviando para impressora...')
-      status.attr('class', 'text-end small mt-2 text-primary')
+      const formData = new FormData(form[0]);
+      formData.append('action', 'print');
     
-      const formData = new FormData(formDataForm[0])
+      // Limpa mensagens de erro anteriores
+      form.find('.is-invalid').removeClass('is-invalid');
+      form.find('.invalid-feedback').remove();
     
-      $.ajax({
-        url: "{% url 'admin:donation_print_receipt' %}",
-        type: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false,
+      fetch("{% url 'admin:donation_print_receipt' %}", {
+        method: 'POST',
+        body: formData,
         headers: {
           'X-Requested-With': 'XMLHttpRequest',
           'X-CSRFToken': '{{ csrf_token }}'
-        },
-        success: function (data) {
-          status.text('Relatório enviado para impressora com sucesso!')
-          status.attr('class', 'text-end small mt-2 text-success')
-        },
-        error: function (xhr, statusText, errorThrown) {
-          status.text('Erro ao enviar para impressora: ' + statusText)
-          status.attr('class', 'text-end small mt-2 text-danger')
-        },
-        complete: function () {
-          spinner.addClass('d-none')
-          button.prop('disabled', false)
-    
-          setTimeout(function () {
-            status.text('')
-          }, 5000)
         }
       })
+        .then((response) => {
+          if (response.status === 422)
+            return response.json().then((data) => {
+              throw data;
+            });
+          if (!response.ok) throw response;
+          return response; // sem blob
+        })
+        .then(() => {
+          status.text('Relatório enviado para impressora com sucesso!')
+            .removeClass()
+            .addClass('text-success small mt-2');
+        })
+        .catch(async (err) => {
+          if (err.form_errors) {
+            for (const [fieldName, messages] of Object.entries(err.form_errors)) {
+              const input = form.find(`[name="${fieldName}"]`);
+              input.addClass('is-invalid');
+              input.after(`<div class="invalid-feedback">${messages.join('<br>')}</div>`);
+            }
+          } else if (err instanceof Response) {
+            const errorText = await err.text();
+            console.error('Erro inesperado:', errorText);
+            status.text('Erro ao processar o relatório. Código: ' + err.status)
+              .removeClass().addClass('text-danger small mt-2');
+          } else if (typeof err === 'object' && err.error) {
+            status.text(err.error).removeClass().addClass('text-danger small mt-2');
+          } else {
+            status.text('Erro inesperado. Consulte o console.').removeClass().addClass('text-danger small mt-2');
+            console.error(err);
+          }
+        })
+        .finally(() => {
+          setTimeout(() => status.text(''), 5000);
+        });
+    }
+    
+    // o restante do template permanece igual até o final da função downloadPDF
+    function downloadPDF(formId, iframeId) {
+      const form = $('#' + formId)
+      const formData = new FormData(form[0])
+      formData.append('action', 'download')
+    
+      form.find('.is-invalid').removeClass('is-invalid')
+      form.find('.invalid-feedback').remove()
+    
+      fetch("{% url 'admin:donation_print_receipt' %}", {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': '{{ csrf_token }}'
+        }
+      })
+        .then((response) => {
+          if (response.status === 422)
+            return response.json().then((data) => {
+              throw data
+            })
+          if (!response.ok) throw response
+          return response.blob()
+        })
+        .then((blob) => {
+          const blobUrl = window.URL.createObjectURL(blob)
+          document.getElementById(iframeId).src = blobUrl
+        })
+        .catch(async (err) => {
+          if (err.form_errors) {
+            for (const [fieldName, messages] of Object.entries(err.form_errors)) {
+              const input = form.find(`[name="${fieldName}"]`)
+              input.addClass('is-invalid')
+              input.after(`<div class="invalid-feedback">${messages.join('<br>')}</div>`)
+            }
+          } else if (err instanceof Response) {
+            const errorText = await err.text()
+            console.error('Erro inesperado:', errorText)
+            alert('Erro ao processar o relatório. Código: ' + err.status)
+          } else if (typeof err === 'object' && err.error) {
+            alert(err.error)
+          } else {
+            alert('Erro inesperado. Consulte o console para mais detalhes.')
+            console.error(err)
+          }
+        })
     }
   </script>
 
   <script>
     // Espera o DOM carregar e tenta de novo
   </script>
-
-  <style scoped>
-    .form-label {
-      display: block;
-      margin-bottom: 0.25rem;
-      font-weight: 500;
-    }
-  </style>
 {% endblock %}

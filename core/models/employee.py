@@ -13,7 +13,6 @@ class Employee(Person):
         on_delete=models.CASCADE,
         related_name="employees"
     )
-    date_of_birth = models.DateField("Data de nascimento", null=True, blank=True)
     hire_date = models.DateField("Data de admissão", null=True, blank=True)
     termination_date = models.DateField("Data de desligamento", null=True, blank=True)
     ctps = models.CharField("CTPS (Carteira de Trabalho)", max_length=100, null=True, blank=True)

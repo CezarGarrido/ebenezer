@@ -207,7 +207,7 @@ class ReportsAdminView(admin.ModelAdmin):
             queryset = queryset.filter(expected_at__gte=start_date)
         if end_date:
             queryset = queryset.filter(expected_at__lte=end_date)
-        return queryset
+        return queryset.order_by('-expected_at')
 
     def _get_forms(self, request, report_type, data_source):
         return {

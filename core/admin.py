@@ -238,12 +238,13 @@ class DonorAdmin(BasePersonAdmin):
         js = ('js/inline.js',)  # Carrega o script no Django Admin
 
     def person_type_badge(self, obj):
-        if hasattr(obj, 'individual'):
-            return format_html('<span class="badge badge-primary">Física</span>')
-        elif hasattr(obj, 'legalentity'):
-            return format_html('<span class="badge badge-success">Jurídica</span>')
+        if obj.person_type == "F":
+            return format_html('<span class="badge badge-primary">Pessoa Física</span>')
+        elif obj.person_type == "J":
+            return format_html('<span class="badge badge-success">Pessoa Jurídica</span>')
         return format_html('<span class="badge badge-secondary">Desconhecido</span>')
     person_type_badge.short_description = 'Tipo de Pessoa'
+    
     def save_model(self, request, obj, form, change):
         if not obj.created_by:  # Define apenas se for um novo objeto
             obj.created_by = request.user

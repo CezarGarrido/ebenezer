@@ -3,6 +3,7 @@ from datetime import datetime
 from core.escbuilder.escprinter import ESCPrinter
 from django.core.exceptions import ObjectDoesNotExist
 
+
 CHARS_PER_LINE = 80
 CHARS_PER_LINE_CONDENSED = 136
 LEFT_MARGIN = 2
@@ -10,6 +11,19 @@ RIGHT_MARGIN = 1
 RIGHT_MARGIN_CONDENSED = 2
 MAX_LINE_WIDTH = CHARS_PER_LINE - LEFT_MARGIN - RIGHT_MARGIN
 MAX_LINE_WIDTH_CONDENSED = CHARS_PER_LINE_CONDENSED - LEFT_MARGIN - RIGHT_MARGIN_CONDENSED
+
+def truncate_name(name, max_len=45):
+    """Trunca o nome sem cortar sobrenomes, adicionando '...' se necessário."""
+    words = name.strip().split()
+    truncated = ""
+    for word in words:
+        if len(truncated) + len(word) + 1 > max_len:
+            break
+        truncated += (word + " ")
+    truncated = truncated.strip()
+    if truncated != name:
+        truncated += "..."
+    return truncated
 
 def _linha_pontilhada(esquerda, direita, largura=MAX_LINE_WIDTH):
     return f"{esquerda}{'.' * (largura - len(esquerda) - len(direita))}{direita}"
@@ -74,10 +88,13 @@ def generate_table_header(printer):
     printer.condensed(False)
 
 def generate_donation_row(printer, donation):
+    donor_name = truncate_name(donation.donor.name.upper(), max_len=40)
+    donor_str = f"{donation.donor.id} - {donor_name}"
+        
     row_line = (
         f"{donation.id}".ljust(10) +
         (donation.expected_at.strftime('%d/%m/%Y') if donation.expected_at else "-").ljust(12) +
-        f"{donation.donor.id} - {donation.donor.name}".ljust(38) +
+        donor_str.ljust(38) +
         locale.currency(donation.amount or 0, grouping=True).rjust(22) +
         locale.currency(donation.paid_amount or 0, grouping=True).rjust(25)
     )

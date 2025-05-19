@@ -6,6 +6,8 @@ import locale
 from datetime import datetime
 from reportlab.platypus import Table, TableStyle
 from reportlab.lib import colors
+from reportlab.platypus import Paragraph
+from reportlab.lib.styles import getSampleStyleSheet
 
 def get_report_title(context):
     if context.get("employee"):
@@ -26,6 +28,19 @@ def get_identification_lines(context):
         lines.append(f"Doador............: {donor.name.upper()}")
     return lines
 
+def truncate_name(name, max_len=45):
+    """Trunca o nome sem cortar sobrenomes, adicionando '...' se necessário."""
+    words = name.strip().split()
+    truncated = ""
+    for word in words:
+        if len(truncated) + len(word) + 1 > max_len:
+            break
+        truncated += (word + " ")
+    truncated = truncated.strip()
+    if truncated != name:
+        truncated += "..."
+    return truncated
+
 def generate_donation_report_pdf(context):
     buffer = BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)
@@ -44,6 +59,12 @@ def generate_donation_report_pdf(context):
     usable_width = PAGE_WIDTH - MARGIN_LEFT - MARGIN_RIGHT
     c.setFont(FONT_NAME, FONT_SIZE)
     page_number = 1
+    
+    styles = getSampleStyleSheet()
+    para_style = styles["Normal"]
+    para_style.fontName = "Helvetica"
+    para_style.fontSize = 8
+    para_style.leading = 10  # espaço entre linhas dentro da célula
 
     def draw_page_number():
         c.setFont("Helvetica", 8)
@@ -115,10 +136,13 @@ def generate_donation_report_pdf(context):
         diferenca = ((valor_recebido - valor_previsto) / valor_previsto * 100) if valor_previsto > 0 else 0.0
         total_previsto += valor_previsto
         total_recebido += valor_recebido
+        donor_name = truncate_name(d.donor.name.upper(), max_len=28)
+        donor_str = f"{d.donor.id} - {donor_name}"
+        
         rows.append([
             str(d.id),
             d.expected_at.strftime('%d/%m/%Y') if d.expected_at else "-",
-            f"{d.donor.id} - {d.donor.name.upper()}",
+            donor_str,
             locale.currency(valor_previsto, grouping=True),
             locale.currency(valor_recebido, grouping=True),
             f"{diferenca:.2f}%"
@@ -136,6 +160,7 @@ def generate_donation_report_pdf(context):
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
             ('FONTSIZE', (0, 0), (-1, -1), 8),
             ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
+            ('ALIGN', (2, 1), (2, -1), 'LEFT'),  # Coluna doador alinhada à esquerda
         ]
         if "Totais:" in data_block[-1]:
             styles.append(('FONTNAME', (2, -1), (5, -1), 'Helvetica-Bold'))

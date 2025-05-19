@@ -235,7 +235,7 @@ class DonationForm(forms.ModelForm):
     
 class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
     form = DonationForm
-    list_display = ("id", "paid_status", "expected_at", "donor", "format_amount", "format_paid_amount", "paid_at", "created_by", "received_by", "created_at", "updated_at")  # Campos visíveis na listagem
+    list_display = ("id", "paid_status", "expected_at", "donor", "format_amount", "format_paid_amount", "paid_at", "created_by", "received_by", "updated_at")  # Campos visíveis na listagem
     verbose_name = "Doação"
     verbose_name_plural = "Doações"
     entity_labels = {

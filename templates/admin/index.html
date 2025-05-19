@@ -158,7 +158,7 @@
             </table>
           </div>
           <div class="card-footer text-right">
-            <a href="{% url 'admin:donation_donation_changelist' %}?status=atrasado" class="btn btn-sm btn-outline-danger">Ver todos</a>
+            <a href="{% url 'admin:donation_donation_changelist' %}?paid__exact=0" class="btn btn-sm btn-outline-danger">Ver todos</a>
           </div>
         </div>
       </div>

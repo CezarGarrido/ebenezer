@@ -27,7 +27,6 @@ def get_identification_lines(context):
     return lines
 
 def generate_donation_report_pdf(context):
-    locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
     buffer = BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)
 

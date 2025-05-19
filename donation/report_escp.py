@@ -3,8 +3,6 @@ from datetime import datetime
 from core.escbuilder.escprinter import ESCPrinter
 from django.core.exceptions import ObjectDoesNotExist
 
-locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
-
 CHARS_PER_LINE = 80
 CHARS_PER_LINE_CONDENSED = 136
 LEFT_MARGIN = 2

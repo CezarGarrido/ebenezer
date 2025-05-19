@@ -388,7 +388,6 @@ class Donation(models.Model):
     def get_receipt_pdf(self, settings):
         buffer = BytesIO()
         # Configuração inicial
-        locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
         PAGE_WIDTH, PAGE_HEIGHT = A4  # Modo paisagem
         MARGIN_LEFT = 15 * mm
         MARGIN_RIGHT = 15 * mm

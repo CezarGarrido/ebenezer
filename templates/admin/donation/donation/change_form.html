@@ -1,13 +1,26 @@
 {% extends "admin/change_form.html" %}
 
 {% block object-tools-items %}
-{{ block.super }}
-<form method="post">
-    <button type="submit" 
-            class="btn btn-primary form-control mt-3"
-            name="_print_receipt"
-            title="Imprimir Recibo">
-        <i class="fas fa-print"></i> Imprimir Recibo
-    </button>
-</form>
+  {{ block.super }}
+  <hr>
+  <div class="mt-3 d-flex w-100">
+
+    <!-- Link para impressão matricial -->
+    <a href="?action=print_receipt"
+       class="btn btn-primary btn-print rounded-start border-end-0 d-flex align-items-center justify-content-center flex-grow-1"
+       title="Imprimir Recibo Matricial"
+       aria-label="Imprimir Recibo Matricial">
+      <i class="fas fa-print me-2"></i> <strong>Imprimir Recibo</strong>
+    </a>
+
+    <!-- Link para download em PDF -->
+    <a href="?action=download_receipt_pdf"
+       class="ml-1 btn btn-download rounded-end border-start-0 d-flex align-items-center justify-content-center"
+       title="Baixar Recibo em PDF"
+       aria-label="Baixar Recibo em PDF"
+       style="width: 50px; min-width: 50px;">
+      <i class="fas fa-download"></i>
+    </a>
+
+  </div>
 {% endblock %}

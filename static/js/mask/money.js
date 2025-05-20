@@ -13,11 +13,10 @@
 
             $('form').on('submit', function () {
                 $('[data-mask-money]').each(function () {
-                    const valor = $(this).val();
-                    if (valor) {
-                        const valorLimpo = valor.replace(/\./g, '').replace(',', '.').trim();
-                        $(this).val(valorLimpo);
-                    }
+                    const $input = $(this);
+                    const valorLimpo = $input.val().replace(/\./g, '').replace(',', '.').trim();
+                    $input.unmask();
+                    $input.val(valorLimpo);
                 });
             });
         });

@@ -11,6 +11,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.utils.html import format_html
 from django.db.models import Sum, Count
 import locale
+from django.db.models import Q
 
 class CustomAdminSite(admin.AdminSite):
     def index(self, request, extra_context=None):
@@ -21,12 +22,22 @@ class CustomAdminSite(admin.AdminSite):
         current_year = now.year
         total_donations = Donation.objects.filter(paid=True).aggregate(Sum('paid_amount'))['paid_amount__sum'] or 0
         monthly_donations = Donation.objects.filter(paid=True, created_at__month=current_month, created_at__year=current_year).aggregate(Sum('paid_amount'))['paid_amount__sum'] or 0
-        
+                # Últimas doações pagas
+        latest_donations = Donation.objects.filter(paid=True).order_by('-created_at')[:5]
+
+        # Pagamentos em atraso: não pagos e vencidos
+        overdue_donations = Donation.objects.filter(
+            Q(paid=False), Q(expected_at__lt=now.date())
+        ).order_by('expected_at')[:5]
+
         stats = {
             'total_donations': locale.currency(total_donations, grouping=True),
             'donation_count': Donation.objects.count(),
             'donor_count': Donor.objects.count(),
             'monthly_donations': locale.currency(monthly_donations, grouping=True),
+            'latest_donations': latest_donations,
+            'overdue_donations': overdue_donations,
+            'today': now.date(),
         }
         
         extra_context.update(stats)
@@ -167,12 +178,24 @@ class EmployeeUserInline(admin.TabularInline):
     
 class BasePersonAdmin(admin.ModelAdmin):
     inlines = [IndividualInline, LegalEntityInline, AddressInline, EmailInline, PhoneInline]
-    
+    list_per_page = 10  # valor fixo
     list_display = ("id", "name", "created_by", "created_at", "updated_at")
     search_fields = ("name", "id")  # Depende dos campos de identificação disponíveis
     list_filter = ("created_at",)
     readonly_fields = ('created_at', 'updated_at')
+    ordering = ("-created_at",)
+    
+    def get_fieldsets(self, request, obj=None):
+        fieldsets = super().get_fieldsets(request, obj)
 
+        if fieldsets:
+            first_label, first_fields = fieldsets[0]
+            if first_label in (None, '', 'General'):
+                # Substitui o título do primeiro fieldset
+                fieldsets = (("Geral", first_fields),) + tuple(fieldsets[1:])
+
+        return fieldsets
+    
 class EmployeeForm(forms.ModelForm):
     class Meta:
         model = Employee
@@ -208,12 +231,22 @@ class EmployeeAdmin(BasePersonAdmin):
 @admin.register(Donor)
 class DonorAdmin(BasePersonAdmin):
     search_fields = ("name",)
+    list_display = ("id", "name", "person_type_badge", "created_by", "created_at", "updated_at")
+
     exclude = ("owner", "created_by")
     list_filter = ("created_at", "person_type")
 
     class Media:
         js = ('js/inline.js',)  # Carrega o script no Django Admin
 
+    def person_type_badge(self, obj):
+        if obj.person_type == "F":
+            return format_html('<span class="badge badge-primary">Pessoa Física</span>')
+        elif obj.person_type == "J":
+            return format_html('<span class="badge badge-success">Pessoa Jurídica</span>')
+        return format_html('<span class="badge badge-secondary">Desconhecido</span>')
+    person_type_badge.short_description = 'Tipo de Pessoa'
+    
     def save_model(self, request, obj, form, change):
         if not obj.created_by:  # Define apenas se for um novo objeto
             obj.created_by = request.user
@@ -276,12 +309,11 @@ class CustomUserAdmin(UserAdmin):
 
     def save_model(self, request, obj, form, change):
         """ Garante que um novo usuário seja vinculado à empresa do admin logado """
-        if not obj.pk:  # Novo usuário
-            obj.save()
+        obj.save()
+           
+        if not hasattr(obj, 'profile'):
             UserProfile.objects.create(user=obj, company=request.user.profile.company)
-        else:
-            obj.save()
-    
+            
     #-------------------------------------------------------------------------------------
     def formfield_for_manytomany(self, db_field, request, **kwargs):
         """ Personaliza a exibição dos nomes dos grupos """
@@ -318,12 +350,10 @@ class CustomGroupAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         """ Garante que um novo grupo seja vinculado à empresa do admin logado """
-        if not obj.pk:
-            obj.save()
-            GroupCompany.objects.create(group=obj, company=request.user.profile.company)
-        else:
-            obj.save()
-
+        obj.save()
+        if not hasattr(obj, 'group_company'):
+            GroupCompany.objects.create(user=obj, company=request.user.profile.company)
+            
     #--------------------------------------------------------------------------------------------
     # Exibir o nome com apenas a primeira letra maiúscula
     def capitalized_name(self, obj):

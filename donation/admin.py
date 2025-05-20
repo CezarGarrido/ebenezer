@@ -1,14 +1,16 @@
+import datetime
 import locale
 import subprocess
 from django.contrib import messages
 from django.contrib import admin
 from django import forms
+import urllib.parse
 from core.models.donor import Donor
-from core.models.employee import Employee
+from core.models.employee import Employee, EmployeeUser
 from donation.views import Report, ReportsAdminView
 from .models import Donation, DonationSettings
 from django.utils.html import format_html
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django import forms
 from .models import ThankYouMessage, ThankYouMessageLine
 import platform
@@ -207,8 +209,6 @@ class DonationForm(forms.ModelForm):
         paid_amount = cleaned_data.get("paid_amount")
         paid_at = cleaned_data.get("paid_at")
         method = cleaned_data.get("method")
-        received_by = cleaned_data.get("received_by")
-        amount = cleaned_data.get("amount")
 
         if paid:
             # 1. Valor recebido é obrigatório e maior que zero
@@ -232,12 +232,33 @@ class DonationForm(forms.ModelForm):
             cleaned_data["method"] = None
 
         return cleaned_data
-    
+
+
+def action_set_paid(modeladmin, request, queryset):
+
+    atualizadas = 0
+
+    for doacao in queryset:
+        if not doacao.paid:
+            doacao.paid = True
+            doacao.paid_amount = doacao.amount
+            try:
+                employee_user = EmployeeUser.objects.get(user=doacao.created_by)
+                doacao.received_by = employee_user.employee
+            except:
+                pass
+
+            doacao.paid_at = datetime.datetime.now()
+            doacao.save()
+            atualizadas += 1
+
+    messages.success(request, f"{atualizadas} doações atualizadas como pagas.")
+
+action_set_paid.short_description = "Marcar como paga (valor total e funcionário atual)"
+
 class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
     form = DonationForm
-    exclude = ('created_by', 'company')  # Esconde o campo no formulário
-    list_display = ("id", "donor", "format_amount", "paid", "format_paid_amount", "paid_at", "created_by", "created_at", "updated_at")  # Campos visíveis na listagem
-    exclude = ("owner", "created_by")
+    list_display = ("id", "paid_status", "expected_at", "donor", "format_amount", "format_paid_amount", "paid_at", "created_by", "received_by", "updated_at")  # Campos visíveis na listagem
     verbose_name = "Doação"
     verbose_name_plural = "Doações"
     entity_labels = {
@@ -257,11 +278,26 @@ class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
         "id",
         "donor__name",     # Nome do doador
         "notes",           # Notas da doação
-    )
-    
+    )    
+    list_per_page = 10  # valor fixo
+
     autocomplete_fields = ['donor']
+    
+    exclude = ['owner', 'created_by']
+
+    def get_exclude(self, request, obj=None):
+        exclude = list(super().get_exclude(request, obj) or [])
+        if request.user.is_superuser and 'created_by' in exclude:
+            exclude.remove('created_by')
+        return exclude
 
     def save_model(self, request, obj, form, change):
+        if not obj.received_by: 
+            try:
+             obj.received_by = EmployeeUser.objects.get(user=request.user).employee
+            except:
+                pass  # Ou raise, ou log, conforme a lógica do seu sistema
+            
         if not obj.created_by:  # Define apenas se for um novo objeto
             obj.created_by = request.user
             obj.owner = request.user.profile.company
@@ -277,7 +313,13 @@ class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
         }),
     )
     
-    readonly_fields = ("created_by", "created_at", "updated_at", "get_receipt")
+    def get_readonly_fields(self, request, obj=None):
+        base_readonly = ["created_at", "updated_at", "get_receipt"]
+
+        if not request.user.is_superuser:
+            base_readonly.append("created_by")
+
+        return base_readonly
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         user_company = request.user.profile.company
@@ -297,57 +339,77 @@ class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
             return locale.currency(obj.paid_amount, grouping=True)
         return "-"
     
+    def paid_status(self, obj):
+        if obj.paid:
+            return format_html('<span class="badge badge-success" title="Doação paga">Pago</span>')
+
+        # Verifica se está vencida (expected_at no passado)
+        if obj.expected_at and obj.expected_at < datetime.datetime.now().date():
+            return format_html('<span class="badge badge-warning" title="Doação vencida e não paga">Atrasado</span>')
+
+        # Ainda dentro do prazo
+        return format_html('<span class="badge badge-danger" title="Ainda no prazo de pagamento">Pendente</span>')
+
+    paid_status.short_description = "Situação"
     format_amount.short_description = "Valor Esperado"
     format_paid_amount.short_description = "Valor Recebido"
 
-    def response_change(self, request, obj):
-        if '_print_receipt' in request.POST:
+
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        action = request.GET.get("action")
+        obj = self.get_object(request, object_id)
+
+        if action == "download_receipt_pdf":
+            try:
+                settings = DonationSettings.get_solo()
+                if not settings:
+                    messages.error(request, "Configurações do sistema não encontradas.")
+                    logger.error("Configurações de doação não encontradas no banco de dados")
+                    return HttpResponseRedirect(request.path)
+
+                content_pdf = obj.get_receipt_pdf(settings)  # deve retornar o conteúdo binário do PDF
+                response = HttpResponse(content_pdf, content_type='application/pdf')
+                response['Content-Disposition'] = f'attachment; filename=recibo_de_doacao_{obj.pk}.pdf'
+                return response
+
+            except Exception as e:
+                messages.error(request, "Erro ao gerar o PDF.")
+                logger.error(f"Erro ao gerar PDF: {str(e)}", exc_info=True)
+                return HttpResponseRedirect(request.path)
+
+        elif action == "print_receipt":
             try:
                 logger.info(f"Iniciando processo de impressão de recibo para doação ID: {obj.id}")
-                
-                # Validação básica do objeto
                 if not obj or not obj.pk:
                     messages.error(request, "Doação inválida ou não encontrada.")
                     logger.error(f"Objeto de doação inválido: {obj}")
-                    return HttpResponseRedirect(request.get_full_path())
-                
-                # Obter configurações com validação
-                try:
-                    settings = DonationSettings.get_solo()
-                    if not settings:
-                        messages.error(request, "Configurações do sistema não encontradas.")
-                        logger.error("Configurações de doação não encontradas no banco de dados")
-                        return HttpResponseRedirect(request.get_full_path())
-                except Exception as e:
-                    messages.error(request, "Erro ao acessar configurações do sistema.")
-                    logger.error(f"Erro ao acessar DonationSettings: {str(e)}", exc_info=True)
-                    return HttpResponseRedirect(request.get_full_path())
-                
-                # Validação da impressora
+                    return HttpResponseRedirect(request.path)
+
+                settings = DonationSettings.get_solo()
+                if not settings:
+                    messages.error(request, "Configurações do sistema não encontradas.")
+                    logger.error("Configurações de doação não encontradas no banco de dados")
+                    return HttpResponseRedirect(request.path)
+
                 printer_name = settings.default_printer
                 if not printer_name or not printer_name.strip():
                     messages.error(request, "Nenhuma impressora padrão configurada.")
                     logger.error("Nenhuma impressora configurada nas settings")
-                    return HttpResponseRedirect(request.get_full_path())
-                
-                # Tentativa de impressão
-                try:
-                    logger.info(f"Enviando recibo para impressora: {printer_name}")
-                    obj.print_receipt(settings)
-                    messages.success(request, f"Recibo enviado com sucesso para a impressora: {printer_name}")
-                    logger.info(f"Recibo impresso com sucesso para doação ID: {obj.id}")
-                except Exception as e:
-                    messages.error(request, "Erro inesperado ao imprimir recibo.")
-                    logger.error(f"Erro inesperado ao imprimir recibo: {str(e)}", exc_info=True)
-                
+                    return HttpResponseRedirect(request.path)
+
+                obj.print_receipt(settings)
+                messages.success(request, f"Recibo enviado com sucesso para a impressora: {printer_name}")
+                logger.info(f"Recibo impresso com sucesso para doação ID: {obj.id}")
+
             except Exception as e:
-                messages.error(request, "Ocorreu um erro durante o processo de impressão.")
-                logger.critical(f"Erro crítico no processamento de recibo: {str(e)}", exc_info=True)
-            
-            return HttpResponseRedirect(request.get_full_path())
+                messages.error(request, "Erro ao imprimir o recibo.")
+                logger.error(f"Erro ao imprimir recibo: {str(e)}", exc_info=True)
+                return HttpResponseRedirect(request.path)
 
-        return super().response_change(request, obj)
+            return HttpResponseRedirect(request.path)
 
-
+        # Fluxo padrão
+        return super().change_view(request, object_id, form_url, extra_context)
+    
 admin.site.register(Donation, DonationAdmin)
 admin.site.register(Report, ReportsAdminView)

@@ -56,6 +56,10 @@ class ESCPrinter:
         self.columnsRight = -1
         self.columnsLeft = -1
         
+        self.LINES_PER_PAGE = 66
+        self.LINES_PER_HALF_PAGE = self.LINES_PER_PAGE // 2
+        self.printed_lines = 0
+        
     def close(self):
         """Simula o fechamento do stream"""
         pass  # Nada a fechar porque está tudo na memória
@@ -100,8 +104,19 @@ class ESCPrinter:
     def lineFeed(self, lines=1):
         for _ in range(lines):
             self._write(self.CR + self.LINE_FEED)
+        self.printed_lines += lines
         return self
     
+    def fill_to_end_of_current_page(self):
+        linhas_restantes = self.LINES_PER_PAGE - (self.printed_lines % self.LINES_PER_PAGE)
+        if linhas_restantes > 0 and linhas_restantes < self.LINES_PER_PAGE:
+            self.lineFeed(linhas_restantes)
+
+    def fill_to_end_of_half_page(self):
+        linhas_restantes = self.LINES_PER_HALF_PAGE - (self.printed_lines % self.LINES_PER_HALF_PAGE) - 1
+        if linhas_restantes > 0 and linhas_restantes < self.LINES_PER_HALF_PAGE:
+            self.lineFeed(linhas_restantes)    
+
     def formFeed(self):
         self._write(self.CR + self.FF)
     
@@ -242,3 +257,114 @@ class ESCPrinter:
                 html_blocos.append(f"<pre>{bloco_final}</pre>")
 
         return '\n'.join(html_blocos)
+    
+
+        from reportlab.pdfgen import canvas
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib.units import mm
+
+        PAGE_WIDTH, PAGE_HEIGHT = A4
+        MARGIN_LEFT = 15 * mm
+        MARGIN_TOP = 20 * mm
+        LINE_HEIGHT = 5 * mm
+        FONT_NAME = "Courier"
+        FONT_SIZE = 9
+        FONT_SIZE_CONDENSED = 6.5
+        CHAR_WIDTH = 3 * mm
+        CHAR_WIDTH_CONDENSED = 2 * mm
+
+        c = canvas.Canvas(pdf_path, pagesize=A4)
+        x = MARGIN_LEFT
+        y = PAGE_HEIGHT - MARGIN_TOP
+        condensed = False
+        bold = False
+
+        current_font = FONT_NAME
+        current_font_size = FONT_SIZE
+        current_char_width = CHAR_WIDTH
+        c.setFont(current_font, current_font_size)
+
+        text_buffer = ""
+        
+        def flush_buffer():
+            nonlocal x, y
+            if text_buffer:
+                if bold:
+                    c.setFont(f"{current_font}-Bold", current_font_size)
+                else:
+                    c.setFont(current_font, current_font_size)
+                c.drawString(x, y, text_buffer)
+                return len(text_buffer) * current_char_width
+            return 0
+
+        for char in data.decode('latin-1', errors='ignore'):
+            if char == '\f':  # Form feed - nova página
+                flush_buffer()
+                c.showPage()
+                y = PAGE_HEIGHT - MARGIN_TOP
+                x = MARGIN_LEFT
+                text_buffer = ""
+                continue
+            elif char == '\n':  # Nova linha
+                x += flush_buffer()
+                y -= LINE_HEIGHT
+                x = MARGIN_LEFT
+                text_buffer = ""
+                
+                # Verifica se precisa de nova página
+                if y < MARGIN_TOP:
+                    c.showPage()
+                    y = PAGE_HEIGHT - MARGIN_TOP
+                    x = MARGIN_LEFT
+                continue
+            elif char == '\r':  # Carriage return - volta ao início da linha
+                x += flush_buffer()
+                x = MARGIN_LEFT
+                text_buffer = ""
+                continue
+            elif char == '\x0F':  # Condensed ON
+                x += flush_buffer()
+                condensed = True
+                current_font_size = FONT_SIZE_CONDENSED
+                current_char_width = CHAR_WIDTH_CONDENSED
+                text_buffer = ""
+                continue
+            elif char == '\x12':  # Condensed OFF
+                x += flush_buffer()
+                condensed = False
+                current_font_size = FONT_SIZE
+                current_char_width = CHAR_WIDTH
+                text_buffer = ""
+                continue
+            elif char == '\x1B':  # ESC - início de comando (vamos ignorar)
+                continue
+            elif char == '\x1BE':  # Bold ON
+                x += flush_buffer()
+                bold = True
+                text_buffer = ""
+                continue
+            elif char == '\x1BF':  # Bold OFF
+                x += flush_buffer()
+                bold = False
+                text_buffer = ""
+                continue
+            elif ord(char) < 32:  # Ignora outros caracteres de controle
+                continue
+            else:
+                text_buffer += char
+                # Se o próximo caractere ultrapassar a margem direita, faz flush
+                if x + (len(text_buffer) * current_char_width) > PAGE_WIDTH - MARGIN_LEFT:
+                    x += flush_buffer()
+                    y -= LINE_HEIGHT
+                    x = MARGIN_LEFT
+                    text_buffer = ""
+                    
+                    # Verifica se precisa de nova página
+                    if y < MARGIN_TOP:
+                        c.showPage()
+                        y = PAGE_HEIGHT - MARGIN_TOP
+                        x = MARGIN_LEFT
+
+        # Flush do buffer final
+        flush_buffer()
+        c.save()

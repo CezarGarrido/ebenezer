@@ -56,6 +56,10 @@ class ESCPrinter:
         self.columnsRight = -1
         self.columnsLeft = -1
         
+        self.LINES_PER_PAGE = 66
+        self.LINES_PER_HALF_PAGE = self.LINES_PER_PAGE // 2
+        self.printed_lines = 0
+        
     def close(self):
         """Simula o fechamento do stream"""
         pass  # Nada a fechar porque está tudo na memória
@@ -100,8 +104,19 @@ class ESCPrinter:
     def lineFeed(self, lines=1):
         for _ in range(lines):
             self._write(self.CR + self.LINE_FEED)
+        self.printed_lines += lines
         return self
     
+    def fill_to_end_of_current_page(self):
+        linhas_restantes = self.LINES_PER_PAGE - (self.printed_lines % self.LINES_PER_PAGE)
+        if linhas_restantes > 0 and linhas_restantes < self.LINES_PER_PAGE:
+            self.lineFeed(linhas_restantes)
+
+    def fill_to_end_of_half_page(self):
+        linhas_restantes = self.LINES_PER_HALF_PAGE - (self.printed_lines % self.LINES_PER_HALF_PAGE) - 1
+        if linhas_restantes > 0 and linhas_restantes < self.LINES_PER_HALF_PAGE:
+            self.lineFeed(linhas_restantes)    
+
     def formFeed(self):
         self._write(self.CR + self.FF)
     

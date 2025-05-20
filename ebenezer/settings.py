@@ -212,8 +212,8 @@ JAZZMIN_UI_TWEAKS = {
     "dark_mode_theme": None,
     "button_classes": {
         "primary": "btn-primary",
-        "secondary": "btn-outline-dark",
-        "info": "btn-outline-info",
+        "secondary": "btn-dark",
+        "info": "btn-outline-primary",
         "warning": "btn-warning",
         "danger": "btn-danger",
         "success": "btn-success"

@@ -232,7 +232,30 @@ class DonationForm(forms.ModelForm):
             cleaned_data["method"] = None
 
         return cleaned_data
-    
+
+
+def action_set_paid(modeladmin, request, queryset):
+
+    atualizadas = 0
+
+    for doacao in queryset:
+        if not doacao.paid:
+            doacao.paid = True
+            doacao.paid_amount = doacao.amount
+            try:
+                employee_user = EmployeeUser.objects.get(user=doacao.created_by)
+                doacao.received_by = employee_user.employee
+            except:
+                pass
+
+            doacao.paid_at = datetime.datetime.now()
+            doacao.save()
+            atualizadas += 1
+
+    messages.success(request, f"{atualizadas} doações atualizadas como pagas.")
+
+action_set_paid.short_description = "Marcar como paga (valor total e funcionário atual)"
+
 class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
     form = DonationForm
     list_display = ("id", "paid_status", "expected_at", "donor", "format_amount", "format_paid_amount", "paid_at", "created_by", "received_by", "updated_at")  # Campos visíveis na listagem
@@ -255,9 +278,9 @@ class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
         "id",
         "donor__name",     # Nome do doador
         "notes",           # Notas da doação
-    )
-    
-    
+    )    
+    list_per_page = 10  # valor fixo
+
     autocomplete_fields = ['donor']
     
     exclude = ['owner', 'created_by']
@@ -331,72 +354,62 @@ class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
     format_amount.short_description = "Valor Esperado"
     format_paid_amount.short_description = "Valor Recebido"
 
-    def response_change(self, request, obj):
-        if '_download_receipt_pdf' in request.POST:
-            # Obter configurações com validação
+
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        action = request.GET.get("action")
+        obj = self.get_object(request, object_id)
+
+        if action == "download_receipt_pdf":
             try:
                 settings = DonationSettings.get_solo()
                 if not settings:
                     messages.error(request, "Configurações do sistema não encontradas.")
                     logger.error("Configurações de doação não encontradas no banco de dados")
-                    return HttpResponseRedirect(request.get_full_path())
+                    return HttpResponseRedirect(request.path)
+
+                content_pdf = obj.get_receipt_pdf(settings)  # deve retornar o conteúdo binário do PDF
+                response = HttpResponse(content_pdf, content_type='application/pdf')
+                response['Content-Disposition'] = f'attachment; filename=recibo_de_doacao_{obj.pk}.pdf'
+                return response
+
             except Exception as e:
-                messages.error(request, "Erro ao acessar configurações do sistema.")
-                logger.error(f"Erro ao acessar DonationSettings: {str(e)}", exc_info=True)
-                return HttpResponseRedirect(request.get_full_path())
-                
-            content_pdf = obj.get_receipt_pdf(settings)  # deve retornar o conteúdo binário do PDF
+                messages.error(request, "Erro ao gerar o PDF.")
+                logger.error(f"Erro ao gerar PDF: {str(e)}", exc_info=True)
+                return HttpResponseRedirect(request.path)
 
-            response = HttpResponse(content_pdf, content_type='application/pdf')
-            response['Content-Disposition'] = f'attachment; filename=recibo_de_doacao_{obj.pk}.pdf'
-            return response
-
-        if '_print_receipt' in request.POST:
+        elif action == "print_receipt":
             try:
                 logger.info(f"Iniciando processo de impressão de recibo para doação ID: {obj.id}")
-                
-                # Validação básica do objeto
                 if not obj or not obj.pk:
                     messages.error(request, "Doação inválida ou não encontrada.")
                     logger.error(f"Objeto de doação inválido: {obj}")
-                    return HttpResponseRedirect(request.get_full_path())
-                
-                # Obter configurações com validação
-                try:
-                    settings = DonationSettings.get_solo()
-                    if not settings:
-                        messages.error(request, "Configurações do sistema não encontradas.")
-                        logger.error("Configurações de doação não encontradas no banco de dados")
-                        return HttpResponseRedirect(request.get_full_path())
-                except Exception as e:
-                    messages.error(request, "Erro ao acessar configurações do sistema.")
-                    logger.error(f"Erro ao acessar DonationSettings: {str(e)}", exc_info=True)
-                    return HttpResponseRedirect(request.get_full_path())
-                
-                # Validação da impressora
+                    return HttpResponseRedirect(request.path)
+
+                settings = DonationSettings.get_solo()
+                if not settings:
+                    messages.error(request, "Configurações do sistema não encontradas.")
+                    logger.error("Configurações de doação não encontradas no banco de dados")
+                    return HttpResponseRedirect(request.path)
+
                 printer_name = settings.default_printer
                 if not printer_name or not printer_name.strip():
                     messages.error(request, "Nenhuma impressora padrão configurada.")
                     logger.error("Nenhuma impressora configurada nas settings")
-                    return HttpResponseRedirect(request.get_full_path())
-                
-                # Tentativa de impressão
-                try:
-                    logger.info(f"Enviando recibo para impressora: {printer_name}")
-                    obj.print_receipt(settings)
-                    messages.success(request, f"Recibo enviado com sucesso para a impressora: {printer_name}")
-                    logger.info(f"Recibo impresso com sucesso para doação ID: {obj.id}")
-                except Exception as e:
-                    messages.error(request, "Erro inesperado ao imprimir recibo.")
-                    logger.error(f"Erro inesperado ao imprimir recibo: {str(e)}", exc_info=True)
-                
+                    return HttpResponseRedirect(request.path)
+
+                obj.print_receipt(settings)
+                messages.success(request, f"Recibo enviado com sucesso para a impressora: {printer_name}")
+                logger.info(f"Recibo impresso com sucesso para doação ID: {obj.id}")
+
             except Exception as e:
-                messages.error(request, "Ocorreu um erro durante o processo de impressão.")
-                logger.critical(f"Erro crítico no processamento de recibo: {str(e)}", exc_info=True)
-            
-            return HttpResponseRedirect(request.get_full_path())
+                messages.error(request, "Erro ao imprimir o recibo.")
+                logger.error(f"Erro ao imprimir recibo: {str(e)}", exc_info=True)
+                return HttpResponseRedirect(request.path)
 
-        return super().response_change(request, obj)
+            return HttpResponseRedirect(request.path)
 
+        # Fluxo padrão
+        return super().change_view(request, object_id, form_url, extra_context)
+    
 admin.site.register(Donation, DonationAdmin)
 admin.site.register(Report, ReportsAdminView)

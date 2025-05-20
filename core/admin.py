@@ -178,11 +178,13 @@ class EmployeeUserInline(admin.TabularInline):
     
 class BasePersonAdmin(admin.ModelAdmin):
     inlines = [IndividualInline, LegalEntityInline, AddressInline, EmailInline, PhoneInline]
-    
+    list_per_page = 10  # valor fixo
     list_display = ("id", "name", "created_by", "created_at", "updated_at")
     search_fields = ("name", "id")  # Depende dos campos de identificação disponíveis
     list_filter = ("created_at",)
     readonly_fields = ('created_at', 'updated_at')
+    ordering = ("-created_at",)
+    
     def get_fieldsets(self, request, obj=None):
         fieldsets = super().get_fieldsets(request, obj)
 

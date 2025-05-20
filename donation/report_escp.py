@@ -72,36 +72,39 @@ def generate_report_header(printer, company, title):
     printer.lineFeed(3)
 
 def generate_table_header(printer):
-    printer.condensed(True)
-    print_centered_condensed(printer, "-" * MAX_LINE_WIDTH_CONDENSED)
+    printer.bold(True)
+    print_centered(printer, "-" * MAX_LINE_WIDTH)
     header_line = (
-        "CÓDIGO".ljust(10) +
-        "DATA".ljust(12) +
-        "DOADOR".ljust(38) + 
-        "VALOR PREVISTO".rjust(22) + 
-        "VALOR RECEBIDO".rjust(25) + 
-        "DIFERENÇA".rjust(20)
+        "CÓD".ljust(4) +               # 0–3
+        "DATA".ljust(10) +             # 4–11
+        "DOADOR".ljust(36) +          # 12–47
+        "PREV.".rjust(8) +            # 48–55
+        "RECEB.".rjust(8) +           # 56–63
+        "DIF.(%)".rjust(10)            # 64–71
     )
     printer.print(header_line)
     printer.lineFeed()
-    print_centered_condensed(printer, "-" * MAX_LINE_WIDTH_CONDENSED)
-    printer.condensed(False)
+    print_centered(printer, "-" * MAX_LINE_WIDTH)
+    printer.bold(False)
+
 
 def generate_donation_row(printer, donation):
-    donor_name = truncate_name(donation.donor.name.upper(), max_len=40)
-    donor_str = f"{donation.donor.id} - {donor_name}"
-        
-    row_line = (
-        f"{donation.id}".ljust(10) +
-        (donation.expected_at.strftime('%d/%m/%Y') if donation.expected_at else "-").ljust(12) +
-        donor_str.ljust(38) +
-        locale.currency(donation.amount or 0, grouping=True).rjust(22) +
-        locale.currency(donation.paid_amount or 0, grouping=True).rjust(25)
-    )
+    donor_name = truncate_name(donation.donor.name.upper(), max_len=30)
+    donor_str = f"{donation.donor.id}-{donor_name}"[:36].ljust(36)
+
     valor_previsto = donation.amount or 0
     valor_pago = donation.paid_amount or 0
     dif_percentual = ((valor_pago - valor_previsto) / valor_previsto * 100) if valor_previsto > 0 else 0.0
-    row_line += f"{dif_percentual:.2f}%".rjust(20)
+
+    row_line = (
+        f"{donation.id}".ljust(4) +
+        (donation.expected_at.strftime('%d/%m/%y') if donation.expected_at else "-").ljust(10) +
+        donor_str +
+        locale.currency(valor_previsto, grouping=True, symbol=False).rjust(8) +
+        locale.currency(valor_pago, grouping=True, symbol=False).rjust(8) +
+        f"{dif_percentual:+.1f}%".rjust(10)
+    )
+
     printer.print(row_line)
     printer.lineFeed()
 
@@ -116,17 +119,17 @@ def generate_report_footer(printer, total_previsto, total_recebido, page=1):
     printer.print(_linha_pontilhada("Diferença", f":{diferenca_total:.2f}%"))
     printer.lineFeed(2)
     print_centered(printer, f"--- Página {page} ---")
-    printer.formFeed()
+    printer.fill_to_end_of_current_page()
     printer.reset()
 
 def generate_page_footer(printer, total_previsto, total_recebido, page):
-    print_centered_condensed(printer, "-" * MAX_LINE_WIDTH_CONDENSED)
+    print_centered(printer, "-" * MAX_LINE_WIDTH)
     printer.lineFeed()
-    printer.print(_linha_pontilhada("Subtotal Previsto", f":{locale.currency(total_previsto, grouping=True)}", MAX_LINE_WIDTH_CONDENSED))
+    printer.print(_linha_pontilhada("Subtotal Previsto", f":{locale.currency(total_previsto, grouping=True)}", MAX_LINE_WIDTH))
     printer.lineFeed()
-    printer.print(_linha_pontilhada("Subtotal Recebido", f":{locale.currency(total_recebido, grouping=True)}", MAX_LINE_WIDTH_CONDENSED))
+    printer.print(_linha_pontilhada("Subtotal Recebido", f":{locale.currency(total_recebido, grouping=True)}", MAX_LINE_WIDTH))
     printer.lineFeed()
-    print_centered_condensed(printer, f"--- Página {page} ---")
+    print_centered(printer, f"--- Página {page} ---")
     printer.lineFeed()
 
 def generate_donor_or_employee_report(entity, start_date, end_date, donations, title):
@@ -145,30 +148,32 @@ def generate_donor_or_employee_report(entity, start_date, end_date, donations, t
         
     print_line_side_by_side(printer, f"Período.............: {start_date.strftime('%d/%m/%Y')} até {end_date.strftime('%d/%m/%Y')}", "")
     printer.lineFeed()
-
+    
     generate_table_header(printer)
     total_previsto = 0
     total_recebido = 0
     page = 1
-    first_page_items = 42
-    other_pages_items = 60
+    first_page_items = 40
+    other_pages_items = 58
     items_per_page = first_page_items
     item_count = 0
 
-    printer.condensed(True)
-
-    for donation in list(donations):
+    donations_list = list(donations)  # ou quantos quiser testar
+    total = len(donations_list)
+    
+    for idx, donation in enumerate(donations_list):        
         total_previsto += donation.amount or 0
         total_recebido += donation.paid_amount or 0
         generate_donation_row(printer, donation)
         item_count += 1
         if item_count == items_per_page:
-            generate_page_footer(printer, total_previsto, total_recebido, page)
-            page += 1
-            item_count = 0
-            items_per_page = other_pages_items
+            # Só chama o rodapé se não for a última doação
+            if idx < total - 1:
+                generate_page_footer(printer, total_previsto, total_recebido, page)
+                page += 1
+                item_count = 0
+                items_per_page = other_pages_items
 
-    printer.condensed(False)
     generate_report_footer(printer, total_previsto, total_recebido, page)
     return printer.build()
 
@@ -191,24 +196,26 @@ def generate_general_report(user, start_date, end_date, donations):
     total_previsto = 0
     total_recebido = 0
     page = 1
-    first_page_items = 45
-    other_pages_items = 60
+    first_page_items = 44
+    other_pages_items = 59
     items_per_page = first_page_items
     item_count = 0
-
-    printer.condensed(True)
-
-    for donation in list(donations):
+    
+    donations_list = list(donations)  # ou quantos quiser testar
+    total = len(donations_list)
+    
+    for idx, donation in enumerate(donations_list):        
         total_previsto += donation.amount or 0
         total_recebido += donation.paid_amount or 0
         generate_donation_row(printer, donation)
         item_count += 1
         if item_count == items_per_page:
-            generate_page_footer(printer, total_previsto, total_recebido, page)
-            page += 1
-            item_count = 0
-            items_per_page = other_pages_items
+            # Só chama o rodapé se não for a última doação
+            if idx < total - 1:
+                generate_page_footer(printer, total_previsto, total_recebido, page)
+                page += 1
+                item_count = 0
+                items_per_page = other_pages_items
 
-    printer.condensed(False)
     generate_report_footer(printer, total_previsto, total_recebido, page)
     return printer.build()

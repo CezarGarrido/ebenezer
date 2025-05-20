@@ -128,3 +128,36 @@ body.iframe-mode #jazzy-tabs {
 body.iframe-mode #jazzy-actions {
     margin: 15px !important;
 }
+
+/* SALVAR E ADICIONAR OUTRO(A) - cinza claro + texto azul escuro */
+
+/* IMPRIMIR RECIBO - verde petróleo */
+.btn-print {
+    background-color: #00897B !important;
+    color: white !important;
+    border: none !important;
+}
+
+/* Botão de download com ícone (⬇️) - roxo médio */
+a.btn-download {
+    background-color: #7E57C2 !important;
+    color: white !important;
+    border: none !important;
+}
+
+a.btn-download:hover {
+    background-color: #5E35B1 !important; /* roxo mais escuro para o hover */
+}
+
+
+a.btn-print {
+    background-color: #00897B !important;
+    color: #fff !important;
+    border: none !important;
+}
+
+a.btn-print:hover {
+    background-color: #00695C !important;
+}
+
+

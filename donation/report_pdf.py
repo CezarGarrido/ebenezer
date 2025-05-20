@@ -58,6 +58,8 @@ def generate_donation_report_pdf(context):
     y = PAGE_HEIGHT - MARGIN_TOP
     usable_width = PAGE_WIDTH - MARGIN_LEFT - MARGIN_RIGHT
     c.setFont(FONT_NAME, FONT_SIZE)
+    
+    c.setTitle(get_report_title(context))
     page_number = 1
     
     styles = getSampleStyleSheet()

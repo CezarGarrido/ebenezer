@@ -162,9 +162,9 @@ class Donation(models.Model):
         CHARS_PER_LINE = 80  # Adjusted for typical condensed font on receipt printers
         CHARS_PER_LINE_CONDENSED = 136  # Adjusted for typical condensed font on receipt printers
 
-        LEFT_MARGIN = 5  # Minimum left margin in characters
+        LEFT_MARGIN = 2  # Minimum left margin in characters
         RIGHT_MARGIN = 1  # Minimum right margin in characters
-        RIGHT_MARGIN_CONDENSED  = 5  # Minimum right margin in characters
+        RIGHT_MARGIN_CONDENSED  = 2  # Minimum right margin in characters
         MAX_LINE_WIDTH = CHARS_PER_LINE - LEFT_MARGIN - RIGHT_MARGIN
         MAX_LINE_WIDTH_CONDENSED = CHARS_PER_LINE_CONDENSED - LEFT_MARGIN - RIGHT_MARGIN_CONDENSED
 
@@ -252,11 +252,6 @@ class Donation(models.Model):
 
         def print_company_info(printer, company):
             """Print all company information"""
-            # Print company name
-            printer.bold(True)
-            print_centered(printer, company.name.upper())
-            printer.bold(False)
-
             # Print legal information
             printer.condensed(True)
             print_line_side_by_side_condensed(
@@ -267,39 +262,41 @@ class Donation(models.Model):
             print_line_side_by_side_condensed(
                 printer,
                 "Utilidade Pública Federal Portaria Nº 735 de 13/08/01 DOU 14/08/01",
-                "CEBAS: CEBAS 0030 Resolução Nº 05 de 12/04/2021"
+                "CEBAS 0030 Resolução Nº 05 de 12/04/2021"
             )
             print_centered_condensed(printer, "Atest. de Reg. no Cons. Nac. de Assist. Soc. R n.º 0018 Res n.º 05 de 02/02/04 DOU 05/02/04")
-            printer.lineFeed()
-
-            # Print address
-            address = company.addresses.filter(address_type='UNI').first() or company.addresses.first()
-            if address:
-                address_line = f"{address.street}, {address.number}, {address.neighborhood} - CEP {address.postal_code}"
-                print_centered_condensed(printer, address_line.upper())
-                city_state = f"{address.city} - {address.state}"
-                print_centered_condensed(printer, city_state.upper())
-
             printer.condensed(False)
             printer.lineFeed()
 
+            # Print company name
+            printer.bold(True)
+            print_centered(printer, company.name.upper())
+            printer.bold(False)
+            printer.lineFeed()
+            
             # Print contacts
             try:
                 legal = company.legalentity
                 cnpj = legal.cnpj or "-"
             except ObjectDoesNotExist:
                 cnpj = "-"
-
-            emails = company.emails.all()
-            email_str = ', '.join([e.email for e in emails]) if emails.exists() else "-"
-
-            print_line_side_by_side(printer, f"E-mail(s): {email_str}", f"CNPJ: {cnpj}")
+                
+            print_centered(printer, f"CNPJ: {format_cnpj(cnpj)}")
 
             phones = company.phones.all()
             if phones.exists():
-                phone_str = ', '.join([p.phone for p in phones])
-                printer.print(f"Telefone(s): {phone_str}")
-                printer.lineFeed()
+                phone_str = '/ '.join([p.phone for p in phones])
+                print_centered(printer, f"{phone_str}")
+
+            # Print address
+            address = company.addresses.filter(address_type='UNI').first() or company.addresses.first()
+            if address:
+                address_line = f"{address.street}, {address.number}, {address.neighborhood} - CEP {address.postal_code}"
+                print_centered(printer, address_line.upper())
+                city_state = f"{address.city} - {address.state}"
+                print_centered(printer, city_state.upper())
+
+            printer.lineFeed()
 
         def print_receipt_header(printer):
             """Print receipt header section"""
@@ -318,7 +315,7 @@ class Donation(models.Model):
             print_line_side_by_side(printer, receipt_num, issue_date)
             
             # Donor information
-            printer.print(f"Recebemos de: {receipt.donor.name}")
+            printer.print(f"Recebemos de: {receipt.donor.name.upper()}")
             printer.lineFeed()
             
             print_donor_address(printer, receipt.donor)
@@ -367,19 +364,14 @@ class Donation(models.Model):
         escp = ESCPrinter(escp24pin=False)
         if not escp.initialize():
             raise Exception("Failed to initialize printer")
-        escp.setMargins(5, 80)
+        escp.setMargins(2, 80)
         print_company_info(escp, company)
         print_receipt_header(escp)
         print_donation_details(escp, self)
         print_footer(escp, settings)
 
-        ALTURA_FOLHA = 14.0  # 140mm
-        conteudo_usado = 12.0  # conteúdo impresso ocupa 12cm
-        espaco_restante = ALTURA_FOLHA - conteudo_usado
-
-        if espaco_restante > 0:
-            escp.advanceVertical(espaco_restante)
-    
+        escp.fill_to_end_of_half_page()
+        
         escp.reset()
         
         
@@ -404,7 +396,7 @@ class Donation(models.Model):
         # Posição inicial
         x = MARGIN_LEFT
         y = PAGE_HEIGHT - MARGIN_TOP
-        
+        c.setTitle("Recibo de Doação")  # <- Título interno do PDF
         # Funções auxiliares
         def draw_text(text, bold=False, condensed=False, align="left", custom_x=None, custom_y=None):
             nonlocal x, y
@@ -458,13 +450,6 @@ class Donation(models.Model):
             
             y -= LINE_HEIGHT
         
-        # 1. Cabeçalho da organização
-        company = self.owner
-        
-        # Nome da organização (negrito e centralizado)
-        draw_text(company.name.upper(), bold=True, align="center")
-        y -= LINE_HEIGHT * 0.5  # Espaço extra
-        
         # Informações legais (condensado)
         draw_side_by_side(
             "Utilidade Pública Municipal Lei Nº 1527 de 09/11/88",
@@ -474,7 +459,7 @@ class Donation(models.Model):
         
         draw_side_by_side(
             "Utilidade Pública Federal Portaria Nº 735 de 13/08/01 DOU 14/08/01",
-            "CEBAS: CEBAS 0030 Resolução Nº 05 de 12/04/2021",
+            "CEBAS 0030 Resolução Nº 05 de 12/04/2021",
             condensed=True
         )
         
@@ -482,35 +467,35 @@ class Donation(models.Model):
                 condensed=True, align="center")
         y -= LINE_HEIGHT
         
-        # Endereço
-        address = company.addresses.filter(address_type='UNI').first() or company.addresses.first()
-        if address:
-            address_line = f"{address.street}, {address.number}, {address.neighborhood} - CEP {address.postal_code}"
-            draw_text(address_line.upper(), condensed=True, align="center")
-            city_state = f"{address.city} - {address.state}"
-            draw_text(city_state.upper(), condensed=True, align="center")
+        # 1. Cabeçalho da organização
+        company = self.owner
         
-        y -= LINE_HEIGHT
-        
+        # Nome da organização (negrito e centralizado)
+        draw_text(company.name.upper(), bold=True, align="center")
+        y -= LINE_HEIGHT * 0.5  # Espaço extra
+                
         # Contatos e CNPJ
         try:
             legal = company.legalentity
             cnpj = legal.cnpj or "-"
         except:
             cnpj = "-"
-        
-        emails = company.emails.all()
-        email_str = ', '.join([e.email for e in emails]) if emails.exists() else "-"
-        
-        draw_side_by_side(
-            f"E-mail(s): {email_str}",
-            f"CNPJ: {cnpj}"
-        )
+            
+        draw_text(f"CNPJ: {format_cnpj(cnpj)}", bold=False, align="center")
         
         phones = company.phones.all()
         if phones.exists():
-            phone_str = ', '.join([p.phone for p in phones])
-            draw_text(f"Telefone(s): {phone_str}")
+            phone_str = ' / '.join([p.phone for p in phones])
+            draw_text(f"{phone_str}", align="center")
+            
+        # Endereço
+        address = company.addresses.filter(address_type='UNI').first() or company.addresses.first()
+        if address:
+            address_line = f"{address.street}, {address.number}, {address.neighborhood} - CEP {address.postal_code}"
+            draw_text(address_line.upper(), bold=False, align="center")
+            city_state = f"{address.city} - {address.state}"
+            draw_text(city_state.upper(), bold=False, align="center")
+
         
         y -= LINE_HEIGHT * 1.5
         
@@ -582,9 +567,13 @@ class Donation(models.Model):
         
         # Mensagem de agradecimento
         thank_msg = "AGRADECEMOS SUA DOAÇÃO"
-
-        draw_text(thank_msg, align="center")
         
+        if settings.thank_you_message:
+            for line in settings.thank_you_message.lines.all():
+                draw_text( line.text.upper(), align="center")
+        else:
+            draw_text(thank_msg, align="center")
+
         y -= LINE_HEIGHT * 2
         
         # Assinatura
@@ -596,29 +585,8 @@ class Donation(models.Model):
         c.save()
         buffer.seek(0)
         return buffer.getvalue()  # retorna os bytes do PDF
-
-    def get_whats_msg(self):
-        nome = self.donor.name
-        valor = locale.currency(self.amount, grouping=True)
-        data = self.expected_at.strftime('%d/%m/%Y')
-        forma = dict(PAYMENT_METHOD_CHOICES).get(self.method, 'Outro').upper() if self.paid else 'A CONFIRMAR'
-        numero = self.id
-
-        return f"""Olá {nome}, tudo bem?
-
-    Com alegria, confirmamos o recebimento da sua doação no valor de {valor}, realizada em {data}.
-
-    Essa contribuição é muito importante para continuarmos com nosso trabalho em prol da comunidade. 💛
-
-    Caso precise, o recibo está disponível com todos os dados:
-    - Nome: {nome}
-    - Data: {data}
-    - Valor: {valor}
-    - Forma de pagamento: {forma}
-    - Nº do recibo: {numero}
-
-    📄 Se desejar o recibo impresso ou em PDF, é só me avisar por aqui mesmo!
-
-    Muito obrigado por acreditar em nossa missão.
-    Juntos, seguimos transformando vidas. ✨
-    """
+    
+    
+def format_cnpj(cnpj: str) -> str:
+    cnpj = ''.join(filter(str.isdigit, cnpj))  # Remove pontos, traços, barras etc.
+    return f"{cnpj[:2]}.{cnpj[2:5]}.{cnpj[5:8]}/{cnpj[8:12]}-{cnpj[12:]}"

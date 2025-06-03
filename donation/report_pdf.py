@@ -143,7 +143,7 @@ def generate_donation_report_pdf(context):
         
         rows.append([
             str(d.id),
-            d.expected_at.strftime('%d/%m/%Y') if d.expected_at else "-",
+            d.paid_at.strftime('%d/%m/%Y') if d.paid_at else "-",
             donor_str,
             locale.currency(valor_previsto, grouping=True),
             locale.currency(valor_recebido, grouping=True),

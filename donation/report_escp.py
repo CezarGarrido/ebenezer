@@ -98,7 +98,7 @@ def generate_donation_row(printer, donation):
 
     row_line = (
         f"{donation.id}".ljust(4) +
-        (donation.expected_at.strftime('%d/%m/%y') if donation.expected_at else "-").ljust(10) +
+        (donation.paid_at.strftime('%d/%m/%y') if donation.paid_at else "-").ljust(10) +
         donor_str +
         locale.currency(valor_previsto, grouping=True, symbol=False).rjust(8) +
         locale.currency(valor_pago, grouping=True, symbol=False).rjust(8) +

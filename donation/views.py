@@ -204,10 +204,10 @@ class ReportsAdminView(admin.ModelAdmin):
         if not request.user.is_superuser:
             queryset = queryset.filter(owner=request.user.profile.company)
         if start_date:
-            queryset = queryset.filter(expected_at__gte=start_date)
+            queryset = queryset.filter(paid_at__gte=start_date)
         if end_date:
-            queryset = queryset.filter(expected_at__lte=end_date)
-        return queryset.order_by('-expected_at')
+            queryset = queryset.filter(paid_at__lte=end_date)
+        return queryset.order_by('-paid_at')
 
     def _get_forms(self, request, report_type, data_source):
         return {

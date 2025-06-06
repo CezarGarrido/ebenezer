@@ -40,7 +40,7 @@ python manage.py migrate
 ### ▶️ Executando o projeto
 ```bash
 python manage.py create_admin (admin@admin.com, admin)
-python manage.py createsuperuser (Opcional) Usuario personalizado
+python manage.py createsuperuser (Opcional) Usuário personalizado
 
 python manage.py runserver "0.0.0.0:8099"
 ```

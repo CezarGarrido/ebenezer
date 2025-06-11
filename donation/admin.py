@@ -12,7 +12,7 @@ from .models import Donation, DonationSettings
 from django.utils.html import format_html
 from django.http import HttpResponse, HttpResponseRedirect
 from django import forms
-from .models import ThankYouMessage, ThankYouMessageLine
+from .models import ThankYouMessage, ThankYouMessageLine, PAYMENT_METHOD_CHOICES
 import platform
 from django.utils.safestring import mark_safe
 
@@ -201,7 +201,7 @@ class DonationForm(forms.ModelForm):
 
 
     class Media:
-        js = ("js/vendor/jquery.mask.min.js", "js/mask/money.js", "js/payment.js")  # Adicionamos um script personalizado
+        js = ("js/vendor/jquery.mask.min.js", "js/mask/money.js", "js/payment.js", "js/save_date.js",)  # Adicionamos um script personalizado
         
     def clean(self):
         cleaned_data = super().clean()
@@ -256,9 +256,20 @@ def action_set_paid(modeladmin, request, queryset):
 
 action_set_paid.short_description = "Marcar como paga (valor total e funcionário atual)"
 
+
+from .filter import DateRangeFilter
+
+class ExpectedAtFilter(DateRangeFilter):
+    parameter_name = "expected_at"
+    title = "Dt. Vencimento"
+
+class PaidAtFilter(DateRangeFilter):
+    parameter_name = "paid_at"
+    title = "Dt. Pagamento"
+
 class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
     form = DonationForm
-    list_display = ("id", "paid_status", "expected_at", "donor", "format_amount", "format_paid_amount", "paid_at", "created_by", "received_by", "updated_at")  # Campos visíveis na listagem
+    list_display = ("id", "expected_at", "paid_status", "donor_display", "format_amount", "format_paid_amount", "method", "paid_at", "created_by_display", "received_by_display", "action_buttons")  # Campos visíveis na listagem
     verbose_name = "Doação"
     verbose_name_plural = "Doações"
     entity_labels = {
@@ -268,10 +279,12 @@ class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
     }
         # Filtros para facilitar a navegação
     list_filter = (
-        "paid",             # Se foi paga ou não
-        "method",           # Método de pagamento
-        "created_by",       # Usuário que criou
+        ExpectedAtFilter,
+        PaidAtFilter,
     )
+
+    class Media:
+        js = ("js/vendor/moment.min.js", "js/vendor/datetimerange-picker.js", "js/daterange.js", "js/donation_list.js")  # Adicionamos um script personalizado
 
     # Campos pesquisáveis
     search_fields = (
@@ -284,6 +297,104 @@ class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
     autocomplete_fields = ['donor']
     
     exclude = ['owner', 'created_by']
+
+    def donor_display(self, obj):
+        return obj.donor.name.upper()
+    donor_display.short_description = "Doador"
+    donor_display.admin_order_field = "donor"
+    
+    def created_by_display(self, obj):
+        user = obj.created_by
+        if not user:
+            return "-"
+
+        try:
+            # Verifica se existe um EmployeeUser vinculado
+            employee_user = user.employeeuser
+            name = str(employee_user.employee)  # usa o __str__ do modelo Employee
+        except EmployeeUser.DoesNotExist:
+            name = user.get_full_name() or user.username
+
+
+        initials = "".join(part[0].upper() for part in name.split()[:2])
+
+        html = format_html(
+            '<span style="'
+            'display: inline-block; width: 24px; height: 24px; '
+            'line-height: 24px; border-radius: 50%; background-color: #007bff; '
+            'color: white; text-align: center; font-size: 12px; margin-right: 8px;">{}</span>'
+            '{}',
+            initials,
+            name
+        )
+        return html
+
+    def received_by_display(self, obj):
+        employee = obj.received_by
+        if not employee:
+            return "-"
+        
+        name = employee.name
+        initials = "".join(part[0].upper() for part in name.split()[:2])
+
+        html = format_html(
+            '<span style="'
+            'display: inline-block; width: 24px; height: 24px; '
+            'line-height: 24px; border-radius: 50%; background-color: #007bff; '
+            'color: white; text-align: center; font-size: 12px; margin-right: 8px;">{}</span>'
+            '{}',
+            initials,
+            name
+        )
+        return 
+        
+    received_by_display.short_description = "Recebido por"
+    received_by_display.admin_order_field = 'received_by'
+
+    created_by_display.short_description = "Criado por"
+    created_by_display.admin_order_field = 'created_by'
+
+    def format_paid_amount(self, obj):
+        if not obj.paid_amount:
+            return ""
+        
+        return format_html(
+            '<strong style="font-size: 1.1em;">{}</strong>',
+            locale.currency(obj.paid_amount, grouping=True),
+        )
+
+    format_paid_amount.short_description = "Valor Recebido"
+    format_paid_amount.admin_order_field = 'paid_amount'
+
+    def action_buttons(self, obj):
+        from django.urls import reverse
+        modal_id = f"modal-baixa-{obj.pk}"
+        url_payment = reverse('admin:donation_donation_change', args=[obj.pk]) + '#informações-de-pagamento-tab'
+        change_url = reverse("admin:donation_donation_change", args=[obj.pk])
+        print_url = reverse("admin:donation_donation_changelist") + f'?action=print_batch&ids={obj.pk}'
+
+        btn_edit = format_html(
+            '<a href="{}" '
+            'class="btn btn-sm btn-primary me-2" '
+            'title="Editar Doação #{}">'
+            '<i class="fas fa-pencil-alt"></i> Editar</a>',
+            change_url, obj.pk
+        )
+
+        btn_delete = format_html(
+            '<a class="btn btn-sm btn-danger me-2" href="{}" title="Excluir Doação #{}"><i class="fas fa-trash"></i> Excluir</a>',
+            reverse('admin:donation_donation_delete', args=[obj.pk]), obj.pk
+        )
+
+        btn_print = format_html(
+            '<a class="btn btn-sm btn-outline-dark me-2" href="{}" title="Imprimir Doação #{}"><i class="fas fa-print"></i> Recibo</a>',
+            print_url, obj.pk
+        )
+
+        return format_html('{} {} {}', btn_edit, btn_delete, btn_print)
+
+    action_buttons.short_description = ''
+    action_buttons.allow_tags = True
 
     def get_exclude(self, request, obj=None):
         exclude = list(super().get_exclude(request, obj) or [])
@@ -334,26 +445,17 @@ class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
     def format_amount(self, obj):
         return locale.currency(obj.amount, grouping=True)
     
-    def format_paid_amount(self, obj):
-        if obj.paid_amount:
-            return locale.currency(obj.paid_amount, grouping=True)
-        return "-"
-    
     def paid_status(self, obj):
         if obj.paid:
             return format_html('<span class="badge badge-success" title="Doação paga">Pago</span>')
-
-        # Verifica se está vencida (expected_at no passado)
-        if obj.expected_at and obj.expected_at < datetime.datetime.now().date():
-            return format_html('<span class="badge badge-warning" title="Doação vencida e não paga">Atrasado</span>')
-
         # Ainda dentro do prazo
-        return format_html('<span class="badge badge-danger" title="Ainda no prazo de pagamento">Pendente</span>')
+        return format_html('<span class="badge badge-warning" title="Aguardando pagamento">Aguardando Pagamento</span>')
 
     paid_status.short_description = "Situação"
-    format_amount.short_description = "Valor Esperado"
-    format_paid_amount.short_description = "Valor Recebido"
+    paid_status.admin_order_field = 'paid'
 
+    format_amount.short_description = "Valor Esperado"
+    format_amount.admin_order_field = 'amount'
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
         action = request.GET.get("action")
@@ -411,5 +513,33 @@ class DonationAdmin(GenderedMessageMixin, admin.ModelAdmin):
         # Fluxo padrão
         return super().change_view(request, object_id, form_url, extra_context)
     
+    def changelist_view(self, request, extra_context=None):
+        action = request.GET.get("action")
+        if action == "print_batch":
+            ids = request.GET.getlist("ids")
+            if not ids:
+                messages.error(request, "Nenhuma doação selecionada.")
+                return super().changelist_view(request, extra_context)
+
+            # Imprime em lote
+            try:
+                settings = DonationSettings.get_solo()
+                printer_name = settings.default_printer
+
+                for pk in ids:
+                    obj = self.model.objects.get(pk=pk)
+                    obj.print_receipt(settings)
+
+                messages.success(request, f"{len(ids)} recibo(s) enviados para a impressora {printer_name}.")
+
+            except Exception as e:
+                messages.error(request, "Erro ao imprimir em lote.")
+                logger.error(f"Erro ao imprimir em lote: {str(e)}", exc_info=True)
+
+            # Retorna à tela de listagem
+            return HttpResponseRedirect(request.path.replace('?action=print_batch', ''))
+
+        return super().changelist_view(request, extra_context)
+
 admin.site.register(Donation, DonationAdmin)
 admin.site.register(Report, ReportsAdminView)

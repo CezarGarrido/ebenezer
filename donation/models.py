@@ -32,8 +32,8 @@ class ThankYouMessage(models.Model):
     name = models.CharField(max_length=100, verbose_name="Título")
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Criado por")
 
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Criado em")
-    updated_at = models.DateTimeField(auto_now=True, editable=False, verbose_name="Atualizado em")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Dt. Criação")
+    updated_at = models.DateTimeField(auto_now=True, editable=False, verbose_name="Dt. Atualização")
 
     class Meta:
         verbose_name = "Agradecimento"
@@ -98,14 +98,14 @@ class Donation(models.Model):
 
     donor = models.ForeignKey(Donor, on_delete=models.CASCADE, verbose_name="Doador")
     amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor Esperado (R$)", )
-    expected_at = models.DateField(null=False, blank=False, verbose_name="Vencimento") #  Data de expectativa de recebimento
-    method = models.CharField(max_length=20,null=True, blank=True, choices=PAYMENT_METHOD_CHOICES, verbose_name="Meio de Pagamento")
+    expected_at = models.DateField(null=False, blank=False, verbose_name="Dt. Vencimento") #  Data de expectativa de recebimento
+    method = models.CharField(max_length=20,null=True, blank=True, choices=PAYMENT_METHOD_CHOICES, verbose_name="Forma de Pagamento")
 
     paid = models.BooleanField(default=False, verbose_name="Foi Pago?")
     paid_amount = models.DecimalField(default=None, null=True, blank=True, max_digits=10, decimal_places=2, verbose_name="Valor Recebido (R$)")
     received_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Recebido por")
 
-    paid_at = models.DateField(null=True, blank=True, verbose_name="Data de Pagamento") #Data em que foi pago
+    paid_at = models.DateField(null=True, blank=True, verbose_name="Dt. Pagamento") #Data em que foi pago
     notes = models.TextField(max_length=255, null=True, blank=True, verbose_name="Observação")
     
     created_at = models.DateTimeField(auto_now_add=True, editable=False, verbose_name="Criado em")

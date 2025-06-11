@@ -80,55 +80,6 @@
     }
 }
 
-/* Modal interno */
-.modal-header {
-    font-size: 0.95rem;
-    padding: 15px;
-}
-
-.modal-body {
-    padding: 0px !important;
-}
-
-body.iframe-mode .wrapper {
-    padding: 0 !important;
-    margin: 0 !important;
-}
-
-body.iframe-mode .content-wrapper {
-    margin: 0 !important;
-    padding: 0 !important;
-}
-
-body.iframe-mode .content {
-    padding: 0 !important;
-    margin: 0 !important;
-}
-
-body.iframe-mode .container-fluid {
-    padding: 0 !important;
-    margin: 0 !important;
-    max-width: 100% !important;
-}
-
-body.iframe-mode .card {
-    box-shadow: none !important;
-    border: none !important;
-    margin: 0 !important;
-}
-
-body.iframe-mode .card-body {
-    padding: 0.5rem !important;
-}
-
-body.iframe-mode #jazzy-tabs {
-    margin-bottom: 0 !important;
-}
-
-body.iframe-mode #jazzy-actions {
-    margin: 15px !important;
-}
-
 /* SALVAR E ADICIONAR OUTRO(A) - cinza claro + texto azul escuro */
 
 /* IMPRIMIR RECIBO - verde petróleo */
@@ -161,3 +112,82 @@ a.btn-print:hover {
 }
 
 
+td.field-action_buttons{
+    text-align: right;
+}
+
+@media only screen and (max-width: 450px) {
+  /* Torna qualquer tabela um layout em bloco responsivo */
+  table,
+  thead,
+  tbody,
+  th,
+  td,
+  tr {
+    display: block;
+  }
+
+  /* Esconde cabeçalhos visualmente (acessibilidade mantida) */
+  thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+
+  tr {
+    border: 1px solid #ccc;
+    margin-bottom: 0.625rem;
+  }
+
+  td {
+    border: none;
+    border-bottom: 1px solid #eee;
+    position: relative;
+    padding-left: 50%;
+    white-space: normal;
+    text-align: left;
+  }
+
+  td:before {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    width: 45%;
+    padding-right: 10px;
+    white-space: nowrap;
+    font-weight: bold;
+    text-align: left;
+    content: attr(data-title); /* Esse é o segredo! */
+  }
+}
+
+
+/* Mantém células alinhadas e evita quebra de conteúdo */
+table th,
+table td {
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+/* Se a tabela estiver dentro de um container, permita overflow */
+table:has(.btn) {
+  overflow: auto;
+}
+
+
+/* Para colunas de ação, ajuda com zoom e dropdowns */
+td[class*="field-action_buttons"], td[class*="acoes"] {
+  position: relative;
+  overflow: visible !important;
+  z-index: 10;
+}
+
+#search_group {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;            /* Espaçamento horizontal entre os elementos */
+}
+
+.daterange{
+    border-radius: 4px !important;
+}

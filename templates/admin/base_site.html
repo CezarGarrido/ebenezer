@@ -2,11 +2,16 @@
 {% load static %}
 
 {% block extrahead %}
-  {{ block.super }}
+{{ block.super }}
 
-  <link rel="prefetch" href="/admin/" />
-  <link rel="prefetch" href="/admin/core/donation" />
-  <script src="{% static 'js/vendor/hotkeys.min.js' %}"></script>
-  <script src="{% static 'js/vendor/cleave.min.js' %}"></script>
-  <script src="{% static 'js/vendor/cleave-phone.br.js' %}"></script>
+<link rel="prefetch" href="/admin/" />
+<link rel="prefetch" href="/admin/donation/donation" />
+
+<script src="{% static 'js/vendor/hotkeys.min.js' %}"></script>
+<script src="{% static 'js/vendor/cleave.min.js' %}"></script>
+<script src="{% static 'js/vendor/cleave-phone.br.js' %}"></script>
+<!-- jQuery -->
+<!-- Daterangepicker JS -->
+
+<link rel="stylesheet" href="{% static 'css/datepicker.css' %}" />
 {% endblock %}
